@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela ejecuciones previas del mismo ref para ahorrar minutos.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Calidad: typecheck → lint → formato → tests → build (§11) ──
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias (reproducible)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint (cero warnings)
+        run: pnpm run lint
+
+      - name: Formato
+        run: pnpm run format:check
+
+      - name: Tests unitarios
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+        env:
+          SERWIST_SUPPRESS_TURBOPACK_WARNING: "1"
+
+  # ── e2e Playwright (flujos críticos, §11) ──
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias (reproducible)
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar navegadores de Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Ejecutar e2e
+        run: pnpm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

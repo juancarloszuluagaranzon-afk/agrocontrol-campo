@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/*
+ * Tema base de campo (§13): alto contraste, legible bajo sol directo.
+ * Por defecto modo claro de alto contraste; se afinará en la Fase 5.
+ */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #ca8a04; /* amarillo maquinaria */
+  --accent: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+  /* Evita rebote de scroll en tablet y deja el mapa a pantalla completa. */
+  overscroll-behavior: none;
+}
