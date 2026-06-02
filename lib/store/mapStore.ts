@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { SuerteProperties } from "@/domain/suertes/schema";
 import { CONTEXT_LAYERS } from "@/lib/geo/layers";
+import type { LngLat } from "@/lib/geo/measure";
 
 /** Objetivo de vuelo solicitado por el buscador (o un click externo). */
 export interface FlyTarget {
@@ -10,6 +11,18 @@ export interface FlyTarget {
   /** cambia en cada solicitud para re-disparar el efecto aunque el destino repita */
   nonce: number;
 }
+
+/** Lectura de posición GPS. */
+export interface GpsFix {
+  lon: number;
+  lat: number;
+  /** precisión horizontal en metros */
+  accuracy: number;
+  /** rumbo en grados (0 = norte), o null si no disponible */
+  heading: number | null;
+}
+
+export type MeasureMode = "off" | "area" | "distance";
 
 interface MapState {
   /** Suerte seleccionada (properties del feature tocado), o null. */
@@ -23,6 +36,28 @@ interface MapState {
   /** Última solicitud de vuelo (buscador). */
   flyTarget: FlyTarget | null;
   flyTo: (t: Omit<FlyTarget, "nonce">) => void;
+
+  // ── GPS ──
+  gps: GpsFix | null;
+  gpsError: string | null;
+  gpsActive: boolean;
+  setGps: (fix: GpsFix) => void;
+  setGpsError: (msg: string | null) => void;
+  setGpsActive: (active: boolean) => void;
+  /** Solicitud de centrar en la posición actual. */
+  centerNonce: number;
+  centerOnMe: () => void;
+
+  // ── Medición ──
+  measureMode: MeasureMode;
+  vertices: LngLat[];
+  setMeasureMode: (mode: MeasureMode) => void;
+  addVertex: (v: LngLat) => void;
+  undoVertex: () => void;
+  clearVertices: () => void;
+  /** Suerte oficial bajo el centroide de la medición (contraste), o null. */
+  measureOfficial: { secSte: string; haOficial: number } | null;
+  setMeasureOfficial: (o: { secSte: string; haOficial: number } | null) => void;
 }
 
 const initialContext: Record<string, boolean> = Object.fromEntries(
@@ -44,4 +79,23 @@ export const useMapStore = create<MapState>((set) => ({
     set((state) => ({
       flyTarget: { ...t, nonce: (state.flyTarget?.nonce ?? 0) + 1 },
     })),
+
+  gps: null,
+  gpsError: null,
+  gpsActive: false,
+  setGps: (gps) => set({ gps, gpsError: null }),
+  setGpsError: (gpsError) => set({ gpsError }),
+  setGpsActive: (gpsActive) => set({ gpsActive }),
+  centerNonce: 0,
+  centerOnMe: () => set((state) => ({ centerNonce: state.centerNonce + 1 })),
+
+  measureMode: "off",
+  vertices: [],
+  setMeasureMode: (measureMode) =>
+    set({ measureMode, vertices: [], measureOfficial: null }),
+  addVertex: (v) => set((state) => ({ vertices: [...state.vertices, v] })),
+  undoVertex: () => set((state) => ({ vertices: state.vertices.slice(0, -1) })),
+  clearVertices: () => set({ vertices: [], measureOfficial: null }),
+  measureOfficial: null,
+  setMeasureOfficial: (measureOfficial) => set({ measureOfficial }),
 }));
