@@ -4,11 +4,19 @@ import { useEffect, useRef } from "react";
 import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
+  type GeoJSONSource,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AOI, baseStyle } from "@/lib/geo/basemap";
 import {
   CONTEXT_LAYERS,
+  GPS_DOT,
+  GPS_HALO,
+  GPS_SOURCE,
+  MEASURE_FILL,
+  MEASURE_LINE,
+  MEASURE_SOURCE,
+  MEASURE_VERTICES,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -17,6 +25,8 @@ import {
   contextLayerId,
   contextSourceId,
 } from "@/lib/geo/layers";
+import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
+import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import type { SuerteProperties } from "@/domain/suertes/schema";
 
@@ -99,6 +109,8 @@ export function MapView() {
       minZoom: AOI.minZoom,
       maxZoom: AOI.maxZoom,
       attributionControl: { compact: true },
+      // Evita que toques seguidos al marcar vértices se interpreten como zoom.
+      doubleClickZoom: false,
     });
     mapRef.current = map;
 
@@ -164,16 +176,89 @@ export function MapView() {
         },
       });
 
-      // Selección al tocar un lote.
+      // Capa GPS: halo de presencia + punto azul (§5).
+      const emptyFc: FeatureCollection<Point> = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      map.addSource(GPS_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: GPS_HALO,
+        type: "circle",
+        source: GPS_SOURCE,
+        paint: {
+          "circle-radius": 20,
+          "circle-color": "#2563eb",
+          "circle-opacity": 0.18,
+        },
+      });
+      map.addLayer({
+        id: GPS_DOT,
+        type: "circle",
+        source: GPS_SOURCE,
+        paint: {
+          "circle-radius": 7,
+          "circle-color": "#2563eb",
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+
+      // Capas de medición (§5): relleno + línea (discontinua) + vértices.
+      const emptyGeom: FeatureCollection<Geometry> = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      map.addSource(MEASURE_SOURCE, { type: "geojson", data: emptyGeom });
+      map.addLayer({
+        id: MEASURE_FILL,
+        type: "fill",
+        source: MEASURE_SOURCE,
+        filter: ["==", ["geometry-type"], "Polygon"],
+        paint: { "fill-color": "#f97316", "fill-opacity": 0.2 },
+      });
+      map.addLayer({
+        id: MEASURE_LINE,
+        type: "line",
+        source: MEASURE_SOURCE,
+        filter: ["!=", ["geometry-type"], "Point"],
+        paint: {
+          "line-color": "#f97316",
+          "line-width": 2.5,
+          "line-dasharray": [2, 1.5],
+        },
+      });
+      map.addLayer({
+        id: MEASURE_VERTICES,
+        type: "circle",
+        source: MEASURE_SOURCE,
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: {
+          "circle-radius": 5,
+          "circle-color": "#ffffff",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#f97316",
+        },
+      });
+
+      // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
+        if (useMapStore.getState().measureMode !== "off") return;
         const f = e.features?.[0] as MapGeoJSONFeature | undefined;
         if (f) setSelected(f.properties as unknown as SuerteProperties);
       });
       map.on("mouseenter", SUERTES_FILL, () => {
-        map.getCanvas().style.cursor = "pointer";
+        if (useMapStore.getState().measureMode === "off")
+          map.getCanvas().style.cursor = "pointer";
       });
       map.on("mouseleave", SUERTES_FILL, () => {
         map.getCanvas().style.cursor = "";
+      });
+
+      // En modo medición, cada toque agrega un vértice.
+      map.on("click", (e) => {
+        if (useMapStore.getState().measureMode === "off") return;
+        useMapStore.getState().addVertex([e.lngLat.lng, e.lngLat.lat]);
       });
     });
 
@@ -221,5 +306,89 @@ export function MapView() {
     if (props) setSelected(props);
   }, [flyTarget, setSelected]);
 
-  return <div ref={containerRef} className="absolute inset-0" />;
+  // ── Marcador GPS ──
+  const gps = useMapStore((s) => s.gps);
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(GPS_SOURCE) as GeoJSONSource | undefined;
+    if (!source) return;
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: gps
+        ? [
+            {
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [gps.lon, gps.lat] },
+              properties: { accuracy: gps.accuracy },
+            },
+          ]
+        : [],
+    };
+    source.setData(fc);
+  }, [gps]);
+
+  // ── Centrar en mi ubicación ──
+  const centerNonce = useMapStore((s) => s.centerNonce);
+  useEffect(() => {
+    const map = mapRef.current;
+    const fix = useMapStore.getState().gps;
+    if (!map || centerNonce === 0 || !fix) return;
+    map.flyTo({ center: [fix.lon, fix.lat], zoom: 17, duration: 1000 });
+  }, [centerNonce]);
+
+  // ── Dibujo de la medición en curso ──
+  const vertices = useMapStore((s) => s.vertices);
+  const measureMode = useMapStore((s) => s.measureMode);
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(MEASURE_SOURCE) as GeoJSONSource | undefined;
+    if (!map || !source) return;
+
+    if (measureMode !== "off") map.getCanvas().style.cursor = "crosshair";
+    else map.getCanvas().style.cursor = "";
+
+    const features: Feature<Geometry>[] = vertices.map((v: LngLat) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: v },
+      properties: {},
+    }));
+
+    if (measureMode === "area" && vertices.length >= 3) {
+      const ring = [...vertices, vertices[0]!];
+      features.push({
+        type: "Feature",
+        geometry: { type: "Polygon", coordinates: [ring] },
+        properties: {},
+      });
+    } else if (vertices.length >= 2) {
+      features.push({
+        type: "Feature",
+        geometry: { type: "LineString", coordinates: vertices },
+        properties: {},
+      });
+    }
+
+    source.setData({ type: "FeatureCollection", features });
+
+    // Contraste: ¿el centroide cae dentro de una suerte conocida? (§5)
+    const setMeasureOfficial = useMapStore.getState().setMeasureOfficial;
+    if (measureMode === "area" && vertices.length >= 3) {
+      const cx = vertices.reduce((a, v) => a + v[0], 0) / vertices.length;
+      const cy = vertices.reduce((a, v) => a + v[1], 0) / vertices.length;
+      const hits = map.queryRenderedFeatures(map.project([cx, cy]), {
+        layers: [SUERTES_FILL],
+      });
+      const props = hits[0]?.properties as SuerteProperties | undefined;
+      setMeasureOfficial(
+        props ? { secSte: props.sec_ste, haOficial: props.ha_oficial } : null,
+      );
+    } else {
+      setMeasureOfficial(null);
+    }
+  }, [vertices, measureMode]);
+
+  // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
+  // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la
+  // altura. Con height/width 100% el mapa llena su contenedor en cualquier caso.
+  return <div ref={containerRef} className="size-full" />;
 }

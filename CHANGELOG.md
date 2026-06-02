@@ -5,6 +5,22 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 2 — GPS y medición
+
+- **Mi ubicación (GPS)**: seguimiento con `watchPosition`, marcador con halo,
+  botón "centrar en mí", precisión visible y aviso si es baja (§5, §13).
+- **Medición geodésica** con Turf: marcar vértices tocando el mapa o con el botón
+  "+ GPS"; área (ha) y perímetro (m), o distancia (m). Contador de puntos,
+  deshacer/limpiar.
+- **Contraste con área oficial**: si el centroide cae en una suerte conocida, se
+  muestra su `ha_oficial` y la diferencia % (§5).
+- Validación del motor contra las 610 suertes: error de área < 5% vs oficial
+  (mediana < 0,5%), criterio de aceptación §5.
+- **Fix**: el contenedor del mapa colapsaba a 0 de alto porque
+  `maplibre-gl.css` (`.maplibregl-map{position:relative}`) anulaba `absolute
+inset-0`; se usa `size-full`. Esto también restaura el click para seleccionar
+  suertes. e2e del GPS y de la medición.
+
 ### Fase 1 — Mapa de suertes
 
 - Mapa MapLibre GL con base satelital Esri World Imagery, centrado en el AOI.

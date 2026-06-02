@@ -9,6 +9,17 @@ export const SUERTES_LINE = "suertes-line";
 export const SUERTES_SELECTED = "suertes-selected";
 export const SUERTES_LABEL = "suertes-label";
 
+// GPS (§5: Mi ubicación)
+export const GPS_SOURCE = "gps";
+export const GPS_HALO = "gps-halo";
+export const GPS_DOT = "gps-dot";
+
+// Medición (§5: área/distancia)
+export const MEASURE_SOURCE = "measure";
+export const MEASURE_FILL = "measure-fill";
+export const MEASURE_LINE = "measure-line";
+export const MEASURE_VERTICES = "measure-vertices";
+
 export type ContextGeometry = "line" | "fill" | "point";
 
 export interface ContextLayer {
