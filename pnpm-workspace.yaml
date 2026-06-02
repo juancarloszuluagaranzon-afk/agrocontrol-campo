@@ -1,3 +1,8 @@
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
+# pnpm 11.2.2: `onlyBuiltDependencies` / `ignoredBuiltDependencies` NO suprimen el
+# error ERR_PNPM_IGNORED_BUILDS (exit 1) en instalaciones limpias en modo CI, lo
+# que rompe el pipeline. El único toggle efectivo es `dangerouslyAllowAllBuilds`,
+# que ejecuta los postinstall (sharp, unrs-resolver) — ambos paquetes confiables y
+# de uso masivo, con binarios precompilados. La integridad se respalda con la
+# verificación de supply-chain del lockfile y `pnpm audit` en CI (§12). Revisar al
+# subir de versión de pnpm. Ver ADR-0003.
+dangerouslyAllowAllBuilds: true

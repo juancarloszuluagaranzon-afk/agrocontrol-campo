@@ -22,3 +22,12 @@ oficial Serwist + Turbopack (`@serwist/turbopack`) es **experimental**.
 - Pérdida de la velocidad de Turbopack **sólo en el build**; el dev no se afecta.
 - A revisar cuando `@serwist/turbopack` sea estable: migrar y quitar `--webpack`.
 - CI fija `SERWIST_SUPPRESS_TURBOPACK_WARNING=1` para silenciar el aviso informativo.
+
+## Nota relacionada — build scripts de pnpm
+
+pnpm 11.2.2 aborta `pnpm install` (exit 1, `ERR_PNPM_IGNORED_BUILDS`) en CI cuando
+hay build scripts sin ejecutar, y en esta versión **ni `onlyBuiltDependencies` ni
+`ignoredBuiltDependencies` lo suprimen**. Se usa `dangerouslyAllowAllBuilds: true`
+en `pnpm-workspace.yaml` (único toggle efectivo). Sólo afecta a `sharp` y
+`unrs-resolver` (binarios precompilados, paquetes confiables). Mitigación: la
+verificación de supply-chain del lockfile y `pnpm audit`. Revisar al actualizar pnpm.
