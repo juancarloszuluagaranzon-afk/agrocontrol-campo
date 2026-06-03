@@ -11,7 +11,7 @@ export default function TabsLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-accent/10 flex items-center justify-between border-b px-4 py-2">
+      <header className="border-accent/10 flex items-center justify-between border-b px-4 py-2 print:hidden">
         <span className="text-base font-bold tracking-tight">
           {t.app.nombre}
         </span>

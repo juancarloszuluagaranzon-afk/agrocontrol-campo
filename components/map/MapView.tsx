@@ -13,6 +13,9 @@ import {
   GPS_DOT,
   GPS_HALO,
   GPS_SOURCE,
+  MAQUINARIA_DOT,
+  MAQUINARIA_LABEL,
+  MAQUINARIA_SOURCE,
   MEASURE_FILL,
   MEASURE_LINE,
   MEASURE_SOURCE,
@@ -28,6 +31,7 @@ import {
 import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
+import { itemsForFecha, useMaquinariaStore } from "@/lib/store/maquinariaStore";
 import type { SuerteProperties } from "@/domain/suertes/schema";
 
 const SUERTES_URL = "/data/suertes_riopaila.geojson";
@@ -241,6 +245,37 @@ export function MapView() {
         },
       });
 
+      // Capa de maquinaria amarilla, ubicada en el centroide de su suerte (§5).
+      map.addSource(MAQUINARIA_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: MAQUINARIA_DOT,
+        type: "circle",
+        source: MAQUINARIA_SOURCE,
+        paint: {
+          "circle-radius": 7,
+          "circle-color": "#eab308",
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#0f172a",
+        },
+      });
+      map.addLayer({
+        id: MAQUINARIA_LABEL,
+        type: "symbol",
+        source: MAQUINARIA_SOURCE,
+        layout: {
+          "text-field": ["get", "identificacion"],
+          "text-size": 11,
+          "text-offset": [0, 1.2],
+          "text-anchor": "top",
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: {
+          "text-color": "#facc15",
+          "text-halo-color": "#0f172a",
+          "text-halo-width": 1.4,
+        },
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
@@ -335,6 +370,27 @@ export function MapView() {
     if (!map || centerNonce === 0 || !fix) return;
     map.flyTo({ center: [fix.lon, fix.lat], zoom: 17, duration: 1000 });
   }, [centerNonce]);
+
+  // ── Maquinaria del día sobre los polígonos (§5) ──
+  const maqItems = useMaquinariaStore((s) => s.items);
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(MAQUINARIA_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!map || !source) return;
+    const d = new Date();
+    const hoy = `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: itemsForFecha(maqItems, hoy).map((i) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [i.lon, i.lat] },
+        properties: { identificacion: i.identificacion, tipo: i.tipo },
+      })),
+    };
+    source.setData(fc);
+  }, [maqItems]);
 
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);
