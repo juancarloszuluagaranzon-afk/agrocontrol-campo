@@ -1,19 +1,30 @@
 # Base de datos — AgroControl Campo (Supabase)
 
-Esquema de la Fase 4. **Aplícalo en el SQL Editor del dashboard de Supabase**
-(Database → SQL Editor → New query), ejecutando los archivos **en este orden**.
-La `anon key` no puede crear tablas; el dashboard usa tu sesión autenticada.
+Esquema de la Fase 4, en `migrations/` (se aplican en orden por su prefijo numérico):
 
-## Orden de ejecución
+1. `0001_suertes_maquinaria_programacion.sql` — extensión PostGIS + tablas base.
+2. `0002_auth_profiles.sql` — perfiles + roles + trigger de alta de usuario.
+3. `0003_schema_programacion_mediciones_audit.sql` — `programacion` (modelo de la app), `mediciones`, `audit_log`.
+4. `0004_rls_and_audit_triggers.sql` — RLS por rol + triggers de auditoría.
+5. `0005_seed_suertes.sql` — carga las 610 suertes (atributos).
 
-1. `migrations/0001_suertes_maquinaria_programacion.sql` — extensión PostGIS + tablas base.
-2. `migrations/0002_auth_profiles.sql` — perfiles + roles + trigger de alta de usuario.
-3. `migrations/0003_schema_programacion_mediciones_audit.sql` — `programacion` (modelo de la app), `mediciones`, `audit_log`.
-4. `migrations/0004_rls_and_audit_triggers.sql` — políticas RLS por rol + triggers de auditoría.
-5. `seed_suertes.sql` — carga las 610 suertes (atributos).
+## Opción A — CLI de Supabase (recomendada)
 
-> Cada archivo es idempotente o seguro de re-ejecutar. Pégalos uno a uno (o todos
-> juntos respetando el orden) y dale **Run**.
+El CLI está instalado como dependencia (`pnpm exec supabase`). Tú corres el login y
+el link (manejan tu token y la contraseña de BD); luego el push es automático:
+
+```bash
+pnpm exec supabase login                                  # navegador / token
+pnpm exec supabase link --project-ref sdlecnysrscszaxkkzca # pide la DB password
+pnpm exec supabase db push                                # aplica 0001..0005
+```
+
+## Opción B — SQL Editor del dashboard
+
+Database → SQL Editor → New query: pega el contenido de cada archivo **en orden** y
+dale **Run**. Cada uno es idempotente / seguro de re-ejecutar.
+
+> Si el paso 1 falla por PostGIS, actívalo en **Database → Extensions** y reintenta.
 
 ## Después de aplicar
 
