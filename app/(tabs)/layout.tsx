@@ -14,6 +14,9 @@ export default function TabsLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <a href="#contenido" className="skip-link print:hidden">
+        Saltar al contenido
+      </a>
       <header className="border-accent/10 flex items-center justify-between gap-3 border-b px-4 py-2 print:hidden">
         <span className="text-base font-bold tracking-tight">
           {t.app.nombre}
@@ -23,7 +26,7 @@ export default function TabsLayout({
           <UserMenu />
         </div>
       </header>
-      <main className="relative flex-1 overflow-hidden">
+      <main id="contenido" className="relative flex-1 overflow-hidden">
         <AuthGate>{children}</AuthGate>
       </main>
       <SyncRunner />

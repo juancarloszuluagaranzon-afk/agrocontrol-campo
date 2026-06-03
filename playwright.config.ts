@@ -13,14 +13,14 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:3100",
+    baseURL: "http://localhost:3200",
     trace: "on-first-retry",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    // Puerto 3100 para no chocar con otros dev servers locales en 3000.
-    command: "pnpm exec next dev --port 3100",
-    url: "http://localhost:3100",
+    // Puerto 3200 propio: evita choques y SW cacheados de otras apps locales.
+    command: "pnpm exec next dev --port 3200",
+    url: "http://localhost:3200",
     // No reutilizar: garantiza que el server lleve el bypass de auth e2e.
     reuseExistingServer: false,
     timeout: 120_000,

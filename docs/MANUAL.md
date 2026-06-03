@@ -1,0 +1,55 @@
+# Manual de uso — AgroControl Campo
+
+App de campo para Riopaila: mapa de suertes, GPS, medición y programación de
+maquinaria amarilla. Funciona en celular/tablet y **sin conexión** tras la primera
+carga. Instálala como app desde el navegador ("Agregar a pantalla de inicio").
+
+## 1. Entrar
+
+- Abre la app e **inicia sesión** con tu correo y contraseña.
+- ¿Primera vez? Usa **Crear cuenta** (o pídele al administrador que te dé acceso).
+- Arriba a la derecha verás tu nombre, el **estado de conexión** y **Salir**.
+
+## 2. Mapa / Campo
+
+- **Base satelital** del ingenio con las **suertes** dibujadas.
+- **Tocar una suerte** → muestra su código, hacienda, sector, **área oficial (ha)**,
+  supervisor y jefe de zona.
+- **Buscar** (arriba): escribe un código `sec_ste` (ej. `3110-090`) o una hacienda
+  → la app vuela al lote y lo resalta.
+- **Capas** (arriba izq.): enciende/apaga red hídrica, canales, vías, cuerpos de
+  agua y estaciones de bombeo.
+- **Mi ubicación** (botón ◎, derecha): activa el GPS; el punto azul es tu posición.
+  Tócalo de nuevo para **centrar** el mapa en ti. Muestra la precisión y avisa si
+  es baja.
+- **Medir** (botón 📐): elige **área** o **distancia**, toca el mapa para marcar
+  vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y perímetro**
+  o **distancia (m)**. Si mides dentro de una suerte conocida, te muestra su área
+  oficial para comparar. Usa **Deshacer** / **Limpiar**.
+
+## 3. Maquinaria amarilla
+
+- Elige la **fecha** arriba; verás los contadores **Zona 1 / Zona 2 / Total**.
+- **Agregar equipo** (botón +): elige la **suerte** (autocompletar); la hacienda y
+  la ubicación se llenan solas. Completa tipo de máquina, identificación, operador,
+  labor, zona, avance (%) y observaciones. **Guardar**.
+- Cada tarjeta permite **Editar** o **Eliminar**.
+- **Imprimir**: vista limpia "Programación Maquinaria Amarilla".
+- **Exportar JSON / CSV** e **Importar** (JSON) la programación.
+- **Historial**: registro auditable de quién creó/editó/eliminó y cuándo.
+- Los equipos del día aparecen como marcadores **sobre su suerte** en el mapa.
+
+## 4. Sin conexión
+
+- Tras la primera carga, la app **abre y funciona sin señal**.
+- Lo que registres sin red queda **pendiente**; la cabecera muestra
+  _"N pendientes"_. Al volver la conexión se **sincroniza** solo
+  (verás _"Sincronizando…"_ y luego _"Sincronizado"_).
+- Para llevar el **mapa offline**: navega por la zona con conexión antes de ir a
+  campo (los mosaicos se guardan en caché).
+
+## 5. Consejos de campo
+
+- Botones grandes y alto contraste para uso con guantes y bajo sol.
+- El GPS necesita **HTTPS** (la app desplegada lo cumple) o `localhost`.
+- Si la precisión del GPS es baja, espera unos segundos a cielo abierto.

@@ -5,6 +5,17 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 5 — Endurecimiento (en curso)
+
+- **PWA offline real** (§14): el service worker cachea `/data/*.geojson|json`
+  (cache-first) y los tiles satelitales de Esri del AOI (cache-first con límite de
+  entradas y expiración) — el mapa y los datos sirven sin red.
+- **Accesibilidad** (WCAG AA, §11): foco visible por teclado y enlace "saltar al
+  contenido".
+- **CI**: opta por Node.js 24 en las JS actions (sin aviso de deprecación).
+- **Manual de uso** ([docs/MANUAL.md](docs/MANUAL.md)) y pasos de **despliegue a
+  Vercel** (env vars, URLs de Auth) en el README.
+
 ### Fase 4 — Persistencia y offline
 
 - **Supabase/PostGIS**: migraciones en `supabase/migrations` — `suertes`,
