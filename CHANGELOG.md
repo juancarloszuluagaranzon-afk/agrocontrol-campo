@@ -5,6 +5,21 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 4 — Persistencia y offline
+
+- **Supabase/PostGIS**: migraciones en `supabase/migrations` — `suertes`,
+  `programacion` (modelo de la app), `mediciones`, `audit_log`, `profiles`/roles;
+  **RLS por rol** y **triggers de auditoría** (antes/después). Seed de 610 suertes.
+  CLI de Supabase para `db push`.
+- **Auth** email+contraseña (Supabase Auth): login/registro, `AuthGate` que protege
+  las pestañas, `UserMenu`, autor de la auditoría = usuario autenticado.
+- **Offline-first + outbox**: el store persiste localmente; los cambios se encolan
+  (`pending`) y el **SyncManager** hace upsert idempotente a Supabase al haber red
+  y sesión (ver [ADR-0004](docs/adr/0004-sync-outbox-localstorage.md)). Indicador
+  de estado en la cabecera (en línea / sin conexión / sincronizando / pendientes).
+- Verificado contra la instancia: usuario autenticado ve las 610 suertes (RLS),
+  el trigger crea el perfil, y el upsert dispara el `audit_log`.
+
 ### Fase 3 — Maquinaria amarilla
 
 - Programación diaria por fecha: agregar / editar / eliminar (soft delete)

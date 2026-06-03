@@ -1,13 +1,8 @@
 /**
- * Tipos de la base de datos.
+ * Tipos de la base de datos (Fase 4).
  *
- * PROVISIONAL: escritos a mano a partir de `supabase/migrations` /
- * `supabase_suertes.sql`. Cuando exista la instancia real se reemplazan por la
- * salida de `supabase gen types typescript` (§7, §9) y se versionan aquí.
- *
- * Cubre las tablas definidas hoy en el SQL: `suertes`, `maquinaria`,
- * `programacion`. Las tablas `mediciones` y `audit_log` (§9) se añadirán en la
- * Fase 4.
+ * Escritos a mano para reflejar `supabase/migrations`. Con la instancia viva se
+ * pueden regenerar con `supabase gen types typescript` (§7).
  */
 
 export type Json =
@@ -18,9 +13,27 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type Rol = "operador" | "supervisor" | "jefe_zona" | "direccion";
+
 export interface Database {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          nombre: string | null;
+          rol: Rol;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          nombre?: string | null;
+          rol?: Rol;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
+      };
       suertes: {
         Row: {
           sec_ste: string;
@@ -35,73 +48,51 @@ export interface Database {
           lon: number | null;
           geom: Json | null;
         };
-        Insert: {
-          sec_ste: string;
-          suerte?: string | null;
-          sector?: string | null;
-          hacienda?: string | null;
-          planta?: string | null;
-          supervisor?: string | null;
-          jefe_zona?: string | null;
-          ha_oficial?: number | null;
-          lat?: number | null;
-          lon?: number | null;
-          geom?: Json | null;
-        };
-        Update: Partial<Database["public"]["Tables"]["suertes"]["Insert"]>;
-        Relationships: [];
-      };
-      maquinaria: {
-        Row: {
-          id: number;
-          tipo: string;
-          identificacion: string | null;
-          estado: string | null;
-          creado_en: string | null;
-        };
-        Insert: {
-          id?: number;
-          tipo: string;
-          identificacion?: string | null;
-          estado?: string | null;
-          creado_en?: string | null;
-        };
-        Update: Partial<Database["public"]["Tables"]["maquinaria"]["Insert"]>;
+        Insert: Database["public"]["Tables"]["suertes"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["suertes"]["Row"]>;
         Relationships: [];
       };
       programacion: {
         Row: {
-          id: number;
+          id: string;
           fecha: string;
-          maquinaria_id: number | null;
-          sec_ste: string | null;
+          tipo: string;
+          identificacion: string | null;
           operador: string | null;
+          sec_ste: string | null;
+          hacienda: string | null;
+          lat: number | null;
+          lon: number | null;
           labor: string | null;
           zona: number | null;
-          avance: number | null;
-          observaciones: string | null;
-          creado_en: string | null;
+          avance: number;
+          observaciones: string;
+          deleted: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
-          id?: number;
+          id: string;
           fecha: string;
-          maquinaria_id?: number | null;
-          sec_ste?: string | null;
+          tipo: string;
+          identificacion?: string | null;
           operador?: string | null;
+          sec_ste?: string | null;
+          hacienda?: string | null;
+          lat?: number | null;
+          lon?: number | null;
           labor?: string | null;
           zona?: number | null;
-          avance?: number | null;
-          observaciones?: string | null;
-          creado_en?: string | null;
+          avance?: number;
+          observaciones?: string;
+          deleted?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["programacion"]["Insert"]>;
         Relationships: [
-          {
-            foreignKeyName: "programacion_maquinaria_id_fkey";
-            columns: ["maquinaria_id"];
-            referencedRelation: "maquinaria";
-            referencedColumns: ["id"];
-          },
           {
             foreignKeyName: "programacion_sec_ste_fkey";
             columns: ["sec_ste"];
@@ -110,10 +101,55 @@ export interface Database {
           },
         ];
       };
+      mediciones: {
+        Row: {
+          id: string;
+          tipo: "area" | "distancia";
+          valor: number;
+          unidad: string;
+          geom: Json | null;
+          autor: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tipo: "area" | "distancia";
+          valor: number;
+          unidad: string;
+          geom?: Json | null;
+          autor?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["mediciones"]["Insert"]>;
+        Relationships: [];
+      };
+      audit_log: {
+        Row: {
+          id: number;
+          tabla: string;
+          registro_id: string;
+          accion: "insert" | "update" | "delete";
+          autor: string | null;
+          antes: Json | null;
+          despues: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          tabla: string;
+          registro_id: string;
+          accion: "insert" | "update" | "delete";
+          autor?: string | null;
+          antes?: Json | null;
+          despues?: Json | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["audit_log"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Enums: { rol: Rol };
     CompositeTypes: Record<string, never>;
   };
 }

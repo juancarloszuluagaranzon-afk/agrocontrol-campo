@@ -21,7 +21,9 @@ export default defineConfig({
     // Puerto 3100 para no chocar con otros dev servers locales en 3000.
     command: "pnpm exec next dev --port 3100",
     url: "http://localhost:3100",
-    reuseExistingServer: !process.env.CI,
+    // No reutilizar: garantiza que el server lleve el bypass de auth e2e.
+    reuseExistingServer: false,
     timeout: 120_000,
+    env: { NEXT_PUBLIC_E2E: "1" },
   },
 });
