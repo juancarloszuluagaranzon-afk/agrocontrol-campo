@@ -45,6 +45,8 @@ interface MaquinariaState {
   removeEquipo: (id: string) => void;
   replaceAll: (items: ProgramacionItem[], audit: AuditEntry[]) => void;
   reset: () => void;
+  /** Fija el autor de las acciones (usuario autenticado). */
+  setAutor: (autor: string) => void;
 }
 
 export const useMaquinariaStore = create<MaquinariaState>()(
@@ -91,6 +93,7 @@ export const useMaquinariaStore = create<MaquinariaState>()(
 
       replaceAll: (items, audit) => set({ items, audit }),
       reset: () => set({ items: [], audit: [] }),
+      setAutor: (autor) => set({ autor }),
     }),
     { name: "agrocontrol-maquinaria" },
   ),
