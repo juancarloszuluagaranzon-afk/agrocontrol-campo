@@ -68,11 +68,23 @@ EPSG:4326) más capas de contexto **depuradas** (ADR-0002). Diccionario en
 
 ## Estado
 
-**Fase 0 (Cimientos) — completa.** App vacía instalable, CI verde. Siguientes
-fases: mapa de suertes (1), GPS y medición (2), maquinaria (3), persistencia y
-offline (4), endurecimiento (5). Ver `CHANGELOG.md`.
+Fases 0–4 completas (cimientos, mapa de suertes, GPS y medición, maquinaria,
+persistencia/offline). Fase 5 (endurecimiento) en curso. Ver `CHANGELOG.md` y el
+[manual de uso](docs/MANUAL.md).
 
-## Despliegue
+## Despliegue (Vercel)
 
-Vercel (HTTPS requerido para GPS). El AOI para tiles offline (bbox WGS84) es
-`lon −76.185..−76.053, lat 4.235..4.385`.
+HTTPS es requisito para el GPS; Vercel lo cubre.
+
+1. **Importar el repo** en Vercel (framework Next.js, detectado automáticamente).
+2. **Variables de entorno** (Project Settings → Environment Variables):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - _(opcional, Fase 5)_ `NEXT_PUBLIC_SENTRY_DSN`
+3. **Build**: el `package.json` ya usa `next build --webpack` (Serwist). No se
+   requiere config extra.
+4. En Supabase → **Authentication → URL Configuration**, agrega el dominio de
+   Vercel a _Site URL_ y _Redirect URLs_.
+
+> AOI para tiles offline (bbox WGS84): `lon −76.185..−76.053, lat 4.235..4.385`.
+> Para uso productivo, validar la licencia de los tiles de Esri (§20).

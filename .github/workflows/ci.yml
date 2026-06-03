@@ -11,6 +11,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Opta por Node.js 24 en las JS actions (evita el aviso de deprecación de Node 20).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   # ── Calidad: typecheck → lint → formato → tests → build (§11) ──
   quality:
