@@ -47,6 +47,19 @@ interface MaquinariaState {
   reset: () => void;
   /** Fija el autor de las acciones (usuario autenticado). */
   setAutor: (autor: string) => void;
+
+  /** Outbox: ids de registros con cambios pendientes de sincronizar (§14). */
+  pending: string[];
+  /** Marca registros como sincronizados (los saca del outbox). */
+  markSynced: (ids: string[]) => void;
+  /** Indicador de sincronización en curso (UI). */
+  syncing: boolean;
+  setSyncing: (v: boolean) => void;
+}
+
+/** Agrega un id al outbox sin duplicar. */
+function enqueue(pending: string[], id: string): string[] {
+  return pending.includes(id) ? pending : [...pending, id];
 }
 
 export const useMaquinariaStore = create<MaquinariaState>()(
@@ -55,6 +68,7 @@ export const useMaquinariaStore = create<MaquinariaState>()(
       items: [],
       audit: [],
       autor: "Operador de campo",
+      pending: [],
 
       addEquipo: (input, derived, fecha) =>
         set((s) => {
@@ -63,6 +77,7 @@ export const useMaquinariaStore = create<MaquinariaState>()(
           return {
             items: [...s.items, item],
             audit: [auditInsert(item, m), ...s.audit],
+            pending: enqueue(s.pending, item.id),
           };
         }),
 
@@ -75,6 +90,7 @@ export const useMaquinariaStore = create<MaquinariaState>()(
           return {
             items: s.items.map((i) => (i.id === id ? after : i)),
             audit: [auditUpdate(before, after, m), ...s.audit],
+            pending: enqueue(s.pending, id),
           };
         }),
 
@@ -88,14 +104,28 @@ export const useMaquinariaStore = create<MaquinariaState>()(
           return {
             items: s.items.map((i) => (i.id === id ? after : i)),
             audit: [auditDelete(before, m), ...s.audit],
+            pending: enqueue(s.pending, id),
           };
         }),
 
       replaceAll: (items, audit) => set({ items, audit }),
-      reset: () => set({ items: [], audit: [] }),
+      reset: () => set({ items: [], audit: [], pending: [] }),
       setAutor: (autor) => set({ autor }),
+      markSynced: (ids) =>
+        set((s) => ({ pending: s.pending.filter((p) => !ids.includes(p)) })),
+      syncing: false,
+      setSyncing: (syncing) => set({ syncing }),
     }),
-    { name: "agrocontrol-maquinaria" },
+    {
+      name: "agrocontrol-maquinaria",
+      // No persistir el estado efímero de sincronización.
+      partialize: (s) => ({
+        items: s.items,
+        audit: s.audit,
+        autor: s.autor,
+        pending: s.pending,
+      }),
+    },
   ),
 );
 

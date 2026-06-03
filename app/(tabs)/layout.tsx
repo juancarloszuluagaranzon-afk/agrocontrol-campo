@@ -1,4 +1,5 @@
 import { SyncStatus } from "@/components/SyncStatus";
+import { SyncRunner } from "@/components/SyncRunner";
 import { TabBar } from "@/components/TabBar";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -25,6 +26,7 @@ export default function TabsLayout({
       <main className="relative flex-1 overflow-hidden">
         <AuthGate>{children}</AuthGate>
       </main>
+      <SyncRunner />
       <TabBar />
     </div>
   );
