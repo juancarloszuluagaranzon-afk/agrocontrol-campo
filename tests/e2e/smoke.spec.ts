@@ -12,6 +12,6 @@ test("se puede navegar a la pestaña Maquinaria", async ({ page }) => {
   await page.getByRole("link", { name: "Maquinaria" }).click();
   await expect(page).toHaveURL(/\/maquinaria$/);
   await expect(
-    page.getByRole("heading", { name: "Maquinaria amarilla" }),
+    page.getByRole("button", { name: "Agregar equipo" }),
   ).toBeVisible();
 });

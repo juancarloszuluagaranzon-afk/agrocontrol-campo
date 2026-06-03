@@ -5,6 +5,22 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 3 — Maquinaria amarilla
+
+- Programación diaria por fecha: agregar / editar / eliminar (soft delete)
+  equipos, con contadores por zona (1/2) y total (§5 Pestaña B).
+- Formulario (React Hook Form + Zod): al elegir la suerte del catálogo
+  (autocompletar), se autocompletan hacienda y centroide (lat/lon).
+- Campos: tipo, identificación, operador, suerte, labor, zona, avance (%),
+  observaciones.
+- **Equipos dibujados en el mapa** sobre el centroide de su suerte (capa de
+  maquinaria sincronizada con la programación del día) — DoD §18.
+- **Historial auditable** (§10): cada alta/edición/baja registra autor, fecha y
+  antes/después. Persistencia local (Zustand + localStorage; Supabase en Fase 4).
+- Vista imprimible "Programación Maquinaria Amarilla"; export/import JSON
+  (validado con Zod) y export CSV (Excel, separador `;`).
+- Tests: dominio (operaciones + auditoría + export) y e2e del flujo.
+
 ### Fase 2 — GPS y medición
 
 - **Mi ubicación (GPS)**: seguimiento con `watchPosition`, marcador con halo,

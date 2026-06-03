@@ -19,7 +19,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Secciones"
-      className="border-accent/10 bg-background grid grid-cols-2 border-t"
+      className="border-accent/10 bg-background grid grid-cols-2 border-t print:hidden"
     >
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
