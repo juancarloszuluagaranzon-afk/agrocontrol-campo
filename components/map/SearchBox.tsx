@@ -17,7 +17,7 @@ export function SearchBox() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/data/suertes_catalogo.json")
+    void fetch("/data/tablones_catalogo.json")
       .then((r) => r.json())
       .then((data: unknown) => {
         if (!cancelled) setCatalogo(catalogoSchema.parse(data));
@@ -36,8 +36,8 @@ export function SearchBox() {
   );
 
   function elegir(entry: CatalogoEntry) {
-    flyTo({ lon: entry.lon, lat: entry.lat, secSte: entry.sec_ste });
-    setQuery(entry.sec_ste);
+    flyTo({ lon: entry.lon, lat: entry.lat, tabId: entry.tab_id });
+    setQuery(entry.tab_id);
     setOpen(false);
   }
 
@@ -59,14 +59,14 @@ export function SearchBox() {
       {open && resultados.length > 0 && (
         <ul className="bg-background mt-1 max-h-72 overflow-auto rounded-lg shadow-xl ring-1 ring-black/10">
           {resultados.map((r) => (
-            <li key={r.sec_ste}>
+            <li key={r.tab_id}>
               <button
                 type="button"
                 onClick={() => elegir(r)}
                 className="hover:bg-accent/5 flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm"
               >
                 <span className="text-primary font-semibold tabular-nums">
-                  {r.sec_ste}
+                  {r.tab_id}
                 </span>
                 <span className="text-accent/60 truncate text-xs">
                   {r.hacienda}

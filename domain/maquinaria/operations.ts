@@ -5,6 +5,8 @@ import type {
 } from "@/domain/maquinaria/schema";
 
 export interface SuerteDerivada {
+  sec_ste: string;
+  tablon: number;
   hacienda: string;
   lat: number;
   lon: number;

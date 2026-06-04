@@ -13,10 +13,11 @@ carga. Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 ## 2. Mapa / Campo
 
 - **Base satelital** del ingenio con las **suertes** dibujadas.
-- **Tocar una suerte** → muestra su código, hacienda, sector, **área oficial (ha)**,
-  supervisor y jefe de zona.
-- **Buscar** (arriba): escribe un código `sec_ste` (ej. `3110-090`) o una hacienda
-  → la app vuela al lote y lo resalta.
+- Una **suerte** está dividida en **tablones**; cada tablón se ve y se toca por
+  separado. **Tocar un tablón** → muestra su suerte, número (ej. "Tablón 3 de 5"),
+  hacienda, sector, **área oficial (ha)**, supervisor y jefe de zona.
+- **Buscar** (arriba): escribe un código de suerte `sec_ste` (ej. `3111-020`), un
+  tablón (`3111-020-T3`) o una hacienda → la app vuela y lo resalta.
 - **Capas** (arriba izq.): enciende/apaga red hídrica, canales, vías, cuerpos de
   agua y estaciones de bombeo.
 - **Mi ubicación** (botón ◎, derecha): activa el GPS; el punto azul es tu posición.
@@ -30,9 +31,10 @@ carga. Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 ## 3. Maquinaria amarilla
 
 - Elige la **fecha** arriba; verás los contadores **Zona 1 / Zona 2 / Total**.
-- **Agregar equipo** (botón +): elige la **suerte** (autocompletar); la hacienda y
-  la ubicación se llenan solas. Completa tipo de máquina, identificación, operador,
-  labor, zona, avance (%) y observaciones. **Guardar**.
+- **Agregar equipo** (botón +): elige el **tablón** (autocompletar por suerte,
+  tablón o hacienda); la hacienda y la ubicación se llenan solas. Completa tipo de
+  máquina, identificación, operador, labor, zona, avance (%) y observaciones.
+  **Guardar**.
 - Cada tarjeta permite **Editar** o **Eliminar**.
 - **Imprimir**: vista limpia "Programación Maquinaria Amarilla".
 - **Exportar JSON / CSV** e **Importar** (JSON) la programación.

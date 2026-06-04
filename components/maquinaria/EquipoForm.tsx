@@ -42,7 +42,7 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
       tipo: "",
       identificacion: "",
       operador: "",
-      sec_ste: "",
+      tab_id: "",
       labor: "",
       zona: 1,
       avance: 0,
@@ -50,11 +50,17 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
     },
   });
 
-  const [query, setQuery] = useState(initial?.sec_ste ?? "");
+  const [query, setQuery] = useState(initial?.tab_id ?? "");
   const [abierto, setAbierto] = useState(false);
   const [derived, setDerived] = useState<SuerteDerivada | null>(
     initial
-      ? { hacienda: initial.hacienda, lat: initial.lat, lon: initial.lon }
+      ? {
+          sec_ste: initial.sec_ste,
+          tablon: initial.tablon,
+          hacienda: initial.hacienda,
+          lat: initial.lat,
+          lon: initial.lon,
+        }
       : null,
   );
 
@@ -62,12 +68,18 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
     () => searchCatalogo(catalogo, query, 8),
     [catalogo, query],
   );
-  const secSte = watch("sec_ste");
+  const tabId = watch("tab_id");
 
-  function elegirSuerte(e: CatalogoEntry) {
-    setValue("sec_ste", e.sec_ste, { shouldValidate: true });
-    setDerived({ hacienda: e.hacienda, lat: e.lat, lon: e.lon });
-    setQuery(e.sec_ste);
+  function elegirTablon(e: CatalogoEntry) {
+    setValue("tab_id", e.tab_id, { shouldValidate: true });
+    setDerived({
+      sec_ste: e.sec_ste,
+      tablon: e.tablon,
+      hacienda: e.hacienda,
+      lat: e.lat,
+      lon: e.lon,
+    });
+    setQuery(e.tab_id);
     setAbierto(false);
   }
 
@@ -78,10 +90,10 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
 
   return (
     <form onSubmit={handleSubmit(enviar)} className="flex flex-col gap-3">
-      {/* Suerte (autocompletar) */}
+      {/* Tablón (autocompletar) */}
       <div className="relative">
         <label className="text-accent/70 mb-1 block text-xs font-semibold">
-          Suerte
+          Tablón
         </label>
         <input
           className={campo}
@@ -90,24 +102,22 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
             setQuery(e.target.value);
             setAbierto(true);
             setDerived(null);
-            setValue("sec_ste", "");
+            setValue("tab_id", "");
           }}
           onFocus={() => setAbierto(true)}
-          placeholder="Buscar sec_ste o hacienda…"
-          aria-label="Suerte"
+          placeholder="Buscar tablón, suerte o hacienda…"
+          aria-label="Tablón"
         />
         {abierto && resultados.length > 0 && (
           <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg bg-white shadow-xl ring-1 ring-black/10">
             {resultados.map((r) => (
-              <li key={r.sec_ste}>
+              <li key={r.tab_id}>
                 <button
                   type="button"
-                  onClick={() => elegirSuerte(r)}
+                  onClick={() => elegirTablon(r)}
                   className="hover:bg-accent/5 flex w-full justify-between gap-2 px-3 py-2 text-left text-sm"
                 >
-                  <span className="font-semibold tabular-nums">
-                    {r.sec_ste}
-                  </span>
+                  <span className="font-semibold tabular-nums">{r.tab_id}</span>
                   <span className="text-accent/60 text-xs">{r.hacienda}</span>
                 </button>
               </li>
@@ -120,8 +130,8 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
             {derived.lon.toFixed(4)}
           </p>
         )}
-        {errors.sec_ste && (
-          <p className="mt-1 text-xs text-red-600">{errors.sec_ste.message}</p>
+        {errors.tab_id && (
+          <p className="mt-1 text-xs text-red-600">{errors.tab_id.message}</p>
         )}
       </div>
 
@@ -183,7 +193,7 @@ export function EquipoForm({ catalogo, initial, onSubmit, onCancel }: Props) {
       <div className="mt-1 flex gap-2">
         <button
           type="submit"
-          disabled={!secSte || !derived}
+          disabled={!tabId || !derived}
           className="bg-primary text-accent flex-1 rounded-lg py-2.5 text-sm font-bold disabled:opacity-40"
         >
           Guardar

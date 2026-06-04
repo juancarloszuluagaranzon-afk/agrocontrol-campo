@@ -1,34 +1,36 @@
 import { z } from "zod";
 
 /**
- * Esquemas de validación de la capa de suertes y el catálogo (§8, §11).
- *
- * Se usan para validar en el borde los GeoJSON/JSON estáticos antes de pintarlos
- * o cargarlos a Supabase. Los tipos de dominio se derivan de estos esquemas
- * (única fuente de verdad).
+ * Esquemas de la capa de **tablones** (§8, §11). Una suerte (`sec_ste`) está
+ * compuesta por uno o varios tablones; el tablón es la unidad de trabajo.
+ * El área oficial es por tablón; la de la suerte = suma de sus tablones.
  */
 
-/** Atributos oficiales de una suerte (properties del GeoJSON principal). */
-export const suertePropertiesSchema = z.object({
-  sec_ste: z.string(), // PK, ej. "3110-090"
-  suerte: z.string().nullable(),
-  sector: z.string().nullable(),
-  hacienda: z.string().nullable(),
-  planta: z.string().nullable(),
-  supervisor: z.string().nullable(),
-  jefe_zona: z.string().nullable(),
-  ha_oficial: z.number(), // autoridad de área
-  ha_geom: z.number().optional(),
+/** Atributos de un tablón (properties del GeoJSON principal). */
+export const tablonPropertiesSchema = z.object({
+  tab_id: z.string(), // PK, ej. "3111-020-T3"
+  sec_ste: z.string(), // suerte a la que pertenece, ej. "3111-020"
+  suerte: z.string(),
+  sector: z.string(),
+  hacienda: z.string(),
+  planta: z.string(),
+  supervisor: z.string(),
+  jefe_zona: z.string(),
+  tablon: z.number(), // número del tablón dentro de la suerte (1..N)
+  tablon_total: z.number(), // total de tablones de la suerte
+  ha_oficial: z.number(), // área oficial del tablón
   lat: z.number(),
   lon: z.number(),
 });
-export type SuerteProperties = z.infer<typeof suertePropertiesSchema>;
+export type TablonProperties = z.infer<typeof tablonPropertiesSchema>;
 
 /** Entrada del catálogo ligero (sin geometría) para buscador/autocompletar. */
 export const catalogoEntrySchema = z.object({
+  tab_id: z.string(),
   sec_ste: z.string(),
   hacienda: z.string(),
   sector: z.string(),
+  tablon: z.number(),
   ha: z.number(),
   lat: z.number(),
   lon: z.number(),
@@ -59,6 +61,6 @@ export function featureCollectionSchema<P extends z.ZodTypeAny>(properties: P) {
   });
 }
 
-export const suertesGeojsonSchema = featureCollectionSchema(
-  suertePropertiesSchema,
+export const tablonesGeojsonSchema = featureCollectionSchema(
+  tablonPropertiesSchema,
 );

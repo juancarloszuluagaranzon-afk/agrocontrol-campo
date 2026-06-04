@@ -19,6 +19,8 @@ export function itemToRow(
     tipo: item.tipo,
     identificacion: item.identificacion,
     operador: item.operador,
+    tab_id: item.tab_id,
+    tablon: item.tablon,
     sec_ste: item.sec_ste,
     hacienda: item.hacienda,
     lat: item.lat,

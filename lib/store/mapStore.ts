@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SuerteProperties } from "@/domain/suertes/schema";
+import type { TablonProperties } from "@/domain/suertes/schema";
 import { CONTEXT_LAYERS } from "@/lib/geo/layers";
 import type { LngLat } from "@/lib/geo/measure";
 
@@ -7,7 +7,7 @@ import type { LngLat } from "@/lib/geo/measure";
 export interface FlyTarget {
   lon: number;
   lat: number;
-  secSte: string;
+  tabId: string;
   /** cambia en cada solicitud para re-disparar el efecto aunque el destino repita */
   nonce: number;
 }
@@ -25,9 +25,9 @@ export interface GpsFix {
 export type MeasureMode = "off" | "area" | "distance";
 
 interface MapState {
-  /** Suerte seleccionada (properties del feature tocado), o null. */
-  selected: SuerteProperties | null;
-  setSelected: (s: SuerteProperties | null) => void;
+  /** Tablón seleccionado (properties del feature tocado), o null. */
+  selected: TablonProperties | null;
+  setSelected: (s: TablonProperties | null) => void;
 
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
@@ -55,9 +55,9 @@ interface MapState {
   addVertex: (v: LngLat) => void;
   undoVertex: () => void;
   clearVertices: () => void;
-  /** Suerte oficial bajo el centroide de la medición (contraste), o null. */
-  measureOfficial: { secSte: string; haOficial: number } | null;
-  setMeasureOfficial: (o: { secSte: string; haOficial: number } | null) => void;
+  /** Tablón oficial bajo el centroide de la medición (contraste), o null. */
+  measureOfficial: { label: string; haOficial: number } | null;
+  setMeasureOfficial: (o: { label: string; haOficial: number } | null) => void;
 }
 
 const initialContext: Record<string, boolean> = Object.fromEntries(

@@ -16,7 +16,7 @@ const input: EquipoInput = {
   tipo: "Bulldozer",
   identificacion: "BD-01",
   operador: "Juan",
-  sec_ste: "3110-090",
+  tab_id: "3110-090-T1",
   labor: "Nivelación",
   zona: 2,
   avance: 40,
@@ -24,7 +24,13 @@ const input: EquipoInput = {
 };
 const item = buildItem(
   input,
-  { hacienda: "NORMANDIA", lat: 4.31, lon: -76.12 },
+  {
+    sec_ste: "3110-090",
+    tablon: 1,
+    hacienda: "NORMANDIA",
+    lat: 4.31,
+    lon: -76.12,
+  },
   "2026-06-02",
   meta,
 );
@@ -45,7 +51,7 @@ describe("export/import", () => {
     const csv = itemsToCSV([item]);
     const [header, row] = csv.split("\r\n");
     expect(header).toBe(
-      "fecha;tipo;identificacion;operador;sec_ste;hacienda;labor;zona;avance;observaciones",
+      "fecha;tipo;identificacion;operador;tab_id;sec_ste;tablon;hacienda;labor;zona;avance;observaciones",
     );
     expect(row).toContain('"con; punto y coma"');
     expect(row).toContain("3110-090");

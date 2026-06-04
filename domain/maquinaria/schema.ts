@@ -27,7 +27,7 @@ export const equipoInputSchema = z.object({
   tipo: z.string().min(1, "Selecciona el tipo de máquina"),
   identificacion: z.string().min(1, "Indica la identificación/placa"),
   operador: z.string().min(1, "Indica el operador"),
-  sec_ste: z.string().min(1, "Selecciona la suerte"),
+  tab_id: z.string().min(1, "Selecciona el tablón"),
   labor: z.string().min(1, "Indica la labor"),
   zona: z.union([z.literal(1), z.literal(2)]),
   avance: z.number().min(0).max(100),
@@ -35,8 +35,10 @@ export const equipoInputSchema = z.object({
 });
 export type EquipoInput = z.infer<typeof equipoInputSchema>;
 
-/** Atributos que se derivan de la suerte elegida (centroide oficial). */
+/** Atributos que se derivan del tablón elegido (suerte + centroide oficial). */
 export const suerteDerivadaSchema = z.object({
+  sec_ste: z.string(),
+  tablon: z.number(),
   hacienda: z.string(),
   lat: z.number(),
   lon: z.number(),
