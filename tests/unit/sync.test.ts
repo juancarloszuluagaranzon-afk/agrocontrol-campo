@@ -12,7 +12,7 @@ const input: EquipoInput = {
   tipo: "Bulldozer",
   identificacion: "BD-09",
   operador: "Juan",
-  sec_ste: "3110-090",
+  tab_id: "3110-090-T1",
   labor: "Nivelación",
   zona: 2,
   avance: 40,
@@ -20,7 +20,13 @@ const input: EquipoInput = {
 };
 const item = buildItem(
   input,
-  { hacienda: "NORMANDIA", lat: 4.31, lon: -76.12 },
+  {
+    sec_ste: "3110-090",
+    tablon: 1,
+    hacienda: "NORMANDIA",
+    lat: 4.31,
+    lon: -76.12,
+  },
   "2026-06-03",
   meta,
 );

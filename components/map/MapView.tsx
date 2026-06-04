@@ -32,9 +32,9 @@ import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import { itemsForFecha, useMaquinariaStore } from "@/lib/store/maquinariaStore";
-import type { SuerteProperties } from "@/domain/suertes/schema";
+import type { TablonProperties } from "@/domain/suertes/schema";
 
-const SUERTES_URL = "/data/suertes_riopaila.geojson";
+const TABLONES_URL = "/data/tablones_riopaila.geojson";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -77,21 +77,27 @@ function addContextLayer(map: MlMap, id: string): void {
 export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
-  const lookupRef = useRef<Map<string, SuerteProperties>>(new Map());
+  const lookupRef = useRef<Map<string, TablonProperties>>(new Map());
+  const pendingTabRef = useRef<string | null>(null);
   const setSelected = useMapStore((s) => s.setSelected);
 
-  // Índice sec_ste → properties para enriquecer la selección del buscador
+  // Índice tab_id → properties para enriquecer la selección del buscador
   // (el catálogo no trae supervisor/jefe_zona). El navegador cachea el GeoJSON.
   useEffect(() => {
     let cancelled = false;
-    void fetch(SUERTES_URL)
+    void fetch(TABLONES_URL)
       .then((r) => r.json())
-      .then((fc: { features: { properties: SuerteProperties }[] }) => {
+      .then((fc: { features: { properties: TablonProperties }[] }) => {
         if (cancelled) return;
-        const map = new Map<string, SuerteProperties>();
-        for (const f of fc.features)
-          map.set(f.properties.sec_ste, f.properties);
+        const map = new Map<string, TablonProperties>();
+        for (const f of fc.features) map.set(f.properties.tab_id, f.properties);
         lookupRef.current = map;
+        // Resolver una selección del buscador que llegó antes que el índice.
+        if (pendingTabRef.current) {
+          const props = map.get(pendingTabRef.current);
+          if (props) setSelected(props);
+          pendingTabRef.current = null;
+        }
       })
       .catch(() => {
         /* sin índice, el buscador degrada a atributos parciales */
@@ -99,7 +105,7 @@ export function MapView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setSelected]);
 
   // ── Montaje único del mapa ──
   useEffect(() => {
@@ -128,7 +134,7 @@ export function MapView() {
     );
 
     map.on("load", () => {
-      map.addSource(SUERTES_SOURCE, { type: "geojson", data: SUERTES_URL });
+      map.addSource(SUERTES_SOURCE, { type: "geojson", data: TABLONES_URL });
 
       // Capas de contexto (ocultas por defecto) antes de las suertes.
       for (const cfg of CONTEXT_LAYERS) {
@@ -139,7 +145,7 @@ export function MapView() {
         addContextLayer(map, cfg.id);
       }
 
-      // Una sola capa de relleno + contorno para las 610 suertes (§13).
+      // Una sola capa de relleno + contorno para los 1378 tablones (§13).
       map.addLayer({
         id: SUERTES_FILL,
         type: "fill",
@@ -161,7 +167,7 @@ export function MapView() {
         type: "line",
         source: SUERTES_SOURCE,
         paint: { "line-color": "#ffffff", "line-width": 3 },
-        filter: ["==", ["get", "sec_ste"], ""],
+        filter: ["==", ["get", "tab_id"], ""],
       });
       map.addLayer({
         id: SUERTES_LABEL,
@@ -169,7 +175,13 @@ export function MapView() {
         source: SUERTES_SOURCE,
         minzoom: 14.5,
         layout: {
-          "text-field": ["get", "sec_ste"],
+          // "3111-020 · T3"
+          "text-field": [
+            "concat",
+            ["get", "sec_ste"],
+            " · T",
+            ["to-string", ["get", "tablon"]],
+          ],
           "text-size": 11,
           "text-font": ["Open Sans Regular"],
         },
@@ -280,7 +292,7 @@ export function MapView() {
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
         const f = e.features?.[0] as MapGeoJSONFeature | undefined;
-        if (f) setSelected(f.properties as unknown as SuerteProperties);
+        if (f) setSelected(f.properties as unknown as TablonProperties);
       });
       map.on("mouseenter", SUERTES_FILL, () => {
         if (useMapStore.getState().measureMode === "off")
@@ -304,12 +316,12 @@ export function MapView() {
   }, [setSelected]);
 
   // ── Resaltado de la suerte seleccionada ──
-  const selectedSecSte = useMapStore((s) => s.selected?.sec_ste ?? "");
+  const selectedTabId = useMapStore((s) => s.selected?.tab_id ?? "");
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.getLayer(SUERTES_SELECTED)) return;
-    map.setFilter(SUERTES_SELECTED, ["==", ["get", "sec_ste"], selectedSecSte]);
-  }, [selectedSecSte]);
+    map.setFilter(SUERTES_SELECTED, ["==", ["get", "tab_id"], selectedTabId]);
+  }, [selectedTabId]);
 
   // ── Visibilidad de capas de contexto ──
   const activeContext = useMapStore((s) => s.activeContext);
@@ -337,8 +349,9 @@ export function MapView() {
       zoom: 16,
       duration: 1200,
     });
-    const props = lookupRef.current.get(flyTarget.secSte);
+    const props = lookupRef.current.get(flyTarget.tabId);
     if (props) setSelected(props);
+    else pendingTabRef.current = flyTarget.tabId; // se resuelve al cargar el índice
   }, [flyTarget, setSelected]);
 
   // ── Marcador GPS ──
@@ -434,9 +447,9 @@ export function MapView() {
       const hits = map.queryRenderedFeatures(map.project([cx, cy]), {
         layers: [SUERTES_FILL],
       });
-      const props = hits[0]?.properties as SuerteProperties | undefined;
+      const props = hits[0]?.properties as TablonProperties | undefined;
       setMeasureOfficial(
-        props ? { secSte: props.sec_ste, haOficial: props.ha_oficial } : null,
+        props ? { label: props.tab_id, haOficial: props.ha_oficial } : null,
       );
     } else {
       setMeasureOfficial(null);

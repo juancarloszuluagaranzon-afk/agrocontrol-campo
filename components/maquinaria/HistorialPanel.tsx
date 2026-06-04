@@ -18,10 +18,10 @@ function resumen(e: AuditEntry): string {
   const src = (e.despues ?? e.antes) as {
     tipo?: string;
     identificacion?: string;
-    sec_ste?: string;
+    tab_id?: string;
   } | null;
   if (!src) return e.registro_id;
-  return `${src.tipo ?? ""} ${src.identificacion ?? ""} · ${src.sec_ste ?? ""}`.trim();
+  return `${src.tipo ?? ""} ${src.identificacion ?? ""} · ${src.tab_id ?? ""}`.trim();
 }
 
 /**

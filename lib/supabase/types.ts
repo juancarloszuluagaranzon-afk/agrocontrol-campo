@@ -59,6 +59,8 @@ export interface Database {
           tipo: string;
           identificacion: string | null;
           operador: string | null;
+          tab_id: string | null;
+          tablon: number | null;
           sec_ste: string | null;
           hacienda: string | null;
           lat: number | null;
@@ -78,6 +80,8 @@ export interface Database {
           tipo: string;
           identificacion?: string | null;
           operador?: string | null;
+          tab_id?: string | null;
+          tablon?: number | null;
           sec_ste?: string | null;
           hacienda?: string | null;
           lat?: number | null;

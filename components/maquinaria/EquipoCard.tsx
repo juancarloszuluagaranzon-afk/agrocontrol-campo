@@ -26,9 +26,9 @@ export function EquipoCard({ item, onEdit, onDelete }: Props) {
 
       <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
         <div>
-          <dt className="text-accent/50">Suerte</dt>
+          <dt className="text-accent/50">Tablón</dt>
           <dd className="text-primary font-semibold tabular-nums">
-            {item.sec_ste}
+            {item.tab_id}
           </dd>
         </div>
         <div>

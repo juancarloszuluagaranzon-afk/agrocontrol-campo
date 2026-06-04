@@ -5,6 +5,21 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 6 — Tablones (cartografía oficial de Ingeniería Agrícola)
+
+- **Nueva fuente de verdad**: capa oficial de **1.378 tablones** (subdivisiones de
+  las 610 suertes), reproyectada de EPSG:3115 a WGS84. Cobertura completa del
+  ingenio (**5.567 ha** vs 2.849). Cada suerte = N tablones; el área oficial es
+  por tablón (la de la suerte = suma). `tab_id` (ej. `3111-020-T3`), numerados
+  1..N por orden geográfico. Scripts en `scripts/`.
+- **Mapa**: dibuja e identifica cada tablón; el panel muestra
+  "Suerte X · Tablón n de N · área". Buscador por `tab_id`/`sec_ste`/hacienda.
+- **Maquinaria por tablón**: el formulario asigna a un tablón (autocompletar);
+  hacienda y centroide se derivan del tablón. `programacion` referencia `tab_id`
+  (migración 0006).
+- **Capas de contexto oficiales**: cuerpos de agua (16) y redes hídricas (103)
+  reemplazan las versiones extraídas del GeoPDF (que tenían artefactos).
+
 ### Fase 5 — Endurecimiento (en curso)
 
 - **PWA offline real** (§14): el service worker cachea `/data/*.geojson|json`

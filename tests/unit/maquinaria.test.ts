@@ -18,7 +18,7 @@ const input: EquipoInput = {
   tipo: "Bulldozer",
   identificacion: "BD-01",
   operador: "Juan",
-  sec_ste: "3110-090",
+  tab_id: "3110-090-T1",
   labor: "Nivelación",
   zona: 1,
   avance: 25,
@@ -26,6 +26,8 @@ const input: EquipoInput = {
 };
 
 const derived: SuerteDerivada = {
+  sec_ste: "3110-090",
+  tablon: 1,
   hacienda: "NORMANDIA",
   lat: 4.31,
   lon: -76.12,

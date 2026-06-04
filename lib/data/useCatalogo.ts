@@ -12,7 +12,7 @@ export function useCatalogo(): CatalogoEntry[] {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/data/suertes_catalogo.json")
+    void fetch("/data/tablones_catalogo.json")
       .then((r) => r.json())
       .then((data: unknown) => {
         if (!cancelled) setCatalogo(catalogoSchema.parse(data));

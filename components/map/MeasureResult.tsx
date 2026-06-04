@@ -71,8 +71,8 @@ export function MeasureResult() {
           )}
           {esArea && official && vertices.length >= 3 && (
             <p className="mt-1 text-xs text-emerald-700">
-              Oficial {official.secSte}: {formatHectareas(official.haOficial)}{" "}
-              (Δ {errorRelativoPct(areaHa, official.haOficial).toFixed(1)}%)
+              Oficial {official.label}: {formatHectareas(official.haOficial)} (Δ{" "}
+              {errorRelativoPct(areaHa, official.haOficial).toFixed(1)}%)
             </p>
           )}
         </div>
