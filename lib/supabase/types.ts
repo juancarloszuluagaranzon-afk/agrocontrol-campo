@@ -127,6 +127,34 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["mediciones"]["Insert"]>;
         Relationships: [];
       };
+      marcadores: {
+        Row: {
+          id: string;
+          user_id: string;
+          nombre: string;
+          nota: string;
+          color: string;
+          lat: number;
+          lon: number;
+          deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          nombre: string;
+          nota?: string;
+          color?: string;
+          lat: number;
+          lon: number;
+          deleted?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["marcadores"]["Insert"]>;
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: number;

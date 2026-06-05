@@ -5,6 +5,21 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fase 7 — Modo Plano, marcado preciso y marcadores
+
+- **Modo Plano**: conmutador Satélite/Plano. El plano colorea los tablones por
+  hacienda (gama propia, 17 colores) con leyenda plegable, al estilo del plano
+  oficial de Ingeniería Agrícola. El satélite sigue disponible.
+- **Marcado preciso**: retícula central fija (✛) con lectura de coordenadas en
+  vivo; el punto se fija en el centro exacto del mapa (no bajo el dedo), con
+  ajuste al vértice de tablón más cercano (≤ ~5 m) al medir.
+- **Marcadores privados** (§5): puntos personales con nombre, nota y color,
+  visibles **solo para quien los crea** (RLS por `user_id`, migración 0007).
+  Funcionan offline (outbox) y se sincronizan/bajan a cualquier dispositivo del
+  usuario.
+- **Área neta por hacienda**: tabla plegable (solo en modo Plano) con el área
+  oficial sumada, tablones y suertes por hacienda, más el total.
+
 ### Fase 6 — Tablones (cartografía oficial de Ingeniería Agrícola)
 
 - **Nueva fuente de verdad**: capa oficial de **1.378 tablones** (subdivisiones de

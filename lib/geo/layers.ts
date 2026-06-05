@@ -25,6 +25,11 @@ export const MAQUINARIA_SOURCE = "maquinaria";
 export const MAQUINARIA_DOT = "maquinaria-dot";
 export const MAQUINARIA_LABEL = "maquinaria-label";
 
+// Marcadores privados del usuario (§5: puntos personales)
+export const MARCADORES_SOURCE = "marcadores";
+export const MARCADORES_DOT = "marcadores-dot";
+export const MARCADORES_LABEL = "marcadores-label";
+
 export type ContextGeometry = "line" | "fill" | "point";
 
 export interface ContextLayer {
