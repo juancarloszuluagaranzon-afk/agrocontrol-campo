@@ -5,13 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
-### Mapa — nomenclatura por suerte
+### Mapa — etiqueta por tablón
 
-- Cada **suerte** se rotula con su nomenclatura (`sec_ste`) **una sola vez**, en
-  su tablón de mayor área, en vez de repetir el código en cada tablón. Nuevo
-  archivo `public/data/suertes_labels.geojson` (610 puntos) generado con
-  `scripts/generar_etiquetas_suertes.py`; las etiquetas aparecen desde un zoom
-  más bajo (13) para verlas sin acercar tanto.
+- **Cada tablón** se rotula con el código de su suerte (`sec_ste`), visible desde
+  zoom 13. Así todos los tablones quedan identificados (el código se repite entre
+  los tablones de una misma suerte). El número de tablón sigue en el panel al
+  tocar el lote.
 
 ### Marca — "Rio Map"
 
