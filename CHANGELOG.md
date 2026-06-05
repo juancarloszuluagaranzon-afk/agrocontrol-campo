@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Marca — "Rio Map"
+
+- **Nombre oficial**: la app pasa a llamarse **Rio Map** (antes "AgroControl
+  Campo"). Se actualiza el nombre visible, el título, el manifest PWA y los docs.
+- **Logo oficial**: nuevo ícono (pin sobre campo al atardecer) en todos los
+  tamaños — favicon, apple-touch e íconos PWA 192/512 + maskable.
+- Las claves internas (cachés del service worker, almacenamiento local de
+  marcadores) se conservan para no invalidar datos ni cachés de usuarios.
+
 ### Enfoque en campo — retiro de Maquinaria y responsive
 
 - **Maquinaria eliminada** (ADR-0005): se retira la pestaña 🚜, su programación,

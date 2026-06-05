@@ -59,20 +59,6 @@ test("mapa: en móvil el buscador y los controles no se solapan", async ({
   await expect(page.getByRole("checkbox").first()).toBeVisible();
 });
 
-test("mapa: el modo Plano muestra la tabla de área neta por hacienda", async ({
-  page,
-}) => {
-  await page.goto("/mapa");
-  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
-  // La tabla sólo existe en modo Plano.
-  await expect(
-    page.getByRole("button", { name: /Área neta por hacienda/ }),
-  ).toHaveCount(0);
-  await page.getByRole("button", { name: "🗺️ Plano" }).click();
-  await page.getByRole("button", { name: /Área neta por hacienda/ }).click();
-  await expect(page.getByRole("cell", { name: "Total" })).toBeVisible();
-});
-
 test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();

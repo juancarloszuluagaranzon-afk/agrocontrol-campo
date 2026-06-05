@@ -6,8 +6,8 @@
  */
 export const t = {
   app: {
-    nombre: "AgroControl Campo",
-    descripcion: "Centro de Operaciones — Riopaila Agrícola",
+    nombre: "Rio Map",
+    descripcion: "Mapa de campo — Riopaila Agrícola",
   },
   sync: {
     enLinea: "En línea",

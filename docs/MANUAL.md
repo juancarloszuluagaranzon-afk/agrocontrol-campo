@@ -1,4 +1,4 @@
-# Manual de uso — AgroControl Campo
+# Manual de uso — Rio Map
 
 App de campo para Riopaila: mapa de tablones, GPS, medición y marcadores
 personales. Funciona en celular/tablet y **sin conexión** tras la primera carga.
