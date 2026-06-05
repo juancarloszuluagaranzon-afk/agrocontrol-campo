@@ -22,7 +22,10 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   agua y estaciones de bombeo.
 - **Mi ubicación** (botón ◎, derecha): activa el GPS; el punto azul es tu posición.
   Tócalo de nuevo para **centrar** el mapa en ti. Muestra la precisión y avisa si
-  es baja.
+  es baja. Aparece además un **cono de orientación** que indica hacia dónde apuntas
+  (usa la brújula del teléfono; gira al mover el equipo). Si el cono "baila" o
+  apunta mal, **calibra** moviendo el teléfono en forma de 8. En iPhone, la primera
+  vez te pedirá permiso para la orientación.
 - **Medir** (botón 📐): elige **área** o **distancia**, toca el mapa para marcar
   vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y perímetro**
   o **distancia (m)**. Si mides dentro de una suerte conocida, te muestra su área

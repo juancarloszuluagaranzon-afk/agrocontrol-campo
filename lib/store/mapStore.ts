@@ -52,6 +52,16 @@ interface MapState {
   centerNonce: number;
   centerOnMe: () => void;
 
+  // ── Brújula / orientación (indicador tipo Avenza, §5) ──
+  /** Indicador de orientación activo (el usuario habilitó la brújula). */
+  compassActive: boolean;
+  setCompassActive: (active: boolean) => void;
+  /** Rumbo del dispositivo en grados (0=N, horario), o null si no hay lectura. */
+  deviceHeading: number | null;
+  /** Precisión de la brújula en grados (negativa o alta = mal calibrada). */
+  headingAccuracy: number | null;
+  setDeviceHeading: (heading: number, accuracy: number | null) => void;
+
   // ── Medición ──
   measureMode: MeasureMode;
   vertices: LngLat[];
@@ -106,6 +116,18 @@ export const useMapStore = create<MapState>((set) => ({
   setGpsActive: (gpsActive) => set({ gpsActive }),
   centerNonce: 0,
   centerOnMe: () => set((state) => ({ centerNonce: state.centerNonce + 1 })),
+
+  compassActive: false,
+  setCompassActive: (compassActive) =>
+    set(
+      compassActive
+        ? { compassActive }
+        : { compassActive, deviceHeading: null, headingAccuracy: null },
+    ),
+  deviceHeading: null,
+  headingAccuracy: null,
+  setDeviceHeading: (deviceHeading, headingAccuracy) =>
+    set({ deviceHeading, headingAccuracy }),
 
   measureMode: "off",
   vertices: [],

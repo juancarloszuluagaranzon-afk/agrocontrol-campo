@@ -14,6 +14,9 @@ export const SUERTES_LABEL = "suertes-label";
 export const GPS_SOURCE = "gps";
 export const GPS_HALO = "gps-halo";
 export const GPS_DOT = "gps-dot";
+// Cono de orientación (brújula, tipo Avenza): fuente y capa propias.
+export const GPS_CONE_SOURCE = "gps-cone";
+export const GPS_CONE = "gps-cone-fill";
 
 // Medición (§5: área/distancia)
 export const MEASURE_SOURCE = "measure";

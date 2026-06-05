@@ -5,6 +5,17 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — indicador de orientación (brújula tipo Avenza)
+
+- **Cono de dirección**: junto al punto azul de "Mi ubicación", un cono
+  semitransparente (~60°) con el vértice en el usuario indica hacia dónde apunta
+  el teléfono. Usa los sensores del dispositivo (brújula / magnetómetro), por lo
+  que **mantiene el rumbo aunque estés quieto** (el `heading` del GPS se anula al
+  detenerse). Rotación suave (interpolación por el camino corto, ~60 fps) y tamaño
+  constante en pantalla. Aviso de **calibración** si la brújula está imprecisa.
+  En iOS pide permiso de orientación al activar la ubicación; requiere HTTPS.
+  Ver [ADR-0006](docs/adr/0006-indicador-orientacion-sensores.md).
+
 ### Mapa — etiqueta por tablón
 
 - **Cada tablón** se rotula con el código de su suerte (`sec_ste`), visible desde
