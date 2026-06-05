@@ -5,9 +5,11 @@ import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
   type GeoJSONSource,
+  type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AOI, baseStyle } from "@/lib/geo/basemap";
+import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import {
   CONTEXT_LAYERS,
   GPS_DOT,
@@ -16,6 +18,9 @@ import {
   MAQUINARIA_DOT,
   MAQUINARIA_LABEL,
   MAQUINARIA_SOURCE,
+  MARCADORES_DOT,
+  MARCADORES_LABEL,
+  MARCADORES_SOURCE,
   MEASURE_FILL,
   MEASURE_LINE,
   MEASURE_SOURCE,
@@ -32,6 +37,7 @@ import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import { itemsForFecha, useMaquinariaStore } from "@/lib/store/maquinariaStore";
+import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
 
 const TABLONES_URL = "/data/tablones_riopaila.geojson";
@@ -132,6 +138,13 @@ export function MapView() {
       new maplibregl.ScaleControl({ unit: "metric" }),
       "bottom-left",
     );
+
+    // Centro del mapa en vivo (para la retícula de marcado preciso).
+    const syncCenter = () => {
+      const c = map.getCenter();
+      useMapStore.getState().setMapCenter([c.lng, c.lat]);
+    };
+    map.on("move", syncCenter);
 
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: TABLONES_URL });
@@ -288,6 +301,37 @@ export function MapView() {
         },
       });
 
+      // Marcadores privados del usuario: pin de color + etiqueta (§5).
+      map.addSource(MARCADORES_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: MARCADORES_DOT,
+        type: "circle",
+        source: MARCADORES_SOURCE,
+        paint: {
+          "circle-radius": 7,
+          "circle-color": ["get", "color"],
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: MARCADORES_LABEL,
+        type: "symbol",
+        source: MARCADORES_SOURCE,
+        layout: {
+          "text-field": ["get", "nombre"],
+          "text-size": 11,
+          "text-offset": [0, 1.2],
+          "text-anchor": "top",
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#0f172a",
+          "text-halo-width": 1.4,
+        },
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
@@ -405,6 +449,63 @@ export function MapView() {
     source.setData(fc);
   }, [maqItems]);
 
+  // ── Marcadores privados del usuario sobre el mapa (§5) ──
+  const marcadores = useMarcadoresStore((s) => s.items);
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(MARCADORES_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!map || !source) return;
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: activos(marcadores).map((m) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [m.lon, m.lat] },
+        properties: { nombre: m.nombre, color: m.color },
+      })),
+    };
+    source.setData(fc);
+  }, [marcadores]);
+
+  // ── Modo de base: satélite ↔ plano (tablones por hacienda) ──
+  const baseMode = useMapStore((s) => s.baseMode);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer(SUERTES_FILL)) return;
+    const plano = baseMode === "plano";
+    if (map.getLayer("esri-imagery")) {
+      map.setLayoutProperty(
+        "esri-imagery",
+        "visibility",
+        plano ? "none" : "visible",
+      );
+    }
+    map.setPaintProperty(
+      SUERTES_FILL,
+      "fill-color",
+      plano
+        ? (haciendaMatchExpression() as unknown as ExpressionSpecification)
+        : "#facc15",
+    );
+    map.setPaintProperty(SUERTES_FILL, "fill-opacity", plano ? 0.62 : 0.12);
+    map.setPaintProperty(
+      SUERTES_LINE,
+      "line-color",
+      plano ? "#475569" : "#facc15",
+    );
+    map.setPaintProperty(
+      SUERTES_LABEL,
+      "text-color",
+      plano ? "#0f172a" : "#ffffff",
+    );
+    map.setPaintProperty(
+      SUERTES_LABEL,
+      "text-halo-color",
+      plano ? "#ffffff" : "#0f172a",
+    );
+  }, [baseMode]);
+
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);
   const measureMode = useMapStore((s) => s.measureMode);
@@ -455,6 +556,41 @@ export function MapView() {
       setMeasureOfficial(null);
     }
   }, [vertices, measureMode]);
+
+  // ── Marcar vértice en el centro exacto (retícula), con snap a vértice ──
+  const markVertexNonce = useMapStore((s) => s.markVertexNonce);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || markVertexNonce === 0) return;
+    const c = map.getCenter();
+    let pt: LngLat = [c.lng, c.lat];
+    // Snap al vértice de tablón más cercano al centro (≤ ~5 m).
+    const hits = map.queryRenderedFeatures(map.project(c), {
+      layers: [SUERTES_FILL],
+    });
+    const geom = hits[0]?.geometry;
+    if (geom && (geom.type === "Polygon" || geom.type === "MultiPolygon")) {
+      const rings: number[][][] =
+        geom.type === "Polygon"
+          ? (geom.coordinates as number[][][])
+          : (geom.coordinates as number[][][][]).flat();
+      const mLat = 111320;
+      const mLon = 111320 * Math.cos((c.lat * Math.PI) / 180);
+      let best = Infinity;
+      let bestPt: LngLat | null = null;
+      for (const ring of rings) {
+        for (const v of ring) {
+          const d = Math.hypot((v[0]! - c.lng) * mLon, (v[1]! - c.lat) * mLat);
+          if (d < best) {
+            best = d;
+            bestPt = [v[0]!, v[1]!];
+          }
+        }
+      }
+      if (bestPt && best <= 5) pt = bestPt;
+    }
+    useMapStore.getState().addVertex(pt);
+  }, [markVertexNonce]);
 
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la

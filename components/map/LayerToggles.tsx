@@ -15,7 +15,7 @@ export function LayerToggles() {
   const activos = Object.values(activeContext).filter(Boolean).length;
 
   return (
-    <div className="pointer-events-auto absolute top-2 left-2 z-10">
+    <div className="pointer-events-auto">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

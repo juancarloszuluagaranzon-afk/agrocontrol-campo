@@ -24,6 +24,7 @@ export function MeasureResult() {
   const addVertex = useMapStore((s) => s.addVertex);
   const undoVertex = useMapStore((s) => s.undoVertex);
   const clearVertices = useMapStore((s) => s.clearVertices);
+  const markVertexAtCenter = useMapStore((s) => s.markVertexAtCenter);
 
   if (mode === "off") return null;
 
@@ -77,7 +78,14 @@ export function MeasureResult() {
           )}
         </div>
 
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 flex-wrap justify-end gap-1">
+          <button
+            type="button"
+            onClick={markVertexAtCenter}
+            className="bg-primary text-accent rounded-lg px-2.5 py-2 text-xs font-bold"
+          >
+            ✛ Marcar
+          </button>
           <button
             type="button"
             onClick={() => gps && addVertex([gps.lon, gps.lat])}

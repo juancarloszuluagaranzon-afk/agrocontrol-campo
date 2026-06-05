@@ -29,6 +29,10 @@ interface MapState {
   selected: TablonProperties | null;
   setSelected: (s: TablonProperties | null) => void;
 
+  /** Base del mapa: satélite (Esri) o plano (estilo Ingeniería Agrícola). */
+  baseMode: "satelite" | "plano";
+  setBaseMode: (m: "satelite" | "plano") => void;
+
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
   toggleContext: (id: string) => void;
@@ -58,6 +62,17 @@ interface MapState {
   /** Tablón oficial bajo el centroide de la medición (contraste), o null. */
   measureOfficial: { label: string; haOficial: number } | null;
   setMeasureOfficial: (o: { label: string; haOficial: number } | null) => void;
+
+  // ── Marcado preciso con retícula central (§5) ──
+  /** Centro actual del mapa, en vivo (lo actualiza MapView al desplazar). */
+  mapCenter: LngLat;
+  setMapCenter: (c: LngLat) => void;
+  /** Solicitud de marcar un vértice de medición en el centro exacto. */
+  markVertexNonce: number;
+  markVertexAtCenter: () => void;
+  /** Modo "colocar marcador" activo (muestra retícula). */
+  placingMarker: boolean;
+  setPlacingMarker: (v: boolean) => void;
 }
 
 const initialContext: Record<string, boolean> = Object.fromEntries(
@@ -67,6 +82,9 @@ const initialContext: Record<string, boolean> = Object.fromEntries(
 export const useMapStore = create<MapState>((set) => ({
   selected: null,
   setSelected: (selected) => set({ selected }),
+
+  baseMode: "satelite",
+  setBaseMode: (baseMode) => set({ baseMode }),
 
   activeContext: initialContext,
   toggleContext: (id) =>
@@ -98,4 +116,12 @@ export const useMapStore = create<MapState>((set) => ({
   clearVertices: () => set({ vertices: [], measureOfficial: null }),
   measureOfficial: null,
   setMeasureOfficial: (measureOfficial) => set({ measureOfficial }),
+
+  mapCenter: [-76.119, 4.31],
+  setMapCenter: (mapCenter) => set({ mapCenter }),
+  markVertexNonce: 0,
+  markVertexAtCenter: () =>
+    set((s) => ({ markVertexNonce: s.markVertexNonce + 1 })),
+  placingMarker: false,
+  setPlacingMarker: (placingMarker) => set({ placingMarker }),
 }));
