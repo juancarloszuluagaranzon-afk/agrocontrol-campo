@@ -34,6 +34,29 @@ describe("integridad de los datos de tablones (§6)", () => {
     expect(totalHa).toBeLessThan(5600);
   });
 
+  it("las etiquetas de suerte: una por suerte (610), únicas y en el AOI", async () => {
+    const fc = (await loadJson("suertes_labels.geojson")) as {
+      features: {
+        geometry: { coordinates: [number, number] };
+        properties: { sec_ste: string; hacienda: string };
+      }[];
+    };
+    expect(fc.features).toHaveLength(610);
+
+    const secs = new Set(fc.features.map((f) => f.properties.sec_ste));
+    expect(secs.size).toBe(610); // sin duplicados: una etiqueta por suerte
+    expect(secs.has("3111-020")).toBe(true);
+
+    // Todas las coordenadas dentro del área de interés (Valle del Cauca).
+    for (const f of fc.features) {
+      const [lon, lat] = f.geometry.coordinates;
+      expect(lon).toBeGreaterThan(-76.3);
+      expect(lon).toBeLessThan(-75.9);
+      expect(lat).toBeGreaterThan(4.1);
+      expect(lat).toBeLessThan(4.5);
+    }
+  });
+
   it("cada tab_id es único y la suerte 3111-020 tiene 5 tablones", async () => {
     const fc = tablonesGeojsonSchema.parse(
       await loadJson("tablones_riopaila.geojson"),

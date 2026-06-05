@@ -24,6 +24,7 @@ import {
   MEASURE_VERTICES,
   SUERTES_FILL,
   SUERTES_LABEL,
+  SUERTES_LABELS_SOURCE,
   SUERTES_LINE,
   SUERTES_SELECTED,
   SUERTES_SOURCE,
@@ -37,6 +38,7 @@ import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
 
 const TABLONES_URL = "/data/tablones_riopaila.geojson";
+const SUERTES_LABELS_URL = "/data/suertes_labels.geojson";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -144,6 +146,11 @@ export function MapView() {
 
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: TABLONES_URL });
+      // Un punto por suerte para rotular su nomenclatura una sola vez (§13).
+      map.addSource(SUERTES_LABELS_SOURCE, {
+        type: "geojson",
+        data: SUERTES_LABELS_URL,
+      });
 
       // Capas de contexto (ocultas por defecto) antes de las suertes.
       for (const cfg of CONTEXT_LAYERS) {
@@ -181,11 +188,11 @@ export function MapView() {
       map.addLayer({
         id: SUERTES_LABEL,
         type: "symbol",
-        source: SUERTES_SOURCE,
-        minzoom: 14.5,
+        source: SUERTES_LABELS_SOURCE,
+        minzoom: 13,
         layout: {
-          // Solo el código de suerte (ej. "3111-020"); el número de tablón se
-          // ve en el panel al tocar el lote. Se omite el sufijo "· T{n}".
+          // Una etiqueta por suerte con su nomenclatura (ej. "3111-020"). El
+          // número de tablón se ve en el panel al tocar el lote.
           "text-field": ["get", "sec_ste"],
           "text-size": 11,
           "text-font": ["Open Sans Regular"],
