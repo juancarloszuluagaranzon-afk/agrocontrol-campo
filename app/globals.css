@@ -7,8 +7,16 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --primary: #ca8a04; /* amarillo maquinaria */
+  --primary: #ca8a04; /* amarillo institucional */
   --accent: #0f172a;
+}
+
+/*
+ * Respeta las áreas seguras del dispositivo (notch / barra de gestos) para que
+ * los paneles flotantes del mapa no queden bajo el sistema en móvil (§13).
+ */
+.safe-bottom {
+  bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 @theme inline {

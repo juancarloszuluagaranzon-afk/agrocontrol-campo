@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { t } from "@/lib/i18n/es-CO";
-import { useMaquinariaStore } from "@/lib/store/maquinariaStore";
+import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 
 /**
  * Indicador permanente de estado de conexión y sincronización (§14): en línea /
@@ -10,8 +10,8 @@ import { useMaquinariaStore } from "@/lib/store/maquinariaStore";
  */
 export function SyncStatus() {
   const [online, setOnline] = useState(true);
-  const pendientes = useMaquinariaStore((s) => s.pending.length);
-  const syncing = useMaquinariaStore((s) => s.syncing);
+  const pendientes = useMarcadoresStore((s) => s.pending.length);
+  const syncing = useMarcadoresStore((s) => s.syncing);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);

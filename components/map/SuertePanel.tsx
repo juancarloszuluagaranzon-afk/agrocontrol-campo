@@ -26,7 +26,7 @@ export function SuertePanel() {
     <div
       role="dialog"
       aria-label={`Tablón ${selected.tab_id}`}
-      className="bg-background pointer-events-auto absolute inset-x-2 bottom-2 z-10 rounded-xl p-4 shadow-2xl ring-1 ring-black/10"
+      className="bg-background safe-bottom pointer-events-auto absolute inset-x-2 z-10 rounded-xl p-4 shadow-2xl ring-1 ring-black/10"
     >
       <div className="flex items-start justify-between gap-3">
         <div>

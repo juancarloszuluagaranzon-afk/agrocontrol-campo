@@ -34,6 +34,31 @@ test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
   await expect(page.getByText("PERALONSO")).toBeVisible();
 });
 
+test("mapa: en móvil el buscador y los controles no se solapan", async ({
+  page,
+}) => {
+  // Viewport de un teléfono típico de campo.
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  const buscador = page.getByPlaceholder("Buscar suerte o hacienda");
+  const capas = page.getByRole("button", { name: /Capas/ });
+  await expect(buscador).toBeVisible();
+  await expect(capas).toBeVisible();
+
+  // El buscador (arriba) y el botón de capas (debajo) no deben solaparse.
+  const b = await buscador.boundingBox();
+  const c = await capas.boundingBox();
+  expect(b).not.toBeNull();
+  expect(c).not.toBeNull();
+  if (b && c) expect(c.y).toBeGreaterThanOrEqual(b.y + b.height - 1);
+
+  // El control de capas sigue siendo utilizable en pantalla angosta.
+  await capas.click();
+  await expect(page.getByRole("checkbox").first()).toBeVisible();
+});
+
 test("mapa: el modo Plano muestra la tabla de área neta por hacienda", async ({
   page,
 }) => {

@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Enfoque en campo — retiro de Maquinaria y responsive
+
+- **Maquinaria eliminada** (ADR-0005): se retira la pestaña 🚜, su programación,
+  historial y los íconos del mapa. La app queda enfocada en el mapa de tablones
+  (identificar, medir, marcar, GPS). La barra inferior desaparece (una sola
+  sección) y el mapa gana pantalla. La tabla `programacion` se conserva en la base
+  de datos como historial (no se borra).
+- **Responsive para campo** (uso ~90 % en móvil): el buscador y los controles
+  dejan de solaparse en pantallas angostas (los controles bajan bajo el buscador);
+  los paneles inferiores respetan el área segura del dispositivo (notch / barra de
+  gestos); anchos con tope para no desbordar. Verificado en e2e a 360 px.
+
 ### Fase 7 — Modo Plano, marcado preciso y marcadores
 
 - **Modo Plano**: conmutador Satélite/Plano. El plano colorea los tablones por

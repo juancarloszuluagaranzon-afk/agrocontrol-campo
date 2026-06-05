@@ -20,11 +20,6 @@ export const MEASURE_FILL = "measure-fill";
 export const MEASURE_LINE = "measure-line";
 export const MEASURE_VERTICES = "measure-vertices";
 
-// Maquinaria amarilla (§5 Pestaña B: equipo sobre el polígono)
-export const MAQUINARIA_SOURCE = "maquinaria";
-export const MAQUINARIA_DOT = "maquinaria-dot";
-export const MAQUINARIA_LABEL = "maquinaria-label";
-
 // Marcadores privados del usuario (§5: puntos personales)
 export const MARCADORES_SOURCE = "marcadores";
 export const MARCADORES_DOT = "marcadores-dot";
