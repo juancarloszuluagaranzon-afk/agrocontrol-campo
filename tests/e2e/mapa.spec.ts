@@ -21,6 +21,19 @@ test("mapa: buscar una suerte y abrir un tablón muestra sus atributos", async (
   await expect(panel).toContainText("PERALONSO");
 });
 
+test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  // La leyenda sólo existe en modo Plano.
+  await expect(page.getByRole("button", { name: /Leyenda/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "🗺️ Plano" }).click();
+  await page.getByRole("button", { name: /Leyenda/ }).click();
+  await expect(page.getByText("Haciendas")).toBeVisible();
+  await expect(page.getByText("PERALONSO")).toBeVisible();
+});
+
 test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await page.goto("/mapa");
   await page.getByRole("button", { name: /Capas/ }).click();

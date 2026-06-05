@@ -29,6 +29,10 @@ interface MapState {
   selected: TablonProperties | null;
   setSelected: (s: TablonProperties | null) => void;
 
+  /** Base del mapa: satélite (Esri) o plano (estilo Ingeniería Agrícola). */
+  baseMode: "satelite" | "plano";
+  setBaseMode: (m: "satelite" | "plano") => void;
+
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
   toggleContext: (id: string) => void;
@@ -67,6 +71,9 @@ const initialContext: Record<string, boolean> = Object.fromEntries(
 export const useMapStore = create<MapState>((set) => ({
   selected: null,
   setSelected: (selected) => set({ selected }),
+
+  baseMode: "satelite",
+  setBaseMode: (baseMode) => set({ baseMode }),
 
   activeContext: initialContext,
   toggleContext: (id) =>

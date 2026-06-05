@@ -37,6 +37,12 @@ export function baseStyle(): StyleSpecification {
       },
     },
     layers: [
+      // Fondo claro para el modo "Plano" (se ve al ocultar el satélite).
+      {
+        id: "fondo-plano",
+        type: "background",
+        paint: { "background-color": "#eef2f6" },
+      },
       {
         id: "esri-imagery",
         type: "raster",

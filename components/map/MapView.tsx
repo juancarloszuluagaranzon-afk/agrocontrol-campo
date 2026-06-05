@@ -5,9 +5,11 @@ import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
   type GeoJSONSource,
+  type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AOI, baseStyle } from "@/lib/geo/basemap";
+import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import {
   CONTEXT_LAYERS,
   GPS_DOT,
@@ -404,6 +406,44 @@ export function MapView() {
     };
     source.setData(fc);
   }, [maqItems]);
+
+  // ── Modo de base: satélite ↔ plano (tablones por hacienda) ──
+  const baseMode = useMapStore((s) => s.baseMode);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer(SUERTES_FILL)) return;
+    const plano = baseMode === "plano";
+    if (map.getLayer("esri-imagery")) {
+      map.setLayoutProperty(
+        "esri-imagery",
+        "visibility",
+        plano ? "none" : "visible",
+      );
+    }
+    map.setPaintProperty(
+      SUERTES_FILL,
+      "fill-color",
+      plano
+        ? (haciendaMatchExpression() as unknown as ExpressionSpecification)
+        : "#facc15",
+    );
+    map.setPaintProperty(SUERTES_FILL, "fill-opacity", plano ? 0.62 : 0.12);
+    map.setPaintProperty(
+      SUERTES_LINE,
+      "line-color",
+      plano ? "#475569" : "#facc15",
+    );
+    map.setPaintProperty(
+      SUERTES_LABEL,
+      "text-color",
+      plano ? "#0f172a" : "#ffffff",
+    );
+    map.setPaintProperty(
+      SUERTES_LABEL,
+      "text-halo-color",
+      plano ? "#ffffff" : "#0f172a",
+    );
+  }, [baseMode]);
 
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);
