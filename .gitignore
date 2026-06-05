@@ -51,3 +51,6 @@ next-env.d.ts
 /playwright-report
 /test-results
 /.playwright
+
+# Artefactos de revisión local (capturas)
+shots/

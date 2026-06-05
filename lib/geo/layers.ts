@@ -7,9 +7,8 @@ export const SUERTES_SOURCE = "suertes";
 export const SUERTES_FILL = "suertes-fill";
 export const SUERTES_LINE = "suertes-line";
 export const SUERTES_SELECTED = "suertes-selected";
-// Etiqueta de nomenclatura: una por suerte (fuente de puntos dedicada).
+// Etiqueta de nomenclatura: cada tablón rotula el código de su suerte.
 export const SUERTES_LABEL = "suertes-label";
-export const SUERTES_LABELS_SOURCE = "suertes-labels";
 
 // GPS (§5: Mi ubicación)
 export const GPS_SOURCE = "gps";
