@@ -5,7 +5,6 @@ import { SearchBox } from "@/components/map/SearchBox";
 import { LayerToggles } from "@/components/map/LayerToggles";
 import { BaseToggle } from "@/components/map/BaseToggle";
 import { Legend } from "@/components/map/Legend";
-import { AreaNetaPanel } from "@/components/map/AreaNetaPanel";
 import { SuertePanel } from "@/components/map/SuertePanel";
 import { GpsControl } from "@/components/map/GpsControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
@@ -25,11 +24,12 @@ export function MapScreen() {
       <Crosshair visible={midiendo || colocando} />
       <SearchBox />
       {/* Columna superior izquierda (bajo el buscador): capas, base, leyenda. */}
+      {/* La tabla "Área neta por hacienda" (AreaNetaPanel) se ocultó por ahora;
+          el componente y su dominio siguen en el repo para reactivarla. */}
       <div className="absolute top-14 left-2 z-10 flex max-w-[calc(100vw-1rem)] flex-col items-start gap-2">
         <LayerToggles />
         <BaseToggle />
         <Legend />
-        <AreaNetaPanel />
       </div>
       {/* Columna de acciones a la derecha (alcance con el pulgar). */}
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 flex -translate-y-1/2 flex-col items-end gap-2">
