@@ -184,13 +184,9 @@ export function MapView() {
         source: SUERTES_SOURCE,
         minzoom: 14.5,
         layout: {
-          // "3111-020 · T3"
-          "text-field": [
-            "concat",
-            ["get", "sec_ste"],
-            " · T",
-            ["to-string", ["get", "tablon"]],
-          ],
+          // Solo el código de suerte (ej. "3111-020"); el número de tablón se
+          // ve en el panel al tocar el lote. Se omite el sufijo "· T{n}".
+          "text-field": ["get", "sec_ste"],
           "text-size": 11,
           "text-font": ["Open Sans Regular"],
         },
