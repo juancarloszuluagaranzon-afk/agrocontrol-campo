@@ -1,4 +1,4 @@
-# AgroControl Campo — Centro de Operaciones
+# Rio Map — Mapa de campo (Riopaila Agrícola)
 
 Aplicación web de campo **offline-first e instalable (PWA)** para **Riopaila
 Agrícola**. Replica lo esencial de Avenza Maps sobre la cartografía oficial del
