@@ -3,7 +3,13 @@
 import { useEffect, useRef } from "react";
 import { useMapStore } from "@/lib/store/mapStore";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
+import {
+  requestOrientationPermission,
+  useDeviceHeading,
+} from "@/lib/geo/useDeviceHeading";
+import { compassNecesitaCalibracion } from "@/lib/geo/orientation";
 import { formatMetros } from "@/lib/geo/format";
+import { t } from "@/lib/i18n/es-CO";
 
 /** Precisión (m) por encima de la cual avisamos que el GPS es pobre (§13, §20). */
 const PRECISION_POBRE_M = 30;
@@ -18,10 +24,14 @@ export function GpsControl() {
   const gps = useMapStore((s) => s.gps);
   const gpsError = useMapStore((s) => s.gpsError);
   const centerOnMe = useMapStore((s) => s.centerOnMe);
+  const compassActive = useMapStore((s) => s.compassActive);
+  const setCompassActive = useMapStore((s) => s.setCompassActive);
+  const headingAccuracy = useMapStore((s) => s.headingAccuracy);
   const centeredRef = useRef(false);
 
-  // Sigue la posición mientras el GPS esté activo.
+  // Sigue la posición y la orientación mientras estén activos.
   useGeolocation(gpsActive);
+  useDeviceHeading(compassActive);
 
   // Centra automáticamente en la primera lectura tras activar.
   useEffect(() => {
@@ -35,12 +45,15 @@ export function GpsControl() {
     if (!gpsActive) {
       centeredRef.current = false;
       setGpsActive(true);
+      // El permiso de orientación (iOS) debe pedirse dentro del gesto del click.
+      void requestOrientationPermission().then((ok) => setCompassActive(ok));
     } else {
       centerOnMe();
     }
   }
 
   const precisionPobre = gps != null && gps.accuracy > PRECISION_POBRE_M;
+  const calibrar = compassActive && compassNecesitaCalibracion(headingAccuracy);
 
   return (
     <div className="flex flex-col items-end gap-1">
@@ -61,6 +74,14 @@ export function GpsControl() {
       {gpsError && (
         <span className="bg-background max-w-44 rounded-md px-2 py-1 text-right text-xs font-medium text-amber-700 shadow ring-1 ring-black/10">
           {gpsError}
+        </span>
+      )}
+      {calibrar && (
+        <span
+          role="alert"
+          className="bg-background max-w-44 rounded-md px-2 py-1 text-right text-xs font-medium text-amber-700 shadow ring-1 ring-black/10"
+        >
+          🧭 {t.brujula.calibrar}
         </span>
       )}
       {gps && (

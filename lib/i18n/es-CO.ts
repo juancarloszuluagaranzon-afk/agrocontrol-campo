@@ -20,6 +20,9 @@ export const t = {
     titulo: "Mapa / Campo",
     placeholder: "El mapa de suertes se construye en la Fase 1.",
   },
+  brujula: {
+    calibrar: "Calibra la brújula: mueve el teléfono en forma de 8.",
+  },
 } as const;
 
 export type Textos = typeof t;

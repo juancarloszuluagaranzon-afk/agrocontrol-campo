@@ -10,8 +10,11 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AOI, baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
+import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import {
   CONTEXT_LAYERS,
+  GPS_CONE,
+  GPS_CONE_SOURCE,
   GPS_DOT,
   GPS_HALO,
   GPS_SOURCE,
@@ -203,6 +206,21 @@ export function MapView() {
         features: [],
       };
       map.addSource(GPS_SOURCE, { type: "geojson", data: emptyFc });
+
+      // Cono de orientación (brújula). Va bajo el halo y el punto, con vértice
+      // en la ubicación del usuario. Se rellena en su propio efecto (RAF).
+      const emptyConeFc: FeatureCollection<Geometry> = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      map.addSource(GPS_CONE_SOURCE, { type: "geojson", data: emptyConeFc });
+      map.addLayer({
+        id: GPS_CONE,
+        type: "fill",
+        source: GPS_CONE_SOURCE,
+        paint: { "fill-color": "#2563eb", "fill-opacity": 0.28 },
+      });
+
       map.addLayer({
         id: GPS_HALO,
         type: "circle",
@@ -379,6 +397,50 @@ export function MapView() {
     };
     source.setData(fc);
   }, [gps]);
+
+  // ── Cono de orientación (brújula tipo Avenza, §5) ──
+  // Bucle de animación: interpola el rumbo por el camino corto (sin saltos en
+  // 0/360) y redibuja el cono a ~60 fps. El tamaño en pantalla se mantiene
+  // (radio en píxeles → metros según el zoom). Mantiene el rumbo aunque el
+  // usuario esté quieto (lo alimenta el magnetómetro, no el GPS).
+  const compassActive = useMapStore((s) => s.compassActive);
+  const gpsPresente = useMapStore((s) => s.gps != null);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const source = map.getSource(GPS_CONE_SOURCE) as GeoJSONSource | undefined;
+    if (!source) return;
+
+    if (!compassActive || !gpsPresente) {
+      source.setData({ type: "FeatureCollection", features: [] });
+      return;
+    }
+
+    let raf = 0;
+    let mostrado: number | null = null; // rumbo suavizado actual
+    const RADIO_PX = 64;
+
+    const frame = () => {
+      const s = useMapStore.getState();
+      const fix = s.gps;
+      const objetivo = s.deviceHeading;
+      if (fix && objetivo != null) {
+        mostrado =
+          mostrado == null ? objetivo : lerpAngle(mostrado, objetivo, 0.2);
+        const radioM = RADIO_PX * metersPerPixel(fix.lat, map.getZoom());
+        source.setData(
+          coneSector(fix.lon, fix.lat, mostrado, {
+            apertureDeg: 60,
+            radiusM: radioM,
+            steps: 12,
+          }),
+        );
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [compassActive, gpsPresente]);
 
   // ── Centrar en mi ubicación ──
   const centerNonce = useMapStore((s) => s.centerNonce);
