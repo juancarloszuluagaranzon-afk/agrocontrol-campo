@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — nomenclatura por suerte
+
+- Cada **suerte** se rotula con su nomenclatura (`sec_ste`) **una sola vez**, en
+  su tablón de mayor área, en vez de repetir el código en cada tablón. Nuevo
+  archivo `public/data/suertes_labels.geojson` (610 puntos) generado con
+  `scripts/generar_etiquetas_suertes.py`; las etiquetas aparecen desde un zoom
+  más bajo (13) para verlas sin acercar tanto.
+
 ### Marca — "Rio Map"
 
 - **Nombre oficial**: la app pasa a llamarse **Rio Map** (antes "AgroControl
