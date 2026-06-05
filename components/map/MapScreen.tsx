@@ -23,14 +23,14 @@ export function MapScreen() {
     <div className="absolute inset-0">
       <MapView />
       <Crosshair visible={midiendo || colocando} />
-      {/* Columna superior izquierda: capas, base, leyenda. */}
-      <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-2">
+      <SearchBox />
+      {/* Columna superior izquierda (bajo el buscador): capas, base, leyenda. */}
+      <div className="absolute top-14 left-2 z-10 flex max-w-[calc(100vw-1rem)] flex-col items-start gap-2">
         <LayerToggles />
         <BaseToggle />
         <Legend />
         <AreaNetaPanel />
       </div>
-      <SearchBox />
       {/* Columna de acciones a la derecha (alcance con el pulgar). */}
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 flex -translate-y-1/2 flex-col items-end gap-2">
         <GpsControl />

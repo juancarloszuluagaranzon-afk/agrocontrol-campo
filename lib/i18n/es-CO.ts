@@ -9,10 +9,6 @@ export const t = {
     nombre: "AgroControl Campo",
     descripcion: "Centro de Operaciones — Riopaila Agrícola",
   },
-  tabs: {
-    mapa: "Mapa",
-    maquinaria: "Maquinaria",
-  },
   sync: {
     enLinea: "En línea",
     sinConexion: "Sin conexión",
@@ -23,10 +19,6 @@ export const t = {
   mapa: {
     titulo: "Mapa / Campo",
     placeholder: "El mapa de suertes se construye en la Fase 1.",
-  },
-  maquinaria: {
-    titulo: "Maquinaria amarilla",
-    placeholder: "El programador de maquinaria se construye en la Fase 3.",
   },
 } as const;
 

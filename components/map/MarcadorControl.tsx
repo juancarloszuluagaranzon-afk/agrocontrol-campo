@@ -78,7 +78,7 @@ export function MarcadorControl() {
   }
 
   return (
-    <div className="pointer-events-auto w-64 rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
+    <div className="pointer-events-auto w-64 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">📍 Mis marcadores</span>
         <button

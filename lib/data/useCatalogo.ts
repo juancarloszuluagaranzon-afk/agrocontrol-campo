@@ -5,7 +5,7 @@ import { catalogoSchema, type CatalogoEntry } from "@/domain/suertes/schema";
 
 /**
  * Carga (una vez) el catálogo ligero de suertes desde /data y lo valida con Zod.
- * Reutilizado por el buscador del mapa y el formulario de maquinaria.
+ * Reutilizado por el buscador del mapa y la tabla de área neta por hacienda.
  */
 export function useCatalogo(): CatalogoEntry[] {
   const [catalogo, setCatalogo] = useState<CatalogoEntry[]>([]);

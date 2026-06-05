@@ -35,7 +35,7 @@ export function MeasureResult() {
     <div
       role="status"
       aria-live="polite"
-      className="bg-background pointer-events-auto absolute inset-x-2 bottom-2 z-10 rounded-xl p-3 shadow-2xl ring-1 ring-black/10"
+      className="bg-background safe-bottom pointer-events-auto absolute inset-x-2 z-10 rounded-xl p-3 shadow-2xl ring-1 ring-black/10"
     >
       <div className="flex items-end justify-between gap-4">
         <div>

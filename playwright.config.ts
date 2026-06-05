@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright e2e — flujos críticos (§11). En Fase 0 solo un smoke test;
- * se ampliará por fase (identificar suerte, medir área, programar equipo).
+ * Playwright e2e — flujos críticos (§11): identificar tablón, medir área,
+ * modo Plano, marcadores y responsive móvil.
  */
 export default defineConfig({
   testDir: "./tests/e2e",

@@ -2,8 +2,9 @@
 
 Aplicación web de campo **offline-first e instalable (PWA)** para **Riopaila
 Agrícola**. Replica lo esencial de Avenza Maps sobre la cartografía oficial del
-ingenio (ubicación GPS, medición de área/distancia, mapa de suertes con linderos
-reales) y suma la gestión de **maquinaria amarilla** ligada a esas suertes.
+ingenio: mapa de tablones con linderos reales, ubicación GPS, medición de
+área/distancia y **marcadores personales** privados. (El módulo de Maquinaria se
+retiró por enfoque de campo; ver [ADR-0005](docs/adr/0005-retiro-modulo-maquinaria.md).)
 
 > Fuente de verdad funcional: `CONTEXTO_PROYECTO_1.md`. Decisiones de arquitectura
 > en [`docs/adr`](docs/adr).
@@ -47,7 +48,7 @@ pnpm dev                     # http://localhost:3000
 ## Estructura
 
 ```
-app/(tabs)/{mapa,maquinaria}    Pestañas (§5)
+app/(tabs)/mapa                 Pantalla principal (mapa, §5)
 components/                     UI (MapView, GpsMarker, …)
 domain/                         Reglas puras + esquemas Zod (testeable, §8)
 lib/{supabase,geo,db,sync,i18n} Acceso a datos y utilidades
@@ -68,8 +69,9 @@ EPSG:4326) más capas de contexto **depuradas** (ADR-0002). Diccionario en
 
 ## Estado
 
-Fases 0–4 completas (cimientos, mapa de suertes, GPS y medición, maquinaria,
-persistencia/offline). Fase 5 (endurecimiento) en curso. Ver `CHANGELOG.md` y el
+Fases 0–7 completas (cimientos, mapa de tablones, GPS y medición,
+persistencia/offline, endurecimiento, cartografía oficial de tablones, modo Plano +
+marcadores). El módulo de maquinaria se retiró (ADR-0005). Ver `CHANGELOG.md` y el
 [manual de uso](docs/MANUAL.md).
 
 ## Despliegue (Vercel)

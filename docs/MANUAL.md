@@ -1,8 +1,8 @@
 # Manual de uso — AgroControl Campo
 
-App de campo para Riopaila: mapa de suertes, GPS, medición y programación de
-maquinaria amarilla. Funciona en celular/tablet y **sin conexión** tras la primera
-carga. Instálala como app desde el navegador ("Agregar a pantalla de inicio").
+App de campo para Riopaila: mapa de tablones, GPS, medición y marcadores
+personales. Funciona en celular/tablet y **sin conexión** tras la primera carga.
+Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 
 ## 1. Entrar
 
@@ -28,18 +28,18 @@ carga. Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   o **distancia (m)**. Si mides dentro de una suerte conocida, te muestra su área
   oficial para comparar. Usa **Deshacer** / **Limpiar**.
 
-## 3. Maquinaria amarilla
+## 3. Vista Plano y marcadores
 
-- Elige la **fecha** arriba; verás los contadores **Zona 1 / Zona 2 / Total**.
-- **Agregar equipo** (botón +): elige el **tablón** (autocompletar por suerte,
-  tablón o hacienda); la hacienda y la ubicación se llenan solas. Completa tipo de
-  máquina, identificación, operador, labor, zona, avance (%) y observaciones.
-  **Guardar**.
-- Cada tarjeta permite **Editar** o **Eliminar**.
-- **Imprimir**: vista limpia "Programación Maquinaria Amarilla".
-- **Exportar JSON / CSV** e **Importar** (JSON) la programación.
-- **Historial**: registro auditable de quién creó/editó/eliminó y cuándo.
-- Los equipos del día aparecen como marcadores **sobre su suerte** en el mapa.
+- **Satélite / Plano** (arriba izq.): cambia entre la base satelital y el **plano**
+  (tablones coloreados por hacienda, como el plano oficial). En modo Plano aparecen
+  la **Leyenda** de haciendas y la tabla **Área neta por hacienda**.
+- **Marcado preciso**: al medir o al colocar un marcador aparece una **cruz ✛** en
+  el centro; mueve el mapa hasta que la cruz quede en el punto exacto y confirma
+  (más preciso que tocar con el dedo).
+- **Marcadores** (botón 📍, derecha): puntos personales que **solo tú ves**.
+  **Nuevo marcador** → centra la cruz, pon **nombre**, una **nota** y un **color**,
+  y **Guardar aquí**. La lista permite **ir** a un marcador o **borrarlo**. Se
+  guardan sin conexión y se sincronizan a tus otros dispositivos.
 
 ## 4. Sin conexión
 

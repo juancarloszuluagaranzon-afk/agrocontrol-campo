@@ -1,27 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useMaquinariaStore } from "@/lib/store/maquinariaStore";
 import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
-import { pushPending, pushPendingMarcadores } from "@/lib/sync/syncManager";
+import { pushPendingMarcadores } from "@/lib/sync/syncManager";
 import type { Marcador } from "@/domain/marcadores/schema";
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 const INTERVALO_MS = 20_000;
 
 /**
- * Orquesta la sincronización del outbox (§14): programación y marcadores. Cuando
- * hay red y sesión, sube los pendientes y baja los marcadores del usuario (para
- * verlos en cualquier dispositivo). Reintenta al volver la conexión y por intervalo.
+ * Orquesta la sincronización del outbox de marcadores (§14). Cuando hay red y
+ * sesión, sube los pendientes y baja los marcadores del usuario (para verlos en
+ * cualquier dispositivo). Reintenta al volver la conexión y por intervalo.
  */
 export function useSync(): void {
   const { user } = useUser();
-  const setSyncing = useMaquinariaStore((s) => s.setSyncing);
-  const markSynced = useMaquinariaStore((s) => s.markSynced);
-  const pending = useMaquinariaStore((s) => s.pending);
-  const mPending = useMarcadoresStore((s) => s.pending);
+  const setSyncing = useMarcadoresStore((s) => s.setSyncing);
+  const pending = useMarcadoresStore((s) => s.pending);
   const enCurso = useRef(false);
 
   const flush = useCallback(async () => {
@@ -32,18 +29,6 @@ export function useSync(): void {
     setSyncing(true);
     try {
       const supabase = createClient();
-
-      // Programación
-      const maq = useMaquinariaStore.getState();
-      if (maq.pending.length > 0) {
-        const res = await pushPending(
-          supabase,
-          maq.items,
-          maq.pending,
-          user.id,
-        );
-        if (res.syncedIds.length > 0) markSynced(res.syncedIds);
-      }
 
       // Marcadores: subir pendientes…
       const mar = useMarcadoresStore.getState();
@@ -75,7 +60,7 @@ export function useSync(): void {
       enCurso.current = false;
       setSyncing(false);
     }
-  }, [user, setSyncing, markSynced]);
+  }, [user, setSyncing]);
 
   useEffect(() => {
     void flush();
@@ -86,5 +71,5 @@ export function useSync(): void {
       clearInterval(id);
       window.removeEventListener("online", onOnline);
     };
-  }, [flush, pending.length, mPending.length]);
+  }, [flush, pending.length]);
 }

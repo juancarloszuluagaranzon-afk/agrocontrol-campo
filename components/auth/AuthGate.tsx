@@ -2,26 +2,19 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { nombreUsuario, useUser } from "@/lib/auth/useUser";
-import { useMaquinariaStore } from "@/lib/store/maquinariaStore";
+import { useUser } from "@/lib/auth/useUser";
 
 /**
  * Puerta de autenticación de las pestañas. Si no hay sesión, redirige a /login.
- * Usa la sesión persistida (tolerante a offline tras el primer login, §14) y
- * fija el autor de la auditoría con el usuario autenticado.
+ * Usa la sesión persistida (tolerante a offline tras el primer login, §14).
  */
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const router = useRouter();
-  const setAutor = useMaquinariaStore((s) => s.setAutor);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
-
-  useEffect(() => {
-    if (user) setAutor(nombreUsuario(user));
-  }, [user, setAutor]);
 
   if (loading) {
     return (
