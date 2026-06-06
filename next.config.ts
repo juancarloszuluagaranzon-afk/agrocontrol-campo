@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   // un objeto `turbopack` evita que `next dev` lo interprete como conflicto y
   // permite conservar Turbopack en desarrollo (ver ADR-0003).
   turbopack: {},
+  // El indicador de desarrollo de Next se posiciona abajo-izquierda y tapaba el
+  // botón de herramientas (✏️) en esa esquina; sólo aplica en dev (no en prod).
+  devIndicators: false,
 };
 
 /**
