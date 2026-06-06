@@ -10,6 +10,7 @@ import { GpsControl } from "@/components/map/GpsControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
 import { MeasureResult } from "@/components/map/MeasureResult";
 import { MarcadorControl } from "@/components/map/MarcadorControl";
+import { MedicionesControl } from "@/components/map/MedicionesControl";
 import { Crosshair } from "@/components/map/Crosshair";
 import { useMapStore } from "@/lib/store/mapStore";
 
@@ -36,6 +37,7 @@ export function MapScreen() {
         <GpsControl />
         <MeasureControl />
         <MarcadorControl />
+        <MedicionesControl />
       </div>
       {midiendo ? <MeasureResult /> : <SuertePanel />}
     </div>

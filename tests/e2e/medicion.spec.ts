@@ -46,4 +46,12 @@ test("medir área: marcar vértices calcula hectáreas", async ({ page }) => {
   const panel = page.getByRole("status").filter({ hasText: "Medir área" });
   await expect(panel).not.toContainText("Marca al menos");
   await expect(panel).toContainText(/\d+,\d+\s*ha/);
+
+  // Guardar la medición con un nombre y verla en la lista.
+  await panel.getByRole("button", { name: /Guardar/ }).click();
+  await page.getByLabel("Nombre de la medición").fill("Lote de prueba");
+  await page.getByRole("button", { name: "Guardar", exact: true }).click();
+
+  await page.getByRole("button", { name: /Mediciones/ }).click();
+  await expect(page.getByText("Lote de prueba")).toBeVisible();
 });

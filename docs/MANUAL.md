@@ -30,6 +30,10 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y perímetro**
   o **distancia (m)**. Si mides dentro de una suerte conocida, te muestra su área
   oficial para comparar. Usa **Deshacer** / **Limpiar**.
+  - **Guardar** (💾): ponle un **nombre** a la medición para conservarla. Las
+    guardadas aparecen en **📐 Mediciones** (derecha): tócalas para **ir**, o
+    **bórralas**. Son privadas (solo tú las ves), sirven **sin conexión** y se
+    sincronizan a tus dispositivos.
 
 ## 3. Vista Plano y marcadores
 
