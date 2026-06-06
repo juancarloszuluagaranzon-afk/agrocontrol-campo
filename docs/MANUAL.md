@@ -18,20 +18,23 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   hacienda, sector, **área oficial (ha)**, supervisor y jefe de zona.
 - **Buscar** (arriba): escribe un código de suerte `sec_ste` (ej. `3111-020`), un
   tablón (`3111-020-T3`) o una hacienda → la app vuela y lo resalta.
-- **Capas** (arriba izq.): enciende/apaga red hídrica, canales, vías, cuerpos de
-  agua y estaciones de bombeo.
+- **Herramientas** (botón ✏️ abajo-izq.): abre el menú con **Dibujar y medir**,
+  **Marcadores**, **Mediciones guardadas** y **Capas** (red hídrica, canales, vías,
+  cuerpos de agua, estaciones de bombeo). Elige una para abrir su panel.
+- **Satélite / Plano** (arriba izq.): siempre visible para cambiar la base del mapa.
 - **Mi ubicación** (botón ◎, derecha): activa el GPS; el punto azul es tu posición.
   Tócalo de nuevo para **centrar** el mapa en ti. Muestra la precisión y avisa si
   es baja. Aparece además un **cono de orientación** que indica hacia dónde apuntas
   (usa la brújula del teléfono; gira al mover el equipo). Si el cono "baila" o
   apunta mal, **calibra** moviendo el teléfono en forma de 8. En iPhone, la primera
   vez te pedirá permiso para la orientación.
-- **Medir** (botón 📐): elige **área** o **distancia**, toca el mapa para marcar
-  vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y perímetro**
-  o **distancia (m)**. Si mides dentro de una suerte conocida, te muestra su área
-  oficial para comparar. Usa **Deshacer** / **Limpiar**.
+- **Dibujar y medir** (menú ✏️): elige **área** o **distancia**, toca el mapa para
+  marcar vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y
+  perímetro** o **distancia (m)**. Si mides dentro de una suerte conocida, te
+  muestra su área oficial para comparar. Usa **Deshacer** / **Limpiar**; **✕** para
+  terminar.
   - **Guardar** (💾): ponle un **nombre** a la medición para conservarla. Las
-    guardadas aparecen en **📐 Mediciones** (derecha): tócalas para **ir**, o
+    guardadas aparecen en **📐 Mediciones guardadas** (menú ✏️): tócalas para **ir**, o
     **bórralas**. Son privadas (solo tú las ves), sirven **sin conexión** y se
     sincronizan a tus dispositivos.
 

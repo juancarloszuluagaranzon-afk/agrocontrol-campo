@@ -20,12 +20,12 @@ const campo =
   "rounded-lg ring-1 ring-black/15 px-3 py-2 text-sm w-full bg-white";
 
 export function MarcadorControl() {
-  const [abierto, setAbierto] = useState(false);
   const [creando, setCreando] = useState(false);
   const items = useMarcadoresStore((s) => s.items);
   const addMarcador = useMarcadoresStore((s) => s.addMarcador);
   const removeMarcador = useMarcadoresStore((s) => s.removeMarcador);
   const setPlacingMarker = useMapStore((s) => s.setPlacingMarker);
+  const setActiveTool = useMapStore((s) => s.setActiveTool);
   const flyTo = useMapStore((s) => s.flyTo);
 
   const {
@@ -62,19 +62,7 @@ export function MarcadorControl() {
 
   function cerrar() {
     cancelarCreacion();
-    setAbierto(false);
-  }
-
-  if (!abierto) {
-    return (
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        className="pointer-events-auto rounded-full bg-white px-3 py-2 text-sm font-medium shadow ring-1 ring-black/10"
-      >
-        📍 Marcadores
-      </button>
-    );
+    setActiveTool("none");
   }
 
   return (

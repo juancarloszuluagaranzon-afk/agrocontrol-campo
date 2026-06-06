@@ -24,10 +24,17 @@ export interface GpsFix {
 
 export type MeasureMode = "off" | "area" | "distance";
 
+/** Herramienta abierta desde el menú (✏️📏). "none" = ninguna. */
+export type ToolId = "none" | "capas" | "medir" | "marcadores" | "mediciones";
+
 interface MapState {
   /** Tablón seleccionado (properties del feature tocado), o null. */
   selected: TablonProperties | null;
   setSelected: (s: TablonProperties | null) => void;
+
+  /** Herramienta activa del menú de herramientas (panel a mostrar). */
+  activeTool: ToolId;
+  setActiveTool: (t: ToolId) => void;
 
   /** Base del mapa: satélite (Esri) o plano (estilo Ingeniería Agrícola). */
   baseMode: "satelite" | "plano";
@@ -92,6 +99,9 @@ const initialContext: Record<string, boolean> = Object.fromEntries(
 export const useMapStore = create<MapState>((set) => ({
   selected: null,
   setSelected: (selected) => set({ selected }),
+
+  activeTool: "none",
+  setActiveTool: (activeTool) => set({ activeTool }),
 
   baseMode: "satelite",
   setBaseMode: (baseMode) => set({ baseMode }),
