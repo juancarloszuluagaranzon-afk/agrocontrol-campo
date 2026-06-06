@@ -24,6 +24,12 @@ export const MEASURE_FILL = "measure-fill";
 export const MEASURE_LINE = "measure-line";
 export const MEASURE_VERTICES = "measure-vertices";
 
+// Mediciones guardadas (persistidas, §5)
+export const MEDICIONES_SOURCE = "mediciones";
+export const MEDICIONES_FILL = "mediciones-fill";
+export const MEDICIONES_LINE = "mediciones-line";
+export const MEDICIONES_LABEL = "mediciones-label";
+
 // Marcadores privados del usuario (§5: puntos personales)
 export const MARCADORES_SOURCE = "marcadores";
 export const MARCADORES_DOT = "marcadores-dot";

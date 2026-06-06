@@ -113,7 +113,12 @@ export interface Database {
           unidad: string;
           geom: Json | null;
           autor: string | null;
+          nombre: string;
+          lat: number | null;
+          lon: number | null;
+          deleted: boolean;
           created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -122,7 +127,12 @@ export interface Database {
           unidad: string;
           geom?: Json | null;
           autor?: string | null;
+          nombre?: string;
+          lat?: number | null;
+          lon?: number | null;
+          deleted?: boolean;
           created_at?: string;
+          updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["mediciones"]["Insert"]>;
         Relationships: [];

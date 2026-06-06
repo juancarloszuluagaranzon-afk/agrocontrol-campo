@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — guardar mediciones
+
+- Al medir un **área** o una **distancia** ahora se puede **💾 Guardar** con un
+  nombre. Las mediciones quedan en una lista (**📐 Mediciones**) para volver a
+  ellas (**ir**) o **borrarlas**, y se dibujan en el mapa (relleno violeta con su
+  nombre). Son **privadas** (solo quien las crea), funcionan **offline** (outbox)
+  y se sincronizan a la nube (tabla `mediciones`, RLS por dueño, migración 0008).
+
 ### Mapa — indicador de orientación (brújula tipo Avenza)
 
 - **Cono de dirección**: junto al punto azul de "Mi ubicación", un cono

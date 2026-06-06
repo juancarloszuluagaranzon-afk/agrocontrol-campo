@@ -25,6 +25,10 @@ import {
   MEASURE_LINE,
   MEASURE_SOURCE,
   MEASURE_VERTICES,
+  MEDICIONES_FILL,
+  MEDICIONES_LABEL,
+  MEDICIONES_LINE,
+  MEDICIONES_SOURCE,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -37,6 +41,7 @@ import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
+import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
 
 const TABLONES_URL = "/data/tablones_riopaila.geojson";
@@ -240,6 +245,46 @@ export function MapView() {
           "circle-color": "#2563eb",
           "circle-stroke-width": 2.5,
           "circle-stroke-color": "#ffffff",
+        },
+      });
+
+      // Mediciones guardadas (persistidas): relleno + contorno + etiqueta.
+      // Van bajo la medición en curso para que la edición activa resalte.
+      const emptyMedFc: FeatureCollection<Geometry> = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      map.addSource(MEDICIONES_SOURCE, { type: "geojson", data: emptyMedFc });
+      map.addLayer({
+        id: MEDICIONES_FILL,
+        type: "fill",
+        source: MEDICIONES_SOURCE,
+        filter: ["==", ["geometry-type"], "Polygon"],
+        paint: { "fill-color": "#7c3aed", "fill-opacity": 0.18 },
+      });
+      map.addLayer({
+        id: MEDICIONES_LINE,
+        type: "line",
+        source: MEDICIONES_SOURCE,
+        filter: ["!=", ["geometry-type"], "Point"],
+        paint: { "line-color": "#7c3aed", "line-width": 2.5 },
+      });
+      map.addLayer({
+        id: MEDICIONES_LABEL,
+        type: "symbol",
+        source: MEDICIONES_SOURCE,
+        filter: ["==", ["geometry-type"], "Point"],
+        layout: {
+          "text-field": ["get", "etiqueta"],
+          "text-size": 11,
+          "text-offset": [0, 0.6],
+          "text-anchor": "top",
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#4c1d95",
+          "text-halo-width": 1.4,
         },
       });
 
@@ -469,6 +514,28 @@ export function MapView() {
     };
     source.setData(fc);
   }, [marcadores]);
+
+  // ── Mediciones guardadas sobre el mapa (§5) ──
+  const mediciones = useMedicionesStore((s) => s.items);
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(MEDICIONES_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!map || !source) return;
+    const features: Feature<Geometry>[] = [];
+    for (const m of activas(mediciones)) {
+      // Forma medida (polígono o línea) …
+      features.push({ type: "Feature", geometry: m.geom, properties: {} });
+      // … y un punto en el centroide para la etiqueta con el nombre.
+      features.push({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [m.lon, m.lat] },
+        properties: { etiqueta: m.nombre },
+      });
+    }
+    source.setData({ type: "FeatureCollection", features });
+  }, [mediciones]);
 
   // ── Modo de base: satélite ↔ plano (tablones por hacienda) ──
   const baseMode = useMapStore((s) => s.baseMode);

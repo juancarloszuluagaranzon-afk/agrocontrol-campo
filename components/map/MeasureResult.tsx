@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import type { Geometry } from "geojson";
 import { useMapStore } from "@/lib/store/mapStore";
 import {
   polygonAreaHa,
@@ -11,6 +13,8 @@ import {
   formatMetros,
   errorRelativoPct,
 } from "@/lib/geo/format";
+import { useMedicionesStore } from "@/lib/store/medicionesStore";
+import type { MedicionDatos } from "@/domain/mediciones/schema";
 
 /**
  * Panel inferior con el resultado de la medición en vivo (§5): área + perímetro
@@ -25,11 +29,42 @@ export function MeasureResult() {
   const undoVertex = useMapStore((s) => s.undoVertex);
   const clearVertices = useMapStore((s) => s.clearVertices);
   const markVertexAtCenter = useMapStore((s) => s.markVertexAtCenter);
+  const addMedicion = useMedicionesStore((s) => s.addMedicion);
+  const [guardando, setGuardando] = useState(false);
+  const [nombre, setNombre] = useState("");
 
   if (mode === "off") return null;
 
   const areaHa = polygonAreaHa(vertices);
   const esArea = mode === "area";
+  const puedeGuardar = esArea ? vertices.length >= 3 : vertices.length >= 2;
+
+  /** Arma los datos de la medición en curso para persistirla. */
+  function datosMedicion(): MedicionDatos {
+    const cx = vertices.reduce((a, v) => a + v[0], 0) / vertices.length;
+    const cy = vertices.reduce((a, v) => a + v[1], 0) / vertices.length;
+    const geom: Geometry = esArea
+      ? { type: "Polygon", coordinates: [[...vertices, vertices[0]!]] }
+      : { type: "LineString", coordinates: vertices };
+    return esArea
+      ? { tipo: "area", valor: areaHa, unidad: "ha", geom, lat: cy, lon: cx }
+      : {
+          tipo: "distancia",
+          valor: lineLengthM(vertices),
+          unidad: "m",
+          geom,
+          lat: cy,
+          lon: cx,
+        };
+  }
+
+  function guardar() {
+    if (!nombre.trim()) return;
+    addMedicion({ nombre: nombre.trim() }, datosMedicion());
+    setNombre("");
+    setGuardando(false);
+    clearVertices();
+  }
 
   return (
     <div
@@ -110,8 +145,49 @@ export function MeasureResult() {
           >
             Limpiar
           </button>
+          <button
+            type="button"
+            onClick={() => setGuardando(true)}
+            disabled={!puedeGuardar}
+            className="rounded-lg bg-violet-600 px-2.5 py-2 text-xs font-bold text-white disabled:opacity-40"
+          >
+            💾 Guardar
+          </button>
         </div>
       </div>
+
+      {guardando && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            guardar();
+          }}
+          className="mt-2 flex items-center gap-2 border-t border-black/5 pt-2"
+        >
+          <input
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Nombre de la medición"
+            aria-label="Nombre de la medición"
+            className="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm ring-1 ring-black/15"
+            autoFocus
+          />
+          <button
+            type="submit"
+            disabled={!nombre.trim()}
+            className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-40"
+          >
+            Guardar
+          </button>
+          <button
+            type="button"
+            onClick={() => setGuardando(false)}
+            className="rounded-lg px-3 py-2 text-sm ring-1 ring-black/15"
+          >
+            Cancelar
+          </button>
+        </form>
+      )}
     </div>
   );
 }
