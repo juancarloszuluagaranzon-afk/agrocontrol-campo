@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — menú de herramientas (estilo Avenza)
+
+- La pantalla queda **despejada**: las herramientas (dibujar y medir, marcadores,
+  mediciones, capas) se agrupan en un **menú ✏️📏** abajo-izquierda, en vez de
+  varios botones sueltos. Sobre el mapa quedan siempre visibles el **buscador**,
+  el conmutador **Satélite/Plano** y **Mi ubicación** (GPS). Al medir, el panel
+  inferior trae un botón **✕** para terminar.
+
 ### Mapa — guardar mediciones
 
 - Al medir un **área** o una **distancia** ahora se puede **💾 Guardar** con un

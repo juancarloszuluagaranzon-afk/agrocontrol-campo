@@ -26,15 +26,16 @@ test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
 }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
-  // La leyenda sólo existe en modo Plano.
-  await expect(page.getByRole("button", { name: /Leyenda/ })).toHaveCount(0);
+  // La leyenda sólo existe en modo Plano y dentro del panel de Capas.
   await page.getByRole("button", { name: "🗺️ Plano" }).click();
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
   await page.getByRole("button", { name: /Leyenda/ }).click();
   await expect(page.getByText("Haciendas")).toBeVisible();
   await expect(page.getByText("PERALONSO")).toBeVisible();
 });
 
-test("mapa: en móvil el buscador y los controles no se solapan", async ({
+test("mapa: en móvil el buscador y el conmutador no se solapan", async ({
   page,
 }) => {
   // Viewport de un teléfono típico de campo.
@@ -43,19 +44,20 @@ test("mapa: en móvil el buscador y los controles no se solapan", async ({
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 
   const buscador = page.getByPlaceholder("Buscar suerte o hacienda");
-  const capas = page.getByRole("button", { name: /Capas/ });
+  const base = page.getByRole("button", { name: "🗺️ Plano" });
   await expect(buscador).toBeVisible();
-  await expect(capas).toBeVisible();
+  await expect(base).toBeVisible();
 
-  // El buscador (arriba) y el botón de capas (debajo) no deben solaparse.
+  // El buscador (arriba) y el conmutador (debajo) no deben solaparse.
   const b = await buscador.boundingBox();
-  const c = await capas.boundingBox();
+  const c = await base.boundingBox();
   expect(b).not.toBeNull();
   expect(c).not.toBeNull();
   if (b && c) expect(c.y).toBeGreaterThanOrEqual(b.y + b.height - 1);
 
-  // El control de capas sigue siendo utilizable en pantalla angosta.
-  await capas.click();
+  // El menú de herramientas funciona en pantalla angosta.
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
   await expect(page.getByRole("checkbox").first()).toBeVisible();
 });
 
@@ -63,7 +65,8 @@ test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 
-  await page.getByRole("button", { name: /Marcadores/ }).click();
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Marcadores", exact: true }).click();
   await page.getByRole("button", { name: /Nuevo marcador/ }).click();
   await page.getByPlaceholder("Nombre del punto").fill("Compuerta dañada");
   await page.getByRole("button", { name: "Guardar aquí" }).click();
@@ -76,7 +79,9 @@ test("mapa: crear un marcador privado lo lista", async ({ page }) => {
 
 test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await page.goto("/mapa");
-  await page.getByRole("button", { name: /Capas/ }).click();
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
   const redHidrica = page.getByRole("checkbox").first();
   await redHidrica.check();
   await expect(redHidrica).toBeChecked();

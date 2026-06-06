@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import { useMapStore } from "@/lib/store/mapStore";
 import { formatHectareas, formatMetros } from "@/lib/geo/format";
@@ -12,29 +11,12 @@ function valorTexto(m: Medicion): string {
 
 /** Lista de mediciones guardadas (privadas): ir y borrar (§5). */
 export function MedicionesControl() {
-  const [abierto, setAbierto] = useState(false);
   const items = useMedicionesStore((s) => s.items);
   const removeMedicion = useMedicionesStore((s) => s.removeMedicion);
+  const setActiveTool = useMapStore((s) => s.setActiveTool);
   const flyTo = useMapStore((s) => s.flyTo);
 
   const lista = activas(items);
-
-  if (!abierto) {
-    return (
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        className="pointer-events-auto rounded-full bg-white px-3 py-2 text-sm font-medium shadow ring-1 ring-black/10"
-      >
-        📐 Mediciones
-        {lista.length > 0 && (
-          <span className="ml-1 rounded-full bg-violet-600 px-1.5 text-xs font-semibold text-white">
-            {lista.length}
-          </span>
-        )}
-      </button>
-    );
-  }
 
   return (
     <div className="pointer-events-auto w-64 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
@@ -42,7 +24,7 @@ export function MedicionesControl() {
         <span className="text-sm font-semibold">📐 Mis mediciones</span>
         <button
           type="button"
-          onClick={() => setAbierto(false)}
+          onClick={() => setActiveTool("none")}
           aria-label="Cerrar"
           className="rounded px-1 text-slate-500 hover:bg-slate-100"
         >

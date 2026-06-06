@@ -28,6 +28,7 @@ export function MeasureResult() {
   const addVertex = useMapStore((s) => s.addVertex);
   const undoVertex = useMapStore((s) => s.undoVertex);
   const clearVertices = useMapStore((s) => s.clearVertices);
+  const setMeasureMode = useMapStore((s) => s.setMeasureMode);
   const markVertexAtCenter = useMapStore((s) => s.markVertexAtCenter);
   const addMedicion = useMedicionesStore((s) => s.addMedicion);
   const [guardando, setGuardando] = useState(false);
@@ -72,7 +73,15 @@ export function MeasureResult() {
       aria-live="polite"
       className="bg-background safe-bottom pointer-events-auto absolute inset-x-2 z-10 rounded-xl p-3 shadow-2xl ring-1 ring-black/10"
     >
-      <div className="flex items-end justify-between gap-4">
+      <button
+        type="button"
+        onClick={() => setMeasureMode("off")}
+        aria-label="Terminar medición"
+        className="text-accent/60 hover:bg-accent/10 absolute top-1 right-1 grid size-8 place-items-center rounded-lg text-lg"
+      >
+        ✕
+      </button>
+      <div className="flex items-end justify-between gap-4 pr-8">
         <div>
           <p className="text-accent/60 text-xs font-medium">
             {esArea ? "Medir área" : "Medir distancia"} ·{" "}
