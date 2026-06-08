@@ -53,6 +53,8 @@ test("medir área: marcar vértices calcula hectáreas", async ({ page }) => {
   await page.getByLabel("Nombre de la medición").fill("Lote de prueba");
   await page.getByRole("button", { name: "Guardar", exact: true }).click();
 
+  // Terminar la medición (libera el menú) y abrir la lista de mediciones.
+  await panel.getByRole("button", { name: "Terminar medición" }).click();
   await page.getByRole("button", { name: "Herramientas" }).click();
   await page.getByRole("button", { name: "Mediciones guardadas" }).click();
   await expect(page.getByText("Lote de prueba")).toBeVisible();

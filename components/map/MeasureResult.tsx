@@ -81,8 +81,8 @@ export function MeasureResult() {
       >
         ✕
       </button>
-      <div className="flex items-end justify-between gap-4 pr-8">
-        <div>
+      <div className="flex flex-col gap-2">
+        <div className="pr-8">
           <p className="text-accent/60 text-xs font-medium">
             {esArea ? "Medir área" : "Medir distancia"} ·{" "}
             <span data-testid="vertex-count">{vertices.length}</span>{" "}
@@ -122,11 +122,11 @@ export function MeasureResult() {
           )}
         </div>
 
-        <div className="flex shrink-0 flex-wrap justify-end gap-1">
+        <div className="grid grid-cols-3 gap-1.5">
           <button
             type="button"
             onClick={markVertexAtCenter}
-            className="bg-primary text-accent rounded-lg px-2.5 py-2 text-xs font-bold"
+            className="bg-primary text-accent rounded-lg px-2 py-2 text-xs font-bold"
           >
             ✛ Marcar
           </button>
@@ -134,15 +134,23 @@ export function MeasureResult() {
             type="button"
             onClick={() => gps && addVertex([gps.lon, gps.lat])}
             disabled={!gps}
-            className="bg-accent/5 rounded-lg px-2.5 py-2 text-xs font-semibold disabled:opacity-40"
+            className="bg-accent/5 rounded-lg px-2 py-2 text-xs font-semibold disabled:opacity-40"
           >
             + GPS
           </button>
           <button
             type="button"
+            onClick={() => setGuardando(true)}
+            disabled={!puedeGuardar}
+            className="rounded-lg bg-violet-600 px-2 py-2 text-xs font-bold text-white disabled:opacity-40"
+          >
+            💾 Guardar
+          </button>
+          <button
+            type="button"
             onClick={undoVertex}
             disabled={vertices.length === 0}
-            className="bg-accent/5 rounded-lg px-2.5 py-2 text-xs font-semibold disabled:opacity-40"
+            className="bg-accent/5 rounded-lg px-2 py-2 text-xs font-semibold disabled:opacity-40"
           >
             Deshacer
           </button>
@@ -150,17 +158,9 @@ export function MeasureResult() {
             type="button"
             onClick={clearVertices}
             disabled={vertices.length === 0}
-            className="bg-accent/5 rounded-lg px-2.5 py-2 text-xs font-semibold disabled:opacity-40"
+            className="bg-accent/5 rounded-lg px-2 py-2 text-xs font-semibold disabled:opacity-40"
           >
             Limpiar
-          </button>
-          <button
-            type="button"
-            onClick={() => setGuardando(true)}
-            disabled={!puedeGuardar}
-            className="rounded-lg bg-violet-600 px-2.5 py-2 text-xs font-bold text-white disabled:opacity-40"
-          >
-            💾 Guardar
           </button>
         </div>
       </div>
