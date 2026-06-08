@@ -12,6 +12,10 @@ versionado [SemVer](https://semver.org/lang/es/).
   varios botones sueltos. Sobre el mapa quedan siempre visibles el **buscador**,
   el conmutador **Satélite/Plano** y **Mi ubicación** (GPS). Al medir, el panel
   inferior trae un botón **✕** para terminar.
+- **Panel de medición responsivo**: el valor va arriba y las acciones (Marcar,
+  GPS, Guardar, Deshacer y Limpiar) en una grilla que se acomoda en pantallas
+  angostas (ya no se cortan ni se encima el texto). El botón ✏️ se oculta mientras
+  hay un panel inferior abierto, para no montarse con él.
 
 ### Mapa — guardar mediciones
 

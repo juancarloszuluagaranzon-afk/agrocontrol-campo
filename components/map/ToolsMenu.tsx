@@ -26,13 +26,18 @@ export function ToolsMenu() {
   const activeTool = useMapStore((s) => s.activeTool);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
   const measureMode = useMapStore((s) => s.measureMode);
+  const tablonSeleccionado = useMapStore((s) => s.selected != null);
 
   function elegir(id: Entrada["id"]) {
     setActiveTool(activeTool === id ? "none" : id);
     setOpen(false);
   }
 
-  const algoActivo = activeTool !== "none" || measureMode !== "off";
+  // El menú se oculta mientras hay un panel inferior (medición o tablón) para no
+  // encimarse con él; reaparece al cerrarlo.
+  if (measureMode !== "off" || tablonSeleccionado) return null;
+
+  const algoActivo = activeTool !== "none";
 
   return (
     <div className="pointer-events-auto absolute bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-2 z-20 flex flex-col items-start gap-2">
