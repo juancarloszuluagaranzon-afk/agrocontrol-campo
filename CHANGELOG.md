@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — datos agronómicos por suerte (maestro)
+
+- Al tocar un tablón, el panel muestra ahora la **Agronomía** de su suerte tomada
+  del **maestro de Riopaila**: **variedad**, **edad** (calculada en vivo desde el
+  último corte), **n.º de corte** y **próximo corte**. Cubre 604 de las 610
+  suertes (las 6 sin dato muestran "Sin datos del maestro"). Datos estáticos en
+  `public/data/maestro_suertes.json` (generados con `scripts/convertir_maestro.py`
+  desde el repo `maestro-riopaila`); funciona offline. Sin cambios de BD.
+
 ### Mapa — menú de herramientas (estilo Avenza)
 
 - La pantalla queda **despejada**: las herramientas (dibujar y medir, marcadores,

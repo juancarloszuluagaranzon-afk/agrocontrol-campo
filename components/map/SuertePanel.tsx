@@ -2,17 +2,39 @@
 
 import { useMapStore } from "@/lib/store/mapStore";
 import { formatHectareas } from "@/lib/geo/format";
+import { useMaestro } from "@/lib/data/useMaestro";
+import { edadMeses } from "@/domain/maestro/schema";
+
+/** Fecha ISO (aaaa-mm-dd) → dd/mm/aaaa, o "—" si falta. */
+function fechaCorta(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
 
 /**
  * Panel con los atributos oficiales del tablón tocado (§5). Una suerte tiene
  * uno o varios tablones; cada tablón tiene su área oficial. Tarjeta inferior de
- * alto contraste para campo (§13).
+ * alto contraste para campo (§13). Suma la **agronomía** de la suerte (maestro).
  */
 export function SuertePanel() {
   const selected = useMapStore((s) => s.selected);
   const setSelected = useMapStore((s) => s.setSelected);
+  const maestro = useMaestro();
 
   if (!selected) return null;
+
+  const info = maestro[selected.sec_ste];
+  const edad = edadMeses(
+    info?.fecha_ultimo_corte ?? info?.fecha_siembra ?? null,
+  );
+  const edadTxt =
+    edad == null
+      ? "—"
+      : `${edad.toLocaleString("es-CO", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })} meses`;
 
   const filas: { label: string; value: string }[] = [
     { label: "Hacienda", value: selected.hacienda || "—" },
@@ -21,6 +43,18 @@ export function SuertePanel() {
     { label: "Supervisor", value: selected.supervisor || "—" },
     { label: "Jefe de zona", value: selected.jefe_zona || "—" },
   ];
+
+  const agro: { label: string; value: string }[] = info
+    ? [
+        { label: "Variedad", value: info.variedad ?? "—" },
+        { label: "Edad", value: edadTxt },
+        {
+          label: "N.º de corte",
+          value: info.numero_corte != null ? String(info.numero_corte) : "—",
+        },
+        { label: "Próximo corte", value: fechaCorta(info.fecha_proximo_corte) },
+      ]
+    : [];
 
   return (
     <div
@@ -58,6 +92,24 @@ export function SuertePanel() {
           </div>
         ))}
       </dl>
+
+      <div className="mt-3 border-t border-black/5 pt-3">
+        <p className="text-accent/50 text-[11px] font-semibold tracking-wide uppercase">
+          Agronomía
+        </p>
+        {info ? (
+          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {agro.map((f) => (
+              <div key={f.label} className="flex flex-col">
+                <dt className="text-accent/60 text-xs">{f.label}</dt>
+                <dd className="font-semibold">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="text-accent/50 mt-1 text-sm">Sin datos del maestro</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ mapas web (Leaflet, MapLibre, Mapbox) y para cargar a Supabase/PostGIS.
 | `suertes_riopaila.geojson` | GeoJSON Polygon (WGS84) | **Capa principal.** Linderos + atributos de cada suerte. |
 | `suertes_centroides.geojson` | GeoJSON Point (WGS84) | Centroide de cada suerte (ubicación rápida, etiquetas, marcadores). |
 | `suertes_catalogo.json` | JSON array | Catálogo ligero para autocompletar/buscador (sin geometría). |
+| `maestro_suertes.json` | JSON objeto (por `sec_ste`) | **Agronomía por suerte** (variedad, corte, fechas, TCH…) del maestro de Riopaila. 604 suertes. Generado con `scripts/convertir_maestro.py`. |
 | `suertes_maestro.xlsx` / `.csv` | Tabla | Atributos completos + centroide + áreas. Hoja "Resumen" por hacienda. |
 | `contexto_red_hidrica.geojson` | GeoJSON Line | Red hídrica (contexto del mapa). |
 | `contexto_vias_acceso.geojson` | GeoJSON Line | Vías de acceso. |
