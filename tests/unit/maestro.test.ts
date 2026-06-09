@@ -1,23 +1,57 @@
 import { describe, it, expect } from "vitest";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { edadMeses, maestroSchema } from "@/domain/maestro/schema";
+import { edadSuerteMeses, maestroSchema } from "@/domain/maestro/schema";
 import { catalogoSchema } from "@/domain/suertes/schema";
 
-describe("edadMeses", () => {
+describe("edadSuerteMeses (igual que el maestro)", () => {
   const hoy = new Date(2026, 5, 9); // 2026-06-09 (mes 0-indexado)
 
-  it("cuenta meses desde la fecha de referencia (último corte)", () => {
-    // 2025-08-17 → ~9.7 meses al 2026-06-09.
-    expect(edadMeses("2025-08-17", hoy)).toBeCloseTo(9.7, 1);
+  it("usa la siembra cuando el último corte es anterior (caña planta)", () => {
+    // 3111-020: siembra 31/07/2025, corte 05/06/2025 (anterior) → ref = siembra.
+    const edad = edadSuerteMeses(
+      {
+        variedad: "CC 05-430",
+        fecha_siembra: "2025-07-31",
+        fecha_ultimo_corte: "2025-06-05",
+      },
+      hoy,
+    );
+    expect(edad).toBeCloseTo(10.3, 1); // ≈ edad_csv 10.25
   });
 
-  it("devuelve null si no hay fecha", () => {
-    expect(edadMeses(null, hoy)).toBeNull();
+  it("usa el último corte cuando es posterior a la siembra", () => {
+    const edad = edadSuerteMeses(
+      {
+        variedad: "CC 05-430",
+        fecha_siembra: "2022-02-26",
+        fecha_ultimo_corte: "2026-04-17",
+      },
+      hoy,
+    );
+    expect(edad).toBeCloseTo(1.7, 1);
   });
 
-  it("nunca es negativa (fecha futura → 0)", () => {
-    expect(edadMeses("2027-01-01", hoy)).toBe(0);
+  it("variedad RENOVACIÓN ⇒ 0", () => {
+    expect(
+      edadSuerteMeses(
+        {
+          variedad: "RENOVACION",
+          fecha_siembra: "2020-01-01",
+          fecha_ultimo_corte: null,
+        },
+        hoy,
+      ),
+    ).toBe(0);
+  });
+
+  it("sin fechas ⇒ 0", () => {
+    expect(
+      edadSuerteMeses(
+        { variedad: "CC", fecha_siembra: null, fecha_ultimo_corte: null },
+        hoy,
+      ),
+    ).toBe(0);
   });
 });
 

@@ -3,7 +3,7 @@
 import { useMapStore } from "@/lib/store/mapStore";
 import { formatHectareas } from "@/lib/geo/format";
 import { useMaestro } from "@/lib/data/useMaestro";
-import { edadMeses } from "@/domain/maestro/schema";
+import { edadSuerteMeses } from "@/domain/maestro/schema";
 
 /** Fecha ISO (aaaa-mm-dd) → dd/mm/aaaa, o "—" si falta. */
 function fechaCorta(iso: string | null | undefined): string {
@@ -25,16 +25,12 @@ export function SuertePanel() {
   if (!selected) return null;
 
   const info = maestro[selected.sec_ste];
-  const edad = edadMeses(
-    info?.fecha_ultimo_corte ?? info?.fecha_siembra ?? null,
-  );
-  const edadTxt =
-    edad == null
-      ? "—"
-      : `${edad.toLocaleString("es-CO", {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1,
-        })} meses`;
+  const edadTxt = info
+    ? `${edadSuerteMeses(info).toLocaleString("es-CO", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      })} meses`
+    : "—";
 
   const filas: { label: string; value: string }[] = [
     { label: "Hacienda", value: selected.hacienda || "—" },

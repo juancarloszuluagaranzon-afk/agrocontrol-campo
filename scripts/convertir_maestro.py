@@ -15,8 +15,11 @@ import io
 import json
 import sys
 import urllib.request
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
+
+# Base del serial de Excel (sistema 1900, con el bug del año bisiesto 1900).
+EXCEL_EPOCH = date(1899, 12, 30)
 
 RAW_URL = (
     "https://raw.githubusercontent.com/"
@@ -35,13 +38,27 @@ def leer_csv(arg: str | None) -> str:
 
 
 def fecha_iso(s: str) -> str | None:
+    """Acepta dd/mm/aaaa, ISO o serial de Excel (ej. 44170). Devuelve ISO o None."""
     s = (s or "").strip()
     if not s:
         return None
+    if "/" in s:
+        try:
+            return datetime.strptime(s, "%d/%m/%Y").date().isoformat()
+        except ValueError:
+            return None
+    if "-" in s:
+        try:
+            return datetime.strptime(s[:10], "%Y-%m-%d").date().isoformat()
+        except ValueError:
+            return None
     try:
-        return datetime.strptime(s, "%d/%m/%Y").date().isoformat()
+        serial = float(s.replace(",", "."))
     except ValueError:
         return None
+    if serial <= 0:
+        return None
+    return (EXCEL_EPOCH + timedelta(days=round(serial))).isoformat()
 
 
 def num(s: str) -> float | None:

@@ -28,22 +28,37 @@ export type SuerteMaestro = z.infer<typeof suerteMaestroSchema>;
 export const maestroSchema = z.record(z.string(), suerteMaestroSchema);
 export type Maestro = z.infer<typeof maestroSchema>;
 
-/** Días promedio por mes (para edad fraccionaria, como el maestro). */
-const DIAS_MES = 30.4375;
+/** Días promedio por mes: 365,25/12 (igual que el cálculo del maestro). */
+const DIAS_MES = 365.25 / 12;
+
+function parseISO(iso: string | null): Date | null {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
 
 /**
- * Edad de la suerte en meses, **calculada en vivo**: meses transcurridos desde
- * la fecha de referencia (el último corte; o la siembra para caña planta) hasta
- * `hoy`. Devuelve null si no hay fecha. Nunca negativa.
+ * Edad de la suerte en meses, **calculada en vivo**, replicando el maestro:
+ * - variedad RENOVACIÓN ⇒ 0.
+ * - referencia = la fecha **más reciente** entre siembra y último corte (el
+ *   último corte solo si es posterior a la siembra; en caña planta usa siembra).
+ * - meses = |hoy − referencia| / (365,25/12). Si no hay referencia ⇒ 0.
  */
-export function edadMeses(
-  refISO: string | null,
+export function edadSuerteMeses(
+  info: Pick<
+    SuerteMaestro,
+    "variedad" | "fecha_siembra" | "fecha_ultimo_corte"
+  >,
   hoy: Date = new Date(),
-): number | null {
-  if (!refISO) return null;
-  const [y, m, d] = refISO.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  const ref = new Date(y, m - 1, d);
-  const dias = (hoy.getTime() - ref.getTime()) / 86_400_000;
-  return Math.max(0, Math.round((dias / DIAS_MES) * 10) / 10);
+): number {
+  const v = (info.variedad ?? "").toUpperCase();
+  if (v === "RENOVACION" || v === "RENOVACIÓN") return 0;
+  const siembra = parseISO(info.fecha_siembra);
+  const corte = parseISO(info.fecha_ultimo_corte);
+  let ref = siembra;
+  if (corte && siembra && corte > siembra) ref = corte;
+  if (!ref) return 0;
+  const dias = Math.abs(hoy.getTime() - ref.getTime()) / 86_400_000;
+  return Math.round((dias / DIAS_MES) * 10) / 10;
 }
