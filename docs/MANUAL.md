@@ -15,7 +15,9 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 - **Base satelital** del ingenio con las **suertes** dibujadas.
 - Una **suerte** está dividida en **tablones**; cada tablón se ve y se toca por
   separado. **Tocar un tablón** → muestra su suerte, número (ej. "Tablón 3 de 5"),
-  hacienda, sector, **área oficial (ha)**, supervisor y jefe de zona.
+  hacienda, sector, **área oficial (ha)**, supervisor y jefe de zona. Abajo, en
+  **Agronomía**: **variedad**, **edad** (en meses, calculada al día), **n.º de
+  corte** y **próximo corte** de la suerte (datos del maestro).
 - **Buscar** (arriba): escribe un código de suerte `sec_ste` (ej. `3111-020`), un
   tablón (`3111-020-T3`) o una hacienda → la app vuela y lo resalta.
 - **Herramientas** (botón ✏️ abajo-izq.): abre el menú con **Dibujar y medir**,

@@ -19,6 +19,10 @@ test("mapa: buscar una suerte y abrir un tablón muestra sus atributos", async (
   await expect(panel).toContainText("Tablón 1");
   await expect(panel).toContainText("de 5");
   await expect(panel).toContainText("PERALONSO");
+
+  // Sección de agronomía del maestro (variedad de la suerte).
+  await expect(panel).toContainText("Agronomía");
+  await expect(panel).toContainText("CC 05-430");
 });
 
 test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
