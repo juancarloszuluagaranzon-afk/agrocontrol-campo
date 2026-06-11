@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { elegirPlanta } from "./setup";
+
+test.beforeEach(async ({ page }) => {
+  await elegirPlanta(page); // entra directo al mapa de Riopaila
+});
 
 test.describe("GPS", () => {
   test.use({

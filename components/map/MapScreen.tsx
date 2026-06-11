@@ -13,7 +13,9 @@ import { MarcadorControl } from "@/components/map/MarcadorControl";
 import { MedicionesControl } from "@/components/map/MedicionesControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
+import { PlantaSelector } from "@/components/PlantaSelector";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
 
 /**
  * Pestaña Mapa / Campo (§5): mapa a pantalla completa. Estilo Avenza: el mapa
@@ -25,9 +27,18 @@ export function MapScreen() {
   const midiendo = useMapStore((s) => s.measureMode !== "off");
   const colocando = useMapStore((s) => s.placingMarker);
   const activeTool = useMapStore((s) => s.activeTool);
+  const planta = usePlantaStore((s) => s.planta);
+  const hydrated = usePlantaStore((s) => s.hydrated);
 
+  // Aún leyendo localStorage: no parpadear el selector ni el mapa.
+  if (!hydrated) return <div className="absolute inset-0" />;
+  // Sin planta elegida → selector de entrada (§ ADR-0007).
+  if (!planta) return <PlantaSelector />;
+
+  // `key={planta}`: al cambiar de planta, reconstruye el mapa y sus capas con la
+  // otra cartografía (universos geográficos distintos), sin estados residuales.
   return (
-    <div className="absolute inset-0">
+    <div key={planta} className="absolute inset-0">
       <MapView />
       <Crosshair visible={midiendo || colocando} />
       <SearchBox />

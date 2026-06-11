@@ -1,13 +1,15 @@
 """
-Genera `public/data/maestro_suertes.json` a partir de `maestro.csv` del repo
-`juancarloszuluagaranzon-afk/maestro-riopaila`: información agronómica por suerte
-(variedad, corte, fechas, TCH, etc.), indexada por `sec_ste` para cruzarla con la
-cartografía de Rio Map. Solo se incluyen las suertes que existen en nuestro
-catálogo (`public/data/tablones_catalogo.json`).
+Genera el maestro agronómico por suerte a partir de `maestro.csv` del repo
+`juancarloszuluagaranzon-afk/maestro-riopaila` (variedad, corte, fechas, TCH,
+etc.), indexado por `sec_ste` para cruzarlo con la cartografía de Rio Map. Solo
+se incluyen las suertes que existen en el catálogo de la planta. El maestro es
+único (todas las empresas) y se filtra por el catálogo de cada planta, así que
+sirve igual para Riopaila (RIOP) que para Castilla (CAST/CAUC).
 
 Uso:
-    python scripts/convertir_maestro.py            # baja el CSV del repo
-    python scripts/convertir_maestro.py ruta.csv   # usa un CSV local
+    python scripts/convertir_maestro.py                     # riopaila (del repo)
+    python scripts/convertir_maestro.py castilla            # castilla (del repo)
+    python scripts/convertir_maestro.py riopaila ruta.csv   # CSV local
 """
 
 import csv
@@ -26,8 +28,12 @@ RAW_URL = (
     "juancarloszuluagaranzon-afk/maestro-riopaila/main/maestro.csv"
 )
 DATA = Path(__file__).resolve().parent.parent / "public" / "data"
-CATALOGO = DATA / "tablones_catalogo.json"
-SALIDA = DATA / "maestro_suertes.json"
+
+# Catálogo de origen y archivo de salida por planta.
+PLANTAS = {
+    "riopaila": ("tablones_catalogo.json", "maestro_suertes.json"),
+    "castilla": ("tablones_castilla_catalogo.json", "maestro_castilla.json"),
+}
 
 
 def leer_csv(arg: str | None) -> str:
@@ -77,10 +83,18 @@ def entero(s: str) -> int | None:
 
 
 def main() -> None:
-    catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
+    args = sys.argv[1:]
+    planta = "riopaila"
+    if args and args[0] in PLANTAS:
+        planta = args.pop(0)
+    cat_name, out_name = PLANTAS[planta]
+    catalogo_path = DATA / cat_name
+    salida_path = DATA / out_name
+
+    catalogo = json.loads(catalogo_path.read_text(encoding="utf-8"))
     nuestras = {c["sec_ste"] for c in catalogo}
 
-    texto = leer_csv(sys.argv[1] if len(sys.argv) > 1 else None)
+    texto = leer_csv(args[0] if args else None)
     reader = csv.DictReader(io.StringIO(texto), delimiter=";")
 
     salida: dict[str, dict] = {}
@@ -107,13 +121,13 @@ def main() -> None:
             "empresa": (row.get("EMPRESA") or "").strip() or None,
         }
 
-    SALIDA.write_text(
+    salida_path.write_text(
         json.dumps(salida, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8",
     )
     faltan = sorted(nuestras - set(salida))
-    print(f"OK: {len(salida)} suertes con datos -> {SALIDA.name}")
-    print(f"Nuestras suertes sin datos en el maestro: {len(faltan)} {faltan}")
+    print(f"OK [{planta}]: {len(salida)} suertes con datos -> {salida_path.name}")
+    print(f"Suertes del catálogo sin datos en el maestro: {len(faltan)} {faltan}")
 
 
 if __name__ == "__main__":
