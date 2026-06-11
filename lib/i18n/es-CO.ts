@@ -9,6 +9,12 @@ export const t = {
     nombre: "Rio Map",
     descripcion: "Mapa de campo — Riopaila Agrícola",
   },
+  planta: {
+    elegir: "Elige tu planta",
+    ayuda: "Verás solo el mapa de esta empresa. Podrás cambiarla luego.",
+    cambiar: "Cambiar planta",
+    cambiarA: (nombre: string) => `Ver ${nombre}`,
+  },
   sync: {
     enLinea: "En línea",
     sinConexion: "Sin conexión",

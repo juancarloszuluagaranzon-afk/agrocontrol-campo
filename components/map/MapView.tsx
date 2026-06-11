@@ -8,7 +8,7 @@ import maplibregl, {
   type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { AOI, baseStyle } from "@/lib/geo/basemap";
+import { baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import {
@@ -40,11 +40,11 @@ import {
 import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
+import { plantaConfig } from "@/lib/plantas";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
-
-const TABLONES_URL = "/data/tablones_riopaila.geojson";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -91,11 +91,16 @@ export function MapView() {
   const pendingTabRef = useRef<string | null>(null);
   const setSelected = useMapStore((s) => s.setSelected);
 
+  // Planta activa: define cartografía y encuadre. `MapScreen` re-monta este
+  // componente (key por planta), así que `cfg` es estable durante su vida.
+  const planta = usePlantaStore((s) => s.planta);
+  const cfg = plantaConfig(planta);
+
   // Índice tab_id → properties para enriquecer la selección del buscador
   // (el catálogo no trae supervisor/jefe_zona). El navegador cachea el GeoJSON.
   useEffect(() => {
     let cancelled = false;
-    void fetch(TABLONES_URL)
+    void fetch(cfg.tablones)
       .then((r) => r.json())
       .then((fc: { features: { properties: TablonProperties }[] }) => {
         if (cancelled) return;
@@ -115,7 +120,7 @@ export function MapView() {
     return () => {
       cancelled = true;
     };
-  }, [setSelected]);
+  }, [setSelected, cfg.tablones]);
 
   // ── Montaje único del mapa ──
   useEffect(() => {
@@ -124,10 +129,10 @@ export function MapView() {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: baseStyle(),
-      center: AOI.center,
-      zoom: AOI.zoom,
-      minZoom: AOI.minZoom,
-      maxZoom: AOI.maxZoom,
+      center: cfg.aoi.center,
+      zoom: cfg.aoi.zoom,
+      minZoom: cfg.aoi.minZoom,
+      maxZoom: cfg.aoi.maxZoom,
       attributionControl: { compact: true },
       // Evita que toques seguidos al marcar vértices se interpreten como zoom.
       doubleClickZoom: false,
@@ -151,7 +156,7 @@ export function MapView() {
     map.on("move", syncCenter);
 
     map.on("load", () => {
-      map.addSource(SUERTES_SOURCE, { type: "geojson", data: TABLONES_URL });
+      map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
 
       // Capas de contexto (ocultas por defecto) antes de las suertes.
       for (const cfg of CONTEXT_LAYERS) {
@@ -381,7 +386,7 @@ export function MapView() {
       map.remove();
       mapRef.current = null;
     };
-  }, [setSelected]);
+  }, [setSelected, cfg.tablones, cfg.aoi]);
 
   // ── Resaltado de la suerte seleccionada ──
   const selectedTabId = useMapStore((s) => s.selected?.tab_id ?? "");

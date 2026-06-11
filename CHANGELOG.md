@@ -5,6 +5,19 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Multi-planta — Castilla Agrícola junto a Riopaila
+
+- La app sirve ahora a **dos empresas**: al abrirla por primera vez se elige la
+  **planta** (Riopaila o Castilla); la elección se **guarda** y en cada reapertura
+  se entra directo a esa planta. Se puede cambiar desde el **header** (no recarga
+  el mapa con botones sueltos; reconstruye la cartografía de la otra empresa).
+- **Castilla**: **2.445 tablones / 853 suertes** (cartografía ArcGIS, WGS84) con su
+  **maestro** propio que cruza el **96 %** de las suertes (variedad, edad, corte).
+  Datos en `public/data/tablones_castilla.*` y `maestro_castilla.json`, generados
+  con `scripts/convertir_castilla.py` y `scripts/convertir_maestro.py castilla`.
+- Cada planta carga **solo sus datos** (cartografía, catálogo, maestro y encuadre);
+  configuración en `lib/plantas.ts`. Sin cambios de BD. Ver **ADR-0007**.
+
 ### Mapa — datos agronómicos por suerte (maestro)
 
 - Al tocar un tablón, el panel muestra ahora la **Agronomía** de su suerte tomada

@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { catalogoSchema, type CatalogoEntry } from "@/domain/suertes/schema";
+import { plantaConfig } from "@/lib/plantas";
+import { usePlantaStore } from "@/lib/store/plantaStore";
 
 /**
- * Carga (una vez) el catálogo ligero de suertes desde /data y lo valida con Zod.
- * Reutilizado por el buscador del mapa y la tabla de área neta por hacienda.
+ * Carga el catálogo ligero de suertes de la **planta activa** desde /data y lo
+ * valida con Zod. Reutilizado por el buscador del mapa y la tabla de área neta
+ * por hacienda. Se recarga al cambiar de planta.
  */
 export function useCatalogo(): CatalogoEntry[] {
+  const planta = usePlantaStore((s) => s.planta);
   const [catalogo, setCatalogo] = useState<CatalogoEntry[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/data/tablones_catalogo.json")
+    void fetch(plantaConfig(planta).catalogo)
       .then((r) => r.json())
       .then((data: unknown) => {
         if (!cancelled) setCatalogo(catalogoSchema.parse(data));
@@ -23,7 +27,7 @@ export function useCatalogo(): CatalogoEntry[] {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [planta]);
 
   return catalogo;
 }

@@ -60,18 +60,21 @@ tests/{unit,e2e}/               Pruebas
 
 ## Datos
 
-`public/data/` contiene **610 suertes / 17 haciendas / 2.849,12 ha** (WGS84,
-EPSG:4326) más capas de contexto **depuradas** (ADR-0002). Diccionario en
+`public/data/` contiene la cartografía de **dos plantas** (ADR-0007): **Riopaila**
+(1.378 tablones / 610 suertes) y **Castilla** (2.445 tablones / 853 suertes), cada
+una con su catálogo y su maestro agronómico (WGS84, EPSG:4326), más capas de
+contexto **depuradas** (ADR-0002). Diccionario en
 [`public/data/README_DATOS.md`](public/data/README_DATOS.md).
 
-> **Alcance conocido:** esta capa cubre 610 suertes (2.849 ha), no la totalidad
-> del ingenio (~5.583 ha netas). Las áreas por suerte sí son oficiales.
+> **Multi-planta:** el usuario elige planta al entrar (se persiste); la app carga
+> solo los datos de esa empresa. Las áreas por suerte son las oficiales.
 
 ## Estado
 
 Fases 0–7 completas (cimientos, mapa de tablones, GPS y medición,
 persistencia/offline, endurecimiento, cartografía oficial de tablones, modo Plano +
-marcadores). El módulo de maquinaria se retiró (ADR-0005). Ver `CHANGELOG.md` y el
+marcadores) y **multi-planta** (Riopaila + Castilla, ADR-0007). El módulo de
+maquinaria se retiró (ADR-0005). Ver `CHANGELOG.md` y el
 [manual de uso](docs/MANUAL.md).
 
 ## Despliegue (Vercel)

@@ -82,3 +82,33 @@ amontonados en ~`-76.069, 4.257`). Se filtraron con `limpiar_contexto.py` (en el
 repo de insumos). Conteo tras la limpieza: red_hídrica 104, vías 79, canales 113,
 cuerpos_agua 16, estaciones_bombeo 16. Las capas de suertes/centroides/catálogo no
 requirieron limpieza. Ver ADR-0002.
+
+---
+
+## Castilla Agrícola (multi-planta, ADR-0007)
+
+Segunda empresa del grupo. Cartografía de **ArcGIS** (shapefile
+`STES_AGRICOLAS_JUN_9_2026`, WGS84/CRS84), **polígonos por tablón**, con el código
+de suerte como atributo (`Suerte_Sap`, ej. `2108-122`). A diferencia de Riopaila,
+**no** viene de un GeoPDF: el shapefile trae la tabla completa, así que la
+integración es directa (sin heurísticas de área).
+
+| Archivo | Tipo | Uso |
+|---|---|---|
+| `tablones_castilla.geojson` | GeoJSON Polygon (WGS84) | **Capa principal** de Castilla. Mismo esquema `properties` que Riopaila (`tab_id`, `sec_ste`, `hacienda`, `tablon`…). |
+| `tablones_castilla_catalogo.json` | JSON array | Catálogo ligero (buscador). |
+| `maestro_castilla.json` | JSON por `sec_ste` | Agronomía por suerte (CAST + CAUC). |
+
+- **2.445 tablones / 853 suertes / 60 sectores / 61 haciendas.** Empresas en el
+  insumo: Agrícola Castilla (776 suertes) + Agrícola Invasión (77).
+- **Cruce con el maestro: 96 %** (821/853: 775 CAST + 46 CAUC). Las 32 suertes sin
+  dato igual se dibujan (geometría + sector + hacienda + área del shapefile).
+- Un tablón partido en varios polígonos con el mismo número se fusiona en **un**
+  tablón (MultiPolygon, área sumada) para que `tab_id` sea llave única.
+
+Reproducir:
+
+```bash
+python scripts/convertir_castilla.py            # shapefile -> geojson + catálogo
+python scripts/convertir_maestro.py castilla    # maestro.csv -> maestro_castilla.json
+```

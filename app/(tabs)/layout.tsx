@@ -2,6 +2,7 @@ import { SyncStatus } from "@/components/SyncStatus";
 import { SyncRunner } from "@/components/SyncRunner";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { PlantaSwitch } from "@/components/PlantaSwitch";
 import { t } from "@/lib/i18n/es-CO";
 
 /**
@@ -22,6 +23,7 @@ export default function TabsLayout({
           {t.app.nombre}
         </span>
         <div className="flex items-center gap-2">
+          <PlantaSwitch />
           <SyncStatus />
           <UserMenu />
         </div>
