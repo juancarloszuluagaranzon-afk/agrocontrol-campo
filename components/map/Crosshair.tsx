@@ -14,15 +14,15 @@ export function Crosshair({ visible }: { visible: boolean }) {
     <>
       <div
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
       >
-        <div className="relative size-10">
-          <div className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-white shadow" />
-          <div className="absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-white shadow" />
-          <div className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-orange-500" />
+        <div className="relative size-10 drop-shadow-[0_0_2px_rgba(0,0,0,0.9)]">
+          <div className="absolute top-1/2 left-0 h-0.5 w-full -translate-y-1/2 bg-white" />
+          <div className="absolute top-0 left-1/2 h-full w-0.5 -translate-x-1/2 bg-white" />
+          <div className="absolute top-1/2 left-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-orange-500" />
         </div>
       </div>
-      <div className="pointer-events-none absolute top-[calc(50%+1.5rem)] left-1/2 z-10 -translate-x-1/2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white tabular-nums">
+      <div className="pointer-events-none absolute top-[calc(50%+1.5rem)] left-1/2 z-20 -translate-x-1/2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white tabular-nums">
         {c[1].toFixed(5)}, {c[0].toFixed(5)}
       </div>
     </>
