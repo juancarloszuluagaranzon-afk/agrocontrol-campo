@@ -37,7 +37,9 @@ export function useGeolocation(active: boolean): void {
             : "No se pudo obtener la ubicación.";
         setGpsError(msg);
       },
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10_000 },
+      // `maximumAge: 0`: nunca servir una posición cacheada; siempre la más
+      // fresca, para que el punto no arranque en una lectura vieja (§5).
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10_000 },
     );
 
     return () => navigator.geolocation.clearWatch(id);

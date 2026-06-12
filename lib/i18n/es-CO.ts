@@ -29,6 +29,9 @@ export const t = {
   brujula: {
     calibrar: "Calibra la brújula: mueve el teléfono en forma de 8.",
   },
+  gps: {
+    afinando: "Afinando ubicación…",
+  },
 } as const;
 
 export type Textos = typeof t;

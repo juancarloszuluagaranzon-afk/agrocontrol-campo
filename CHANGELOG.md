@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — calidad de la ubicación (GPS)
+
+- El halo del punto azul ahora es el **disco de precisión real** (radio = `accuracy`
+  en metros, como Avenza/Google Maps): se ve cómo la incertidumbre **se cierra** al
+  afinar el GPS, en vez de un círculo de tamaño fijo que la ocultaba.
+- Lectura **siempre fresca** (`maximumAge: 0`): el punto ya no arranca en una
+  posición cacheada vieja.
+- Al activar "Mi ubicación" se centra en la primera lectura (rápida, aproximada) y
+  se **re-centra una vez** al llegar el primer fix preciso, para no quedar fijado en
+  la posición burda. Mientras tanto se muestra **"Afinando ubicación…"**.
+- Sin cambios de BD ni dependencias. Helpers puros en `lib/geo/gps.ts` con tests.
+
 ### Multi-planta — Castilla Agrícola junto a Riopaila
 
 - La app sirve ahora a **dos empresas**: al abrirla por primera vez se elige la

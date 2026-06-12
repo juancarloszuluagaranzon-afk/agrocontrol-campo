@@ -11,8 +11,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
+import { accuracyCircle } from "@/lib/geo/gps";
 import {
   CONTEXT_LAYERS,
+  GPS_ACCURACY_SOURCE,
   GPS_CONE,
   GPS_CONE_SOURCE,
   GPS_DOT,
@@ -216,6 +218,8 @@ export function MapView() {
         features: [],
       };
       map.addSource(GPS_SOURCE, { type: "geojson", data: emptyFc });
+      // Disco de precisión (polígono de radio real); se rellena en su efecto.
+      map.addSource(GPS_ACCURACY_SOURCE, { type: "geojson", data: emptyFc });
 
       // Cono de orientación (brújula). Va bajo el halo y el punto, con vértice
       // en la ubicación del usuario. Se rellena en su propio efecto (RAF).
@@ -231,15 +235,13 @@ export function MapView() {
         paint: { "fill-color": "#2563eb", "fill-opacity": 0.28 },
       });
 
+      // Halo = disco de precisión real (relleno del polígono de `accuracy`), no
+      // un círculo de tamaño fijo: comunica la incertidumbre y su convergencia.
       map.addLayer({
         id: GPS_HALO,
-        type: "circle",
-        source: GPS_SOURCE,
-        paint: {
-          "circle-radius": 20,
-          "circle-color": "#2563eb",
-          "circle-opacity": 0.18,
-        },
+        type: "fill",
+        source: GPS_ACCURACY_SOURCE,
+        paint: { "fill-color": "#2563eb", "fill-opacity": 0.15 },
       });
       map.addLayer({
         id: GPS_DOT,
@@ -427,12 +429,15 @@ export function MapView() {
     else pendingTabRef.current = flyTarget.tabId; // se resuelve al cargar el índice
   }, [flyTarget, setSelected]);
 
-  // ── Marcador GPS ──
+  // ── Marcador GPS + disco de precisión ──
   const gps = useMapStore((s) => s.gps);
   useEffect(() => {
     const map = mapRef.current;
     const source = map?.getSource(GPS_SOURCE) as GeoJSONSource | undefined;
-    if (!source) return;
+    const accuracy = map?.getSource(GPS_ACCURACY_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!source || !accuracy) return;
     const fc: FeatureCollection<Point> = {
       type: "FeatureCollection",
       features: gps
@@ -446,6 +451,11 @@ export function MapView() {
         : [],
     };
     source.setData(fc);
+    accuracy.setData(
+      gps
+        ? accuracyCircle(gps.lon, gps.lat, gps.accuracy)
+        : { type: "FeatureCollection", features: [] },
+    );
   }, [gps]);
 
   // ── Cono de orientación (brújula tipo Avenza, §5) ──

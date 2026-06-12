@@ -12,6 +12,8 @@ export const SUERTES_LABEL = "suertes-label";
 
 // GPS (§5: Mi ubicación)
 export const GPS_SOURCE = "gps";
+// Disco de precisión (polígono de radio real `accuracy`); reemplaza al halo fijo.
+export const GPS_ACCURACY_SOURCE = "gps-accuracy";
 export const GPS_HALO = "gps-halo";
 export const GPS_DOT = "gps-dot";
 // Cono de orientación (brújula, tipo Avenza): fuente y capa propias.
