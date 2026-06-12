@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — la cruz de marcado se ve en móvil
+
+- Al crear un marcador, el formulario pasa a una **hoja inferior** (no al panel
+  superior) y se quitó el `autoFocus`: así dejan de **tapar el centro** de la
+  pantalla, donde está la **cruz ✛** de marcado preciso (en móvil, el panel + el
+  teclado la ocultaban). Primero alineas la cruz, luego escribes el nombre.
+- La cruz se ve mejor sobre el satélite: trazo más grueso, mayor contraste y por
+  encima de los paneles.
+
 ### Mapa — calidad de la ubicación (GPS)
 
 - El halo del punto azul ahora es el **disco de precisión real** (radio = `accuracy`

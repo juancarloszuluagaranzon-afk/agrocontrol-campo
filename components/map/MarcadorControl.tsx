@@ -65,21 +65,24 @@ export function MarcadorControl() {
     setActiveTool("none");
   }
 
-  return (
-    <div className="pointer-events-auto w-64 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">📍 Mis marcadores</span>
-        <button
-          type="button"
-          onClick={cerrar}
-          aria-label="Cerrar"
-          className="rounded px-1 text-slate-500 hover:bg-slate-100"
-        >
-          ✕
-        </button>
-      </div>
-
-      {creando ? (
+  // Durante la creación, el formulario va como **hoja inferior** (no en el panel
+  // superior) para no tapar el centro del mapa, donde está la cruz de marcado. En
+  // móvil eso —más el teclado— ocultaba la cruz. Sin `autoFocus`: primero alineas
+  // la cruz y luego tocas "Nombre" para escribir.
+  if (creando) {
+    return (
+      <div className="pointer-events-auto fixed inset-x-2 bottom-2 z-20 mx-auto max-w-md rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/10">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">📍 Nuevo marcador</span>
+          <button
+            type="button"
+            onClick={cancelarCreacion}
+            aria-label="Cancelar"
+            className="rounded px-1 text-slate-500 hover:bg-slate-100"
+          >
+            ✕
+          </button>
+        </div>
         <form onSubmit={handleSubmit(guardar)} className="mt-2 space-y-2">
           <p className="rounded bg-amber-50 px-2 py-1 text-[11px] text-amber-800">
             Centra la cruz ✛ donde quieras el punto y guarda.
@@ -89,7 +92,6 @@ export function MarcadorControl() {
               {...register("nombre")}
               placeholder="Nombre del punto"
               className={campo}
-              autoFocus
             />
             {errors.nombre && (
               <p className="mt-0.5 text-[11px] text-red-600">
@@ -133,52 +135,66 @@ export function MarcadorControl() {
             </button>
           </div>
         </form>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={iniciarCreacion}
-            className="bg-primary mt-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
+      </div>
+    );
+  }
+
+  return (
+    <div className="pointer-events-auto w-64 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold">📍 Mis marcadores</span>
+        <button
+          type="button"
+          onClick={cerrar}
+          aria-label="Cerrar"
+          className="rounded px-1 text-slate-500 hover:bg-slate-100"
+        >
+          ✕
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={iniciarCreacion}
+        className="bg-primary mt-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
+      >
+        ➕ Nuevo marcador
+      </button>
+      <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto">
+        {lista.length === 0 && (
+          <li className="px-1 py-2 text-[12px] text-slate-500">
+            Aún no tienes marcadores. Solo tú los ves.
+          </li>
+        )}
+        {lista.map((m) => (
+          <li
+            key={m.id}
+            className="flex items-center gap-2 rounded px-1 py-1 hover:bg-slate-50"
           >
-            ➕ Nuevo marcador
-          </button>
-          <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto">
-            {lista.length === 0 && (
-              <li className="px-1 py-2 text-[12px] text-slate-500">
-                Aún no tienes marcadores. Solo tú los ves.
-              </li>
-            )}
-            {lista.map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center gap-2 rounded px-1 py-1 hover:bg-slate-50"
-              >
-                <span
-                  aria-hidden
-                  className="size-3 shrink-0 rounded-full ring-1 ring-black/10"
-                  style={{ backgroundColor: m.color }}
-                />
-                <button
-                  type="button"
-                  onClick={() => flyTo({ lon: m.lon, lat: m.lat, tabId: "" })}
-                  className="min-w-0 flex-1 truncate text-left text-sm"
-                  title={m.nota || m.nombre}
-                >
-                  {m.nombre}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeMarcador(m.id)}
-                  aria-label={`Borrar ${m.nombre}`}
-                  className="rounded px-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                >
-                  🗑
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+            <span
+              aria-hidden
+              className="size-3 shrink-0 rounded-full ring-1 ring-black/10"
+              style={{ backgroundColor: m.color }}
+            />
+            <button
+              type="button"
+              onClick={() => flyTo({ lon: m.lon, lat: m.lat, tabId: "" })}
+              className="min-w-0 flex-1 truncate text-left text-sm"
+              title={m.nota || m.nombre}
+            >
+              {m.nombre}
+            </button>
+            <button
+              type="button"
+              onClick={() => removeMarcador(m.id)}
+              aria-label={`Borrar ${m.nombre}`}
+              className="rounded px-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
+            >
+              🗑
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
