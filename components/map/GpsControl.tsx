@@ -8,6 +8,7 @@ import {
   useDeviceHeading,
 } from "@/lib/geo/useDeviceHeading";
 import { compassNecesitaCalibracion } from "@/lib/geo/orientation";
+import { gpsAfinando } from "@/lib/geo/gps";
 import { formatMetros } from "@/lib/geo/format";
 import { t } from "@/lib/i18n/es-CO";
 
@@ -28,15 +29,23 @@ export function GpsControl() {
   const setCompassActive = useMapStore((s) => s.setCompassActive);
   const headingAccuracy = useMapStore((s) => s.headingAccuracy);
   const centeredRef = useRef(false);
+  // Ya se re-centró en el primer fix preciso de esta sesión de GPS.
+  const refinedRef = useRef(false);
 
   // Sigue la posición y la orientación mientras estén activos.
   useGeolocation(gpsActive);
   useDeviceHeading(compassActive);
 
-  // Centra automáticamente en la primera lectura tras activar.
+  // Centra en la primera lectura (rápida, aproximada) y **re-centra** una vez al
+  // llegar el primer fix preciso, para no quedar fijado en la posición burda.
   useEffect(() => {
-    if (gpsActive && gps && !centeredRef.current) {
+    if (!gpsActive || !gps) return;
+    if (!centeredRef.current) {
       centeredRef.current = true;
+      centerOnMe();
+    }
+    if (!refinedRef.current && !gpsAfinando(gps.accuracy)) {
+      refinedRef.current = true;
       centerOnMe();
     }
   }, [gpsActive, gps, centerOnMe]);
@@ -44,6 +53,7 @@ export function GpsControl() {
   function onClick() {
     if (!gpsActive) {
       centeredRef.current = false;
+      refinedRef.current = false;
       setGpsActive(true);
       // El permiso de orientación (iOS) debe pedirse dentro del gesto del click.
       void requestOrientationPermission().then((ok) => setCompassActive(ok));
@@ -54,6 +64,8 @@ export function GpsControl() {
 
   const precisionPobre = gps != null && gps.accuracy > PRECISION_POBRE_M;
   const calibrar = compassActive && compassNecesitaCalibracion(headingAccuracy);
+  // Aviso transitorio: activo pero aún sin un fix preciso (sigue afinando).
+  const afinando = gpsActive && gpsAfinando(gps?.accuracy ?? null);
 
   return (
     <div className="flex flex-col items-end gap-1">
@@ -82,6 +94,11 @@ export function GpsControl() {
           className="bg-background max-w-44 rounded-md px-2 py-1 text-right text-xs font-medium text-amber-700 shadow ring-1 ring-black/10"
         >
           🧭 {t.brujula.calibrar}
+        </span>
+      )}
+      {afinando && !gpsError && (
+        <span className="bg-background text-accent/70 rounded-md px-2 py-1 text-right text-xs font-medium shadow ring-1 ring-black/10">
+          📍 {t.gps.afinando}
         </span>
       )}
       {gps && (
