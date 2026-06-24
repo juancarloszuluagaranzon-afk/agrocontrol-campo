@@ -37,3 +37,12 @@ export function errorRelativoPct(medida: number, oficial: number): number {
   if (oficial === 0) return Number.NaN;
   return (Math.abs(medida - oficial) / oficial) * 100;
 }
+
+/**
+ * Formatea coordenadas para el sello de la foto: `lat, lon` con 6 decimales y
+ * punto decimal (formato geográfico estándar, no el locale es-CO con coma).
+ * Ej.: `formatCoordenadas(-76.10389, 4.28846)` → `"4.288460, -76.103890"`.
+ */
+export function formatCoordenadas(lon: number, lat: number): string {
+  return `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+}

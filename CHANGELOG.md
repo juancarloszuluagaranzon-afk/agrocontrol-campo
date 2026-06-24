@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Foto de campo — foto sellada con ubicación y suerte
+
+- Nueva herramienta **📷 Foto de campo**: el técnico, parado en un punto, **toma una
+  foto** con la cámara del teléfono y la app la **sella** (marca de agua) con las
+  **coordenadas GPS**, la **suerte y hacienda** donde está y la **fecha/hora** —queda
+  como evidencia georreferenciada para **descargar o compartir** (WhatsApp, correo).
+- La **suerte se detecta sola** según la ubicación (cruzando el GPS con la cartografía
+  de lotes) y es **editable** por si el GPS cae en el lote vecino (buscador del
+  catálogo). Si estás fuera de todo lote, el sello lleva solo coordenadas + fecha.
+- **Sin BD ni galería**: todo ocurre en el dispositivo; el celular guarda la foto en su
+  galería al compartir/descargar. Funciona offline (la cartografía ya está cacheada).
+
 ### Plano de campo — muestreo de suelos desde un GeoPDF (reemplaza Avenza)
 
 - Nueva herramienta **🗺️ Plano de campo**: el técnico **sube un GeoPDF** de muestreo
