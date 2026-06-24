@@ -5,15 +5,18 @@ import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
   type GeoJSONSource,
+  type ImageSource,
   type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { baseStyle } from "@/lib/geo/basemap";
+import { AOI, baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import { accuracyCircle } from "@/lib/geo/gps";
 import {
   CONTEXT_LAYERS,
+  PDF_OVERLAY_SOURCE,
+  PDF_OVERLAY_LAYER,
   GPS_ACCURACY_SOURCE,
   GPS_CONE,
   GPS_CONE_SOURCE,
@@ -43,10 +46,17 @@ import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { usePlanoStore } from "@/lib/store/planoStore";
+import { getImage } from "@/lib/storage/imageBlobStore";
 import { plantaConfig } from "@/lib/plantas";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
+
+// PNG 1x1 transparente: imagen inicial del image source (se reemplaza al cargar
+// un plano). Un image source exige url+coordinates válidos desde su creación.
+const PIXEL_TRANSPARENTE =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -91,6 +101,9 @@ export function MapView() {
   const mapRef = useRef<MlMap | null>(null);
   const lookupRef = useRef<Map<string, TablonProperties>>(new Map());
   const pendingTabRef = useRef<string | null>(null);
+  // objectURL del backdrop en uso (se revoca al reemplazar/desmontar).
+  const overlayUrlRef = useRef<string | null>(null);
+  const fittedKeyRef = useRef<string | null>(null);
   const setSelected = useMapStore((s) => s.setSelected);
 
   // Planta activa: define cartografía y encuadre. `MapScreen` re-monta este
@@ -168,6 +181,26 @@ export function MapView() {
         });
         addContextLayer(map, cfg.id);
       }
+
+      // Plano de campo: backdrop raster del GeoPDF (oculto hasta que se cargue).
+      // Va sobre el satélite pero bajo las suertes/GPS (el punto azul queda arriba).
+      map.addSource(PDF_OVERLAY_SOURCE, {
+        type: "image",
+        url: PIXEL_TRANSPARENTE,
+        coordinates: [
+          [AOI.bbox[0], AOI.bbox[3]],
+          [AOI.bbox[2], AOI.bbox[3]],
+          [AOI.bbox[2], AOI.bbox[1]],
+          [AOI.bbox[0], AOI.bbox[1]],
+        ],
+      });
+      map.addLayer({
+        id: PDF_OVERLAY_LAYER,
+        type: "raster",
+        source: PDF_OVERLAY_SOURCE,
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 0.85, "raster-fade-duration": 0 },
+      });
 
       // Una sola capa de relleno + contorno para los 1378 tablones (§13).
       map.addLayer({
@@ -675,6 +708,48 @@ export function MapView() {
     }
     useMapStore.getState().addVertex(pt);
   }, [markVertexNonce]);
+
+  // ── Backdrop del "Plano de campo" (GeoPDF) ──
+  // Hidrata el image source desde el store + IndexedDB: actualiza la imagen y sus
+  // 4 esquinas, ajusta opacidad/visibilidad y encuadra al cargar un plano nuevo.
+  const plano = usePlanoStore((s) => s.plano);
+  const planoOpacity = usePlanoStore((s) => s.opacity);
+  const planoVisible = usePlanoStore((s) => s.visible);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer(PDF_OVERLAY_LAYER)) return;
+    const source = map.getSource(PDF_OVERLAY_SOURCE) as ImageSource | undefined;
+    if (!source) return;
+
+    if (!plano || !planoVisible) {
+      map.setLayoutProperty(PDF_OVERLAY_LAYER, "visibility", "none");
+      return;
+    }
+    map.setPaintProperty(PDF_OVERLAY_LAYER, "raster-opacity", planoOpacity);
+
+    let cancelled = false;
+    void getImage(plano.imageKey).then((blob) => {
+      if (cancelled || !blob) return;
+      const url = URL.createObjectURL(blob);
+      source.updateImage({ url, coordinates: plano.coordinates });
+      if (overlayUrlRef.current) URL.revokeObjectURL(overlayUrlRef.current);
+      overlayUrlRef.current = url;
+      map.setLayoutProperty(PDF_OVERLAY_LAYER, "visibility", "visible");
+      if (fittedKeyRef.current !== plano.imageKey) {
+        fittedKeyRef.current = plano.imageKey;
+        map.fitBounds(
+          [
+            [plano.bbox[0], plano.bbox[1]],
+            [plano.bbox[2], plano.bbox[3]],
+          ],
+          { padding: 32, duration: 800 },
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [plano, planoOpacity, planoVisible]);
 
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la

@@ -24,6 +24,17 @@ declare const self: ServiceWorkerGlobalScope;
  */
 const campoCaching: RuntimeCaching[] = [
   {
+    // Worker de pdf.js (Plano de campo): cache-first para usarlo offline.
+    matcher: ({ url, sameOrigin }) =>
+      sameOrigin && url.pathname.startsWith("/pdf/"),
+    handler: new CacheFirst({
+      cacheName: "agrocontrol-pdfjs",
+      plugins: [
+        new ExpirationPlugin({ maxEntries: 4, purgeOnQuotaError: true }),
+      ],
+    }),
+  },
+  {
     matcher: ({ url, sameOrigin }) =>
       sameOrigin && url.pathname.startsWith("/data/"),
     handler: new CacheFirst({
