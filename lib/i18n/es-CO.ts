@@ -32,6 +32,19 @@ export const t = {
   gps: {
     afinando: "Afinando ubicación…",
   },
+  foto: {
+    titulo: "Foto de campo",
+    ayuda: "Toma una foto y queda sellada con la ubicación y la suerte.",
+    tomar: "Tomar foto",
+    sinGps: "Activa 'Mi ubicación' (◎) para sellar la foto.",
+    detectando: "Detectando suerte…",
+    suerte: "Suerte",
+    hacienda: "Hacienda",
+    fueraDeLote: "Fuera de cualquier suerte",
+    sellar: "Sellar y compartir",
+    otra: "Tomar otra",
+    error: "No se pudo procesar la foto. Intenta de nuevo.",
+  },
   plano: {
     titulo: "Plano de campo",
     ayuda:

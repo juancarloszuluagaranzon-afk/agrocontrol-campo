@@ -3,6 +3,7 @@ import {
   formatHectareas,
   formatMetros,
   errorRelativoPct,
+  formatCoordenadas,
 } from "@/lib/geo/format";
 
 describe("formatHectareas", () => {
@@ -22,6 +23,12 @@ describe("formatHectareas", () => {
 describe("formatMetros", () => {
   it("redondea a entero por defecto", () => {
     expect(formatMetros(1234.5)).toBe("1.235 m");
+  });
+});
+
+describe("formatCoordenadas", () => {
+  it("muestra lat, lon con 6 decimales y punto", () => {
+    expect(formatCoordenadas(-76.10389, 4.28846)).toBe("4.288460, -76.103890");
   });
 });
 
