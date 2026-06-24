@@ -59,7 +59,7 @@ import type { TablonProperties } from "@/domain/suertes/schema";
 // PNG 1x1 transparente: imagen inicial del image source (se reemplaza al cargar
 // un plano). Un image source exige url+coordinates válidos desde su creación.
 const PIXEL_TRANSPARENTE =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
