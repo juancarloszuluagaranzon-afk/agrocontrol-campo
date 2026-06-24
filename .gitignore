@@ -46,6 +46,9 @@ next-env.d.ts
 /public/sw.js.map
 /public/swe-worker-*.js
 
+# worker de pdf.js (copiado en predev/prebuild desde node_modules)
+/public/pdf/
+
 # tests
 /coverage
 /playwright-report
