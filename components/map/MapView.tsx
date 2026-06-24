@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
@@ -9,7 +9,7 @@ import maplibregl, {
   type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { AOI, baseStyle } from "@/lib/geo/basemap";
+import { baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import { accuracyCircle } from "@/lib/geo/gps";
@@ -55,11 +55,6 @@ import { plantaConfig } from "@/lib/plantas";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import type { TablonProperties } from "@/domain/suertes/schema";
-
-// PNG 1x1 transparente: imagen inicial del image source (se reemplaza al cargar
-// un plano). Un image source exige url+coordinates válidos desde su creación.
-const PIXEL_TRANSPARENTE =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -107,6 +102,8 @@ export function MapView() {
   // objectURL del backdrop en uso (se revoca al reemplazar/desmontar).
   const overlayUrlRef = useRef<string | null>(null);
   const fittedKeyRef = useRef<string | null>(null);
+  // El mapa terminó de cargar (capas listas); dispara la hidratación del plano.
+  const [mapReady, setMapReady] = useState(false);
   const setSelected = useMapStore((s) => s.setSelected);
 
   // Planta activa: define cartografía y encuadre. `MapScreen` re-monta este
@@ -185,25 +182,8 @@ export function MapView() {
         addContextLayer(map, cfg.id);
       }
 
-      // Plano de campo: backdrop raster del GeoPDF (oculto hasta que se cargue).
-      // Va sobre el satélite pero bajo las suertes/GPS (el punto azul queda arriba).
-      map.addSource(PDF_OVERLAY_SOURCE, {
-        type: "image",
-        url: PIXEL_TRANSPARENTE,
-        coordinates: [
-          [AOI.bbox[0], AOI.bbox[3]],
-          [AOI.bbox[2], AOI.bbox[3]],
-          [AOI.bbox[2], AOI.bbox[1]],
-          [AOI.bbox[0], AOI.bbox[1]],
-        ],
-      });
-      map.addLayer({
-        id: PDF_OVERLAY_LAYER,
-        type: "raster",
-        source: PDF_OVERLAY_SOURCE,
-        layout: { visibility: "none" },
-        paint: { "raster-opacity": 0.85, "raster-fade-duration": 0 },
-      });
+      // El backdrop del "Plano de campo" (image source) se crea bajo demanda en su
+      // efecto, con la imagen real; así no hace falta un placeholder.
 
       // Una sola capa de relleno + contorno para los 1378 tablones (§13).
       map.addLayer({
@@ -444,6 +424,8 @@ export function MapView() {
         if (useMapStore.getState().measureMode === "off") return;
         useMapStore.getState().addVertex([e.lngLat.lng, e.lngLat.lat]);
       });
+
+      setMapReady(true);
     });
 
     return () => {
@@ -746,24 +728,49 @@ export function MapView() {
   const planoVisible = usePlanoStore((s) => s.visible);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getLayer(PDF_OVERLAY_LAYER)) return;
-    const source = map.getSource(PDF_OVERLAY_SOURCE) as ImageSource | undefined;
-    if (!source) return;
+    if (!map || !mapReady) return;
 
+    // Sin plano (o invisible): quitar la capa/fuente del backdrop si existía.
     if (!plano || !planoVisible) {
-      map.setLayoutProperty(PDF_OVERLAY_LAYER, "visibility", "none");
+      if (map.getLayer(PDF_OVERLAY_LAYER)) map.removeLayer(PDF_OVERLAY_LAYER);
+      if (map.getSource(PDF_OVERLAY_SOURCE))
+        map.removeSource(PDF_OVERLAY_SOURCE);
       return;
     }
-    map.setPaintProperty(PDF_OVERLAY_LAYER, "raster-opacity", planoOpacity);
 
     let cancelled = false;
     void getImage(plano.imageKey).then((blob) => {
-      if (cancelled || !blob) return;
+      if (cancelled || !blob || !mapRef.current) return;
       const url = URL.createObjectURL(blob);
-      source.updateImage({ url, coordinates: plano.coordinates });
+      const existing = map.getSource(PDF_OVERLAY_SOURCE) as
+        | ImageSource
+        | undefined;
+      if (existing) {
+        existing.updateImage({ url, coordinates: plano.coordinates });
+      } else {
+        // Se crea con la imagen real (no placeholder) y se inserta bajo las
+        // suertes/GPS para que el punto azul quede encima.
+        map.addSource(PDF_OVERLAY_SOURCE, {
+          type: "image",
+          url,
+          coordinates: plano.coordinates,
+        });
+        map.addLayer(
+          {
+            id: PDF_OVERLAY_LAYER,
+            type: "raster",
+            source: PDF_OVERLAY_SOURCE,
+            paint: {
+              "raster-opacity": planoOpacity,
+              "raster-fade-duration": 0,
+            },
+          },
+          map.getLayer(SUERTES_FILL) ? SUERTES_FILL : undefined,
+        );
+      }
+      map.setPaintProperty(PDF_OVERLAY_LAYER, "raster-opacity", planoOpacity);
       if (overlayUrlRef.current) URL.revokeObjectURL(overlayUrlRef.current);
       overlayUrlRef.current = url;
-      map.setLayoutProperty(PDF_OVERLAY_LAYER, "visibility", "visible");
       if (fittedKeyRef.current !== plano.imageKey) {
         fittedKeyRef.current = plano.imageKey;
         map.fitBounds(
@@ -778,7 +785,7 @@ export function MapView() {
     return () => {
       cancelled = true;
     };
-  }, [plano, planoOpacity, planoVisible]);
+  }, [plano, planoOpacity, planoVisible, mapReady]);
 
   // ── Puntos de muestreo del plano sobre el mapa ──
   useEffect(() => {
@@ -786,7 +793,7 @@ export function MapView() {
     const source = map?.getSource(PLANO_PUNTOS_SOURCE) as
       | GeoJSONSource
       | undefined;
-    if (!map || !source) return;
+    if (!map || !source || !mapReady) return;
     const fc: FeatureCollection<Point> = {
       type: "FeatureCollection",
       features: (plano?.puntos ?? []).map((p) => ({
@@ -799,7 +806,7 @@ export function MapView() {
       })),
     };
     source.setData(fc);
-  }, [plano]);
+  }, [plano, mapReady]);
 
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la
