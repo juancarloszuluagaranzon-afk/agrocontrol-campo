@@ -808,6 +808,23 @@ export function MapView() {
     source.setData(fc);
   }, [plano, mapReady]);
 
+  // ── Con un plano activo, las suertes se ocultan para verlo solo ──
+  // El GeoPDF ya trae su propia cartografía; mostrar las suertes encima lo
+  // ensucia. Se restauran al quitar el plano (o al ocultarlo).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    const vis = plano && planoVisible ? "none" : "visible";
+    for (const id of [
+      SUERTES_FILL,
+      SUERTES_LINE,
+      SUERTES_LABEL,
+      SUERTES_SELECTED,
+    ]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+    }
+  }, [plano, planoVisible, mapReady]);
+
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la
   // altura. Con height/width 100% el mapa llena su contenedor en cualquier caso.
