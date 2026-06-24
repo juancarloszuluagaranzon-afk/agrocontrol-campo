@@ -17,6 +17,9 @@ import {
   CONTEXT_LAYERS,
   PDF_OVERLAY_SOURCE,
   PDF_OVERLAY_LAYER,
+  PLANO_PUNTOS_SOURCE,
+  PLANO_PUNTOS_DOT,
+  PLANO_PUNTOS_LABEL,
   GPS_ACCURACY_SOURCE,
   GPS_CONE,
   GPS_CONE_SOURCE,
@@ -396,6 +399,32 @@ export function MapView() {
         },
       });
 
+      // Puntos de muestreo del "Plano de campo": punto + número. Verde si ya se
+      // muestreó, rojo si pendiente. Se llenan desde el store (efecto aparte).
+      map.addSource(PLANO_PUNTOS_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: PLANO_PUNTOS_DOT,
+        type: "circle",
+        source: PLANO_PUNTOS_SOURCE,
+        paint: {
+          "circle-radius": 8,
+          "circle-color": ["case", ["get", "muestreado"], "#16a34a", "#dc2626"],
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: PLANO_PUNTOS_LABEL,
+        type: "symbol",
+        source: PLANO_PUNTOS_SOURCE,
+        layout: {
+          "text-field": ["get", "etiqueta"],
+          "text-size": 10,
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: { "text-color": "#ffffff" },
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
@@ -750,6 +779,27 @@ export function MapView() {
       cancelled = true;
     };
   }, [plano, planoOpacity, planoVisible]);
+
+  // ── Puntos de muestreo del plano sobre el mapa ──
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(PLANO_PUNTOS_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!map || !source) return;
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: (plano?.puntos ?? []).map((p) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+        properties: {
+          etiqueta: p.id.replace(/^P/, ""),
+          muestreado: p.muestreado,
+        },
+      })),
+    };
+    source.setData(fc);
+  }, [plano]);
 
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la

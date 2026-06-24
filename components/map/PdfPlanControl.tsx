@@ -3,8 +3,12 @@
 import { useRef, useState } from "react";
 import { parseGeoRef } from "@/lib/geo/geopdf";
 import { rasterizarPagina1 } from "@/lib/geo/pdfRender";
+import { extraerPuntosMuestreo } from "@/lib/geo/pdfPoints";
+import { distanciaMetros } from "@/lib/geo/gps";
+import { formatMetros } from "@/lib/geo/format";
 import { putImage, deleteImage } from "@/lib/storage/imageBlobStore";
 import { usePlanoStore } from "@/lib/store/planoStore";
+import { useMapStore } from "@/lib/store/mapStore";
 import { planoMetaSchema } from "@/domain/plano/schema";
 import { t } from "@/lib/i18n/es-CO";
 
@@ -20,7 +24,12 @@ export function PdfPlanControl() {
   const opacity = usePlanoStore((s) => s.opacity);
   const cargar = usePlanoStore((s) => s.cargar);
   const setOpacity = usePlanoStore((s) => s.setOpacity);
+  const toggleMuestreado = usePlanoStore((s) => s.toggleMuestreado);
+  const addPunto = usePlanoStore((s) => s.addPunto);
   const quitar = usePlanoStore((s) => s.quitar);
+  const gps = useMapStore((s) => s.gps);
+  const flyTo = useMapStore((s) => s.flyTo);
+  const mapCenter = useMapStore((s) => s.mapCenter);
   const [estado, setEstado] = useState<"idle" | "leyendo">("idle");
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -46,13 +55,16 @@ export function PdfPlanControl() {
       const previo = usePlanoStore.getState().plano?.imageKey;
       if (previo && previo !== imageKey) await deleteImage(previo);
 
+      // Extrae los puntos de muestreo de la capa del PDF (puede dar []).
+      const puntos = await extraerPuntosMuestreo(bytes, ref);
+
       const meta = planoMetaSchema.parse({
         nombre: file.name,
         imageKey,
         coordinates: ref.coordinates,
         bbox: ref.bbox,
         opacity: 0.85,
-        puntos: [],
+        puntos,
       });
       cargar(meta);
     } catch {
@@ -109,6 +121,62 @@ export function PdfPlanControl() {
               className="w-full"
             />
           </label>
+
+          {/* Checklist de puntos: distancia (GPS) + marcar muestreado + ir. */}
+          {plano.puntos.length > 0 && (
+            <ul className="max-h-44 space-y-0.5 overflow-y-auto border-t border-black/5 pt-1">
+              {plano.puntos.map((p) => {
+                const dist = gps
+                  ? distanciaMetros(gps.lon, gps.lat, p.lon, p.lat)
+                  : null;
+                return (
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-2 rounded px-1 py-1 hover:bg-slate-50"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleMuestreado(p.id)}
+                      aria-label={`Marcar ${p.id}`}
+                      className="shrink-0 text-base"
+                    >
+                      {p.muestreado ? "✅" : "⬜"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        flyTo({ lon: p.lon, lat: p.lat, tabId: "" })
+                      }
+                      className={`min-w-0 flex-1 text-left text-sm ${
+                        p.muestreado ? "text-slate-400 line-through" : ""
+                      }`}
+                    >
+                      {p.id}
+                    </button>
+                    <span className="shrink-0 text-[11px] text-slate-500 tabular-nums">
+                      {dist != null ? formatMetros(dist) : "—"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <button
+            type="button"
+            onClick={() =>
+              addPunto({
+                id: `M${(plano.puntos.length + 1).toString()}`,
+                lon: mapCenter[0],
+                lat: mapCenter[1],
+                muestreado: false,
+              })
+            }
+            className={`${campo} w-full`}
+          >
+            ➕ Punto en el centro
+          </button>
+
           <div className="flex gap-2">
             <button
               type="button"
