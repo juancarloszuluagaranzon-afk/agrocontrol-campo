@@ -25,7 +25,13 @@ export interface GpsFix {
 export type MeasureMode = "off" | "area" | "distance";
 
 /** Herramienta abierta desde el menú (✏️📏). "none" = ninguna. */
-export type ToolId = "none" | "capas" | "medir" | "marcadores" | "mediciones";
+export type ToolId =
+  | "none"
+  | "capas"
+  | "medir"
+  | "marcadores"
+  | "mediciones"
+  | "plano";
 
 interface MapState {
   /** Tablón seleccionado (properties del feature tocado), o null. */

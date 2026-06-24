@@ -7,6 +7,9 @@
     "node": ">=20"
   },
   "scripts": {
+    "copy-pdf-worker": "node scripts/copy-pdf-worker.mjs",
+    "predev": "node scripts/copy-pdf-worker.mjs",
+    "prebuild": "node scripts/copy-pdf-worker.mjs",
     "dev": "next dev --port 3200",
     "build": "next build --webpack",
     "start": "next start",
@@ -40,6 +43,7 @@
     "@turf/length": "^7.3.5",
     "maplibre-gl": "^5.24.0",
     "next": "16.2.6",
+    "pdfjs-dist": "^6.0.227",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.77.0",

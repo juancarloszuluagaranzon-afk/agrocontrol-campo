@@ -5,6 +5,22 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Plano de campo — muestreo de suelos desde un GeoPDF (reemplaza Avenza)
+
+- Nueva herramienta **🗺️ Plano de campo**: el técnico **sube un GeoPDF** de muestreo
+  (georreferenciado) y la app lo muestra como **capa de imagen sobre el mapa** (con
+  opacidad ajustable), con el **GPS encima** para caminar a los puntos —como en
+  Avenza, pero sin pagarlo.
+- **Puntos de muestreo**: se **extraen automáticamente** del PDF (capa
+  `punto_muestreo`) y aparecen como **marcadores numerados** + un **checklist** con la
+  **distancia** a cada punto y una casilla **"muestreado"** (verde al marcar). Si el
+  PDF no trae puntos, se pueden **añadir a mano**.
+- **Por dispositivo y offline**: el plano (puntos + estado) se guarda en el
+  dispositivo (localStorage + IndexedDB para la imagen) y **sobrevive recargas**; no
+  va a la BD (uso ocasional). Funciona sin conexión.
+- Detalle técnico (pdfjs por import dinámico, georreferencia por bytes, worker
+  auto-alojado): **ADR-0008**. Sin cambios de BD.
+
 ### Mapa — la cruz de marcado se ve en móvil
 
 - Al crear un marcador, el formulario pasa a una **hoja inferior** (no al panel

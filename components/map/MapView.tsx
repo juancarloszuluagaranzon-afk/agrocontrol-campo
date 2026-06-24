@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
   type GeoJSONSource,
+  type ImageSource,
   type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -14,6 +15,11 @@ import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import { accuracyCircle } from "@/lib/geo/gps";
 import {
   CONTEXT_LAYERS,
+  PDF_OVERLAY_SOURCE,
+  PDF_OVERLAY_LAYER,
+  PLANO_PUNTOS_SOURCE,
+  PLANO_PUNTOS_DOT,
+  PLANO_PUNTOS_LABEL,
   GPS_ACCURACY_SOURCE,
   GPS_CONE,
   GPS_CONE_SOURCE,
@@ -43,6 +49,8 @@ import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LngLat } from "@/lib/geo/measure";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { usePlanoStore } from "@/lib/store/planoStore";
+import { getImage } from "@/lib/storage/imageBlobStore";
 import { plantaConfig } from "@/lib/plantas";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
@@ -91,6 +99,11 @@ export function MapView() {
   const mapRef = useRef<MlMap | null>(null);
   const lookupRef = useRef<Map<string, TablonProperties>>(new Map());
   const pendingTabRef = useRef<string | null>(null);
+  // objectURL del backdrop en uso (se revoca al reemplazar/desmontar).
+  const overlayUrlRef = useRef<string | null>(null);
+  const fittedKeyRef = useRef<string | null>(null);
+  // El mapa terminó de cargar (capas listas); dispara la hidratación del plano.
+  const [mapReady, setMapReady] = useState(false);
   const setSelected = useMapStore((s) => s.setSelected);
 
   // Planta activa: define cartografía y encuadre. `MapScreen` re-monta este
@@ -168,6 +181,9 @@ export function MapView() {
         });
         addContextLayer(map, cfg.id);
       }
+
+      // El backdrop del "Plano de campo" (image source) se crea bajo demanda en su
+      // efecto, con la imagen real; así no hace falta un placeholder.
 
       // Una sola capa de relleno + contorno para los 1378 tablones (§13).
       map.addLayer({
@@ -363,6 +379,32 @@ export function MapView() {
         },
       });
 
+      // Puntos de muestreo del "Plano de campo": punto + número. Verde si ya se
+      // muestreó, rojo si pendiente. Se llenan desde el store (efecto aparte).
+      map.addSource(PLANO_PUNTOS_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: PLANO_PUNTOS_DOT,
+        type: "circle",
+        source: PLANO_PUNTOS_SOURCE,
+        paint: {
+          "circle-radius": 8,
+          "circle-color": ["case", ["get", "muestreado"], "#16a34a", "#dc2626"],
+          "circle-stroke-width": 2.5,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: PLANO_PUNTOS_LABEL,
+        type: "symbol",
+        source: PLANO_PUNTOS_SOURCE,
+        layout: {
+          "text-field": ["get", "etiqueta"],
+          "text-size": 10,
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: { "text-color": "#ffffff" },
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
@@ -382,6 +424,8 @@ export function MapView() {
         if (useMapStore.getState().measureMode === "off") return;
         useMapStore.getState().addVertex([e.lngLat.lng, e.lngLat.lat]);
       });
+
+      setMapReady(true);
     });
 
     return () => {
@@ -675,6 +719,94 @@ export function MapView() {
     }
     useMapStore.getState().addVertex(pt);
   }, [markVertexNonce]);
+
+  // ── Backdrop del "Plano de campo" (GeoPDF) ──
+  // Hidrata el image source desde el store + IndexedDB: actualiza la imagen y sus
+  // 4 esquinas, ajusta opacidad/visibilidad y encuadra al cargar un plano nuevo.
+  const plano = usePlanoStore((s) => s.plano);
+  const planoOpacity = usePlanoStore((s) => s.opacity);
+  const planoVisible = usePlanoStore((s) => s.visible);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    // Sin plano (o invisible): quitar la capa/fuente del backdrop si existía.
+    if (!plano || !planoVisible) {
+      if (map.getLayer(PDF_OVERLAY_LAYER)) map.removeLayer(PDF_OVERLAY_LAYER);
+      if (map.getSource(PDF_OVERLAY_SOURCE))
+        map.removeSource(PDF_OVERLAY_SOURCE);
+      return;
+    }
+
+    let cancelled = false;
+    void getImage(plano.imageKey).then((blob) => {
+      if (cancelled || !blob || !mapRef.current) return;
+      const url = URL.createObjectURL(blob);
+      const existing = map.getSource(PDF_OVERLAY_SOURCE) as
+        | ImageSource
+        | undefined;
+      if (existing) {
+        existing.updateImage({ url, coordinates: plano.coordinates });
+      } else {
+        // Se crea con la imagen real (no placeholder) y se inserta bajo las
+        // suertes/GPS para que el punto azul quede encima.
+        map.addSource(PDF_OVERLAY_SOURCE, {
+          type: "image",
+          url,
+          coordinates: plano.coordinates,
+        });
+        map.addLayer(
+          {
+            id: PDF_OVERLAY_LAYER,
+            type: "raster",
+            source: PDF_OVERLAY_SOURCE,
+            paint: {
+              "raster-opacity": planoOpacity,
+              "raster-fade-duration": 0,
+            },
+          },
+          map.getLayer(SUERTES_FILL) ? SUERTES_FILL : undefined,
+        );
+      }
+      map.setPaintProperty(PDF_OVERLAY_LAYER, "raster-opacity", planoOpacity);
+      if (overlayUrlRef.current) URL.revokeObjectURL(overlayUrlRef.current);
+      overlayUrlRef.current = url;
+      if (fittedKeyRef.current !== plano.imageKey) {
+        fittedKeyRef.current = plano.imageKey;
+        map.fitBounds(
+          [
+            [plano.bbox[0], plano.bbox[1]],
+            [plano.bbox[2], plano.bbox[3]],
+          ],
+          { padding: 32, duration: 800 },
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [plano, planoOpacity, planoVisible, mapReady]);
+
+  // ── Puntos de muestreo del plano sobre el mapa ──
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource(PLANO_PUNTOS_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!map || !source || !mapReady) return;
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: (plano?.puntos ?? []).map((p) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+        properties: {
+          etiqueta: p.id.replace(/^P/, ""),
+          muestreado: p.muestreado,
+        },
+      })),
+    };
+    source.setData(fc);
+  }, [plano, mapReady]);
 
   // `size-full` (no `absolute inset-0`): maplibre-gl.css fuerza
   // `.maplibregl-map { position: relative }` y anularía `inset-0`, colapsando la

@@ -3,6 +3,13 @@
  * Centralizado para que MapView y los controles compartan una sola fuente.
  */
 
+// Plano de campo: backdrop raster del GeoPDF (image source) + puntos de muestreo.
+export const PDF_OVERLAY_SOURCE = "pdf-overlay";
+export const PDF_OVERLAY_LAYER = "pdf-overlay-layer";
+export const PLANO_PUNTOS_SOURCE = "plano-puntos";
+export const PLANO_PUNTOS_DOT = "plano-puntos-dot";
+export const PLANO_PUNTOS_LABEL = "plano-puntos-label";
+
 export const SUERTES_SOURCE = "suertes";
 export const SUERTES_FILL = "suertes-fill";
 export const SUERTES_LINE = "suertes-line";

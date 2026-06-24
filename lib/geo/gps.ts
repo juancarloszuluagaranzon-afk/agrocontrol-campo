@@ -16,6 +16,23 @@ export function gpsAfinando(accuracy: number | null): boolean {
   return accuracy == null || accuracy > GPS_PRECISION_OK_M;
 }
 
+/** Distancia geodésica en metros entre dos puntos [lon,lat] (haversine). */
+export function distanciaMetros(
+  lon1: number,
+  lat1: number,
+  lon2: number,
+  lat2: number,
+): number {
+  const R = 6_371_000;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
 /**
  * Polígono (círculo geodésico aproximado) de radio `radiusM` metros centrado en
  * `(lon, lat)`. Sirve como disco de precisión del GPS. Suficientemente exacto a

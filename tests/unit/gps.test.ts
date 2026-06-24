@@ -1,5 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { accuracyCircle, gpsAfinando, GPS_PRECISION_OK_M } from "@/lib/geo/gps";
+import {
+  accuracyCircle,
+  gpsAfinando,
+  distanciaMetros,
+  GPS_PRECISION_OK_M,
+} from "@/lib/geo/gps";
+
+describe("distanciaMetros", () => {
+  it("0.001° de latitud ≈ 111 m", () => {
+    const d = distanciaMetros(-76.1, 4.3, -76.1, 4.301);
+    expect(d).toBeGreaterThan(108);
+    expect(d).toBeLessThan(114);
+  });
+
+  it("el mismo punto da 0", () => {
+    expect(distanciaMetros(-76.1, 4.3, -76.1, 4.3)).toBeCloseTo(0, 6);
+  });
+});
 
 describe("gpsAfinando", () => {
   it("afina solo cuando hay fix preciso (≤ umbral)", () => {

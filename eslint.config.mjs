@@ -29,6 +29,8 @@ const eslintConfig = defineConfig([
     // Service worker generado por Serwist (artefacto de build).
     "public/sw.js",
     "public/swe-worker-*.js",
+    // Worker de pdf.js auto-alojado (vendor minificado; se copia en prebuild).
+    "public/pdf/**",
   ]),
 ]);
 

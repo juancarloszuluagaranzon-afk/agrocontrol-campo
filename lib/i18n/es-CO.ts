@@ -32,6 +32,21 @@ export const t = {
   gps: {
     afinando: "Afinando ubicación…",
   },
+  plano: {
+    titulo: "Plano de campo",
+    ayuda:
+      "Sube el GeoPDF de muestreo (Avenza) y camina a los puntos con el GPS.",
+    subir: "Subir GeoPDF",
+    reemplazar: "Reemplazar",
+    leyendo: "Leyendo plano…",
+    quitar: "Quitar plano",
+    opacidad: "Opacidad",
+    sinGeo: "Este PDF no está georreferenciado.",
+    error: "No se pudo leer el plano. Intenta con otro PDF.",
+    puntos: (n: number) => `${n} punto${n === 1 ? "" : "s"} de muestreo`,
+    muestreados: (h: number, n: number) => `${h}/${n} muestreados`,
+    sinPuntos: "No se detectaron puntos. Toca el mapa para marcarlos.",
+  },
 } as const;
 
 export type Textos = typeof t;
