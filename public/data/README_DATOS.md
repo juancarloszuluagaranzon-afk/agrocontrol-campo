@@ -23,11 +23,15 @@ mapas web (Leaflet, MapLibre, Mapbox) y para cargar a Supabase/PostGIS.
 | `suertes_catalogo.json` | JSON array | Catálogo ligero para autocompletar/buscador (sin geometría). |
 | `maestro_suertes.json` | JSON objeto (por `sec_ste`) | **Agronomía por suerte** (variedad, corte, fechas, TCH…) del maestro de Riopaila. 604 suertes. Generado con `scripts/convertir_maestro.py`. |
 | `suertes_maestro.xlsx` / `.csv` | Tabla | Atributos completos + centroide + áreas. Hoja "Resumen" por hacienda. |
-| `contexto_red_hidrica.geojson` | GeoJSON Line | Red hídrica (contexto del mapa). |
+| `contexto_red_hidrica.geojson` | GeoJSON Line | Red hídrica (oficial IGAC: ríos Cauca, La Paila, Bugalagrande…). |
 | `contexto_vias_acceso.geojson` | GeoJSON Line | Vías de acceso. |
-| `contexto_canales.geojson` | GeoJSON Line | Canales de riego y drenaje. |
-| `contexto_cuerpos_agua.geojson` | GeoJSON Polygon | Lagos / cuerpos de agua. |
+| `contexto_canales.geojson` | GeoJSON Line | Canales de riego y drenaje (oficial). |
+| `contexto_cuerpos_agua.geojson` | GeoJSON Polygon | Lagos / cuerpos de agua (oficial). |
 | `contexto_estaciones_bombeo.geojson` | GeoJSON Point | Estaciones de bombeo. |
+| `contexto_freatimetros.geojson` | GeoJSON Point | Freatímetros (pozos) con nivel freático (`Lectura`). |
+| `contexto_pluviometros.geojson` | GeoJSON Point | Pluviómetros (estaciones de lluvia). |
+| `contexto_thiessen.geojson` | GeoJSON Polygon | Polígonos de Thiessen (zonas de lluvia, `Precipitac`). |
+| `contexto_haciendas.geojson` | GeoJSON Polygon | Límites de hacienda (se dibujan como contorno). |
 | `preview_suertes.png` | Imagen | Render de validación de las 610 suertes por hacienda. |
 
 ## Esquema de atributos de cada suerte (`properties`)
@@ -74,14 +78,25 @@ Requiere GDAL (`ogr2ogr`), `shapely`, `pyproj`, `pandas`, `openpyxl`.
 
 ---
 
-## Nota de esta app (AgroControl Campo)
+## Nota de esta app (Rio Map)
 
-Las capas `contexto_*.geojson` de esta carpeta son las **versiones depuradas**: el
-GeoPDF original arrastraba artefactos de extracción (features degenerados
-amontonados en ~`-76.069, 4.257`). Se filtraron con `limpiar_contexto.py` (en el
-repo de insumos). Conteo tras la limpieza: red_hídrica 104, vías 79, canales 113,
-cuerpos_agua 16, estaciones_bombeo 16. Las capas de suertes/centroides/catálogo no
-requirieron limpieza. Ver ADR-0002.
+Las capas `contexto_*.geojson` arrancaron como **versiones depuradas** del GeoPDF
+(que arrastraba artefactos: features degenerados en ~`-76.069, 4.257`, filtrados con
+`limpiar_contexto.py`). Ver ADR-0002.
+
+**Actualización — cartografía oficial de Ingeniería Agrícola.** El área de Ingeniería
+Agrícola entregó sus shapefiles oficiales (QGIS, EPSG:3115). Con
+`scripts/convertir_contexto.py` (pyshp + pyproj, reproyección 3115→4326) se
+**reemplazaron** `canales`, `cuerpos_agua` y `red_hidrica` por el dato oficial y se
+**agregaron** cuatro capas nuevas. Las `.cpg` de origen mezclan UTF-8 y Windows-1252,
+por eso el conversor fija la codificación por capa. Conteo actual:
+
+- red_hidrica 103 · canales 138 · cuerpos_agua 16 (oficiales)
+- freatimetros 202 · pluviometros 36 · thiessen 35 · haciendas 24 (nuevas)
+- vias 79 · estaciones_bombeo 16 (sin equivalente oficial, intactas del GeoPDF)
+
+Regenerar: `python scripts/convertir_contexto.py` (fuente en
+`~/Documents/Rio Maps/Elementos qGIS/Elementos qGIS`).
 
 ---
 

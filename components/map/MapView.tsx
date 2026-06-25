@@ -78,7 +78,10 @@ function addContextLayer(map: MlMap, id: string): void {
     map.addLayer({
       ...common,
       type: "fill",
-      paint: { "fill-color": cfg.color, "fill-opacity": 0.5 },
+      paint: {
+        "fill-color": cfg.color,
+        "fill-opacity": cfg.fillOpacity ?? 0.5,
+      },
     });
   } else {
     map.addLayer({
