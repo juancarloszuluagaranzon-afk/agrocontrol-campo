@@ -36,6 +36,12 @@ export function SuertePanel() {
     { label: "Hacienda", value: selected.hacienda || "—" },
     { label: "Sector", value: selected.sector || "—" },
     { label: "Área del tablón", value: formatHectareas(selected.ha_oficial) },
+    {
+      // Área neta de la suerte completa (todos sus tablones), del maestro.
+      label: "Área de la suerte",
+      value:
+        info?.area_neta_ha != null ? formatHectareas(info.area_neta_ha) : "—",
+    },
     { label: "Supervisor", value: selected.supervisor || "—" },
     { label: "Jefe de zona", value: selected.jefe_zona || "—" },
   ];

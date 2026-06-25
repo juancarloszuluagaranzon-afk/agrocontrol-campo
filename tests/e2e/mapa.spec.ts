@@ -24,6 +24,8 @@ test("mapa: buscar una suerte y abrir un tablón muestra sus atributos", async (
   await expect(panel).toContainText("Tablón 1");
   await expect(panel).toContainText("de 5");
   await expect(panel).toContainText("PERALONSO");
+  // El área de la suerte completa (maestro), además del área del tablón.
+  await expect(panel).toContainText("Área de la suerte");
 
   // Sección de agronomía del maestro (variedad de la suerte).
   await expect(panel).toContainText("Agronomía");
