@@ -35,6 +35,17 @@ const campoCaching: RuntimeCaching[] = [
     }),
   },
   {
+    // Iconos de la app (logo del sello de "Foto de campo"): cache-first offline.
+    matcher: ({ url, sameOrigin }) =>
+      sameOrigin && url.pathname.startsWith("/icons/"),
+    handler: new CacheFirst({
+      cacheName: "agrocontrol-iconos",
+      plugins: [
+        new ExpirationPlugin({ maxEntries: 8, purgeOnQuotaError: true }),
+      ],
+    }),
+  },
+  {
     matcher: ({ url, sameOrigin }) =>
       sameOrigin && url.pathname.startsWith("/data/"),
     handler: new CacheFirst({

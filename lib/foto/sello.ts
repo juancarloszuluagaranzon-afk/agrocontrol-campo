@@ -43,12 +43,30 @@ function cargarImagen(file: File): Promise<HTMLImageElement> {
   });
 }
 
+/** Logo de Rio Map (marca del sello). Una sola carga cacheada por módulo. */
+let logoPromise: Promise<HTMLImageElement | null> | null = null;
+
+/**
+ * Carga el logo `/icons/icon-512.png` (cacheado por el SW para campo offline).
+ * Si falla, resuelve a `null`: un logo ausente nunca debe romper el sellado.
+ */
+function cargarLogo(): Promise<HTMLImageElement | null> {
+  if (logoPromise) return logoPromise;
+  logoPromise = new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = "/icons/icon-512.png";
+  });
+  return logoPromise;
+}
+
 /**
  * Dibuja la foto en un canvas (reducida a ancho máx. 1600 px) con un banner
  * inferior semitransparente y las `lineas` del sello. Devuelve un Blob JPEG.
  */
 export async function sellarFoto(file: File, lineas: string[]): Promise<Blob> {
-  const img = await cargarImagen(file);
+  const [img, logo] = await Promise.all([cargarImagen(file), cargarLogo()]);
   const scale = Math.min(1, 1600 / img.width);
   const w = Math.round(img.width * scale);
   const h = Math.round(img.height * scale);
@@ -64,15 +82,26 @@ export async function sellarFoto(file: File, lineas: string[]): Promise<Blob> {
   const pad = Math.round(fs * 0.6);
   const lh = Math.round(fs * 1.35);
   const bannerH = lineas.length * lh + pad * 2;
+  const top = h - bannerH;
 
   ctx.fillStyle = "rgba(0,0,0,0.55)";
-  ctx.fillRect(0, h - bannerH, w, bannerH);
+  ctx.fillRect(0, top, w, bannerH);
+
+  // Logo de Rio Map como insignia al inicio del recuadro (marca de la app). El
+  // texto se corre a su derecha; si el logo no cargó, queda en el borde (pad).
+  let xTexto = pad;
+  if (logo) {
+    const lado = lineas.length * lh; // cuadrado, alto del bloque de texto
+    ctx.drawImage(logo, pad, top + pad, lado, lado);
+    xTexto = pad + lado + pad;
+  }
+
   ctx.fillStyle = "#ffffff";
   ctx.textBaseline = "top";
   lineas.forEach((linea, i) => {
     // Primera línea (suerte·hacienda) en negrita para destacar.
     ctx.font = `${i === 0 ? "bold " : ""}${fs}px sans-serif`;
-    ctx.fillText(linea, pad, h - bannerH + pad + i * lh);
+    ctx.fillText(linea, xTexto, top + pad + i * lh);
   });
 
   const blob = await new Promise<Blob | null>((res) =>

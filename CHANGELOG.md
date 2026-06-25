@@ -16,6 +16,8 @@ versionado [SemVer](https://semver.org/lang/es/).
   catálogo). Si estás fuera de todo lote, el sello lleva solo coordenadas + fecha.
 - **Sin BD ni galería**: todo ocurre en el dispositivo; el celular guarda la foto en su
   galería al compartir/descargar. Funciona offline (la cartografía ya está cacheada).
+- La foto sellada lleva el **logo de Rio Map** como insignia en el recuadro, para
+  identificar la evidencia como generada por la app (también offline).
 
 ### Plano de campo — muestreo de suelos desde un GeoPDF (reemplaza Avenza)
 
