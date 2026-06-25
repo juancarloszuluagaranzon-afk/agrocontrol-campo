@@ -82,7 +82,8 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     id: "vias_acceso",
     label: "Vías de acceso",
     geometry: "line",
-    color: "#fbbf24",
+    // Rojo: el plano de suertes es amarillo en satélite y se confundía.
+    color: "#ef4444",
     defaultOn: false,
   },
   {
@@ -117,9 +118,10 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     id: "thiessen",
     label: "Polígonos de Thiessen",
     geometry: "fill",
-    color: "#94a3b8",
+    // Slate más oscuro + más opacidad: antes se veía demasiado difuminado.
+    color: "#475569",
     defaultOn: false,
-    fillOpacity: 0.12,
+    fillOpacity: 0.28,
   },
   {
     id: "haciendas",
