@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — área total de la suerte en el panel del tablón
+
+- Al tocar un tablón, el panel muestra ahora también el **Área de la suerte** (área
+  neta de todos sus tablones, tomada del maestro). Antes solo se veía el área del
+  tablón; para suertes de varios tablones el total es distinto y útil. Dato ya
+  presente en `maestro_suertes.json` (`area_neta_ha`); sin cambios de BD ni datos.
+
 ### Lluvia — reporte diario de precipitación por pluviómetro
 
 - Nueva herramienta **🌧️ Lluvia (precipitación)**: el administrador registra los
