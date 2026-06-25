@@ -40,7 +40,8 @@ test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
   await page.getByRole("button", { name: "Herramientas" }).click();
   await page.getByRole("button", { name: "Capas del mapa" }).click();
   await page.getByRole("button", { name: /Leyenda/ }).click();
-  await expect(page.getByText("Haciendas")).toBeVisible();
+  // Encabezado exacto de la leyenda; "Haciendas (límites)" es otra capa de contexto.
+  await expect(page.getByText("Haciendas", { exact: true })).toBeVisible();
   await expect(page.getByText("PERALONSO")).toBeVisible();
 });
 

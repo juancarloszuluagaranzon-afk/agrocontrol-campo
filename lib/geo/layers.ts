@@ -55,6 +55,8 @@ export interface ContextLayer {
   color: string;
   /** visible por defecto al abrir el mapa */
   defaultOn: boolean;
+  /** opacidad del relleno (solo geometry "fill"); por defecto 0.5 */
+  fillOpacity?: number;
 }
 
 /**
@@ -95,6 +97,36 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     label: "Estaciones de bombeo",
     geometry: "point",
     color: "#f43f5e",
+    defaultOn: false,
+  },
+  {
+    id: "freatimetros",
+    label: "Freatímetros (pozos)",
+    geometry: "point",
+    color: "#8b5cf6",
+    defaultOn: false,
+  },
+  {
+    id: "pluviometros",
+    label: "Pluviómetros",
+    geometry: "point",
+    color: "#f472b6",
+    defaultOn: false,
+  },
+  {
+    id: "thiessen",
+    label: "Polígonos de Thiessen",
+    geometry: "fill",
+    color: "#94a3b8",
+    defaultOn: false,
+    fillOpacity: 0.12,
+  },
+  {
+    id: "haciendas",
+    // Polígonos dibujados como contorno (capa MapLibre "line") para no rellenar.
+    label: "Haciendas (límites)",
+    geometry: "line",
+    color: "#eab308",
     defaultOn: false,
   },
 ];

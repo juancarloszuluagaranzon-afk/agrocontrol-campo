@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — capas de agua oficiales de Ingeniería Agrícola
+
+- El área de **Ingeniería Agrícola** entregó su cartografía oficial y se integró como
+  **capas de contexto** (activables desde 🗂️ Capas, offline). Cuatro **nuevas**:
+  **freatímetros** (pozos, con nivel freático), **pluviómetros**, **polígonos de
+  Thiessen** (zonas de lluvia, relleno tenue) y **límites de hacienda** (contorno).
+- Se **reemplazaron** con el dato oficial las capas que antes salían de un GeoPDF:
+  **canales de riego/drenaje**, **cuerpos de agua** y **red hídrica** (esta última, la
+  red IGAC regional: ríos Cauca, La Paila, Bugalagrande…).
+- Generadas con `scripts/convertir_contexto.py` (pyshp + pyproj, reproyección
+  EPSG:3115→4326, codificación por capa). Sin BD ni dependencias nuevas de la app.
+
 ### Foto de campo — foto sellada con ubicación y suerte
 
 - Nueva herramienta **📷 Foto de campo**: el técnico, parado en un punto, **toma una
