@@ -5,6 +5,19 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — reporte diario de precipitación por pluviómetro
+
+- Nueva herramienta **🌧️ Lluvia (precipitación)**: el administrador registra los
+  **milímetros** leídos en un **pluviómetro** (por ID) en una **fecha** (hoy por
+  defecto). Debajo, el **historial** de lecturas recientes.
+- **Dato compartido**: cualquier usuario autenticado registra y **toda la empresa lo
+  ve** (a diferencia de marcadores/mediciones, que son privados). Edición/borrado solo
+  del autor. Tabla nueva `precipitaciones` (migración **0009**, RLS de lectura abierta,
+  soft delete + auditoría). Ver **ADR-0009**.
+- **Offline-first**: reutiliza el outbox (ADR-0004); las lecturas se guardan en el
+  dispositivo y se sincronizan al volver la red. ⚠️ Requiere aplicar la migración 0009
+  (`supabase db push`).
+
 ### Mapa — capas de agua oficiales de Ingeniería Agrícola
 
 - El área de **Ingeniería Agrícola** entregó su cartografía oficial y se integró como

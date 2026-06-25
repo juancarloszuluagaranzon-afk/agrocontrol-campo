@@ -3,14 +3,17 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useMedicionesStore } from "@/lib/store/medicionesStore";
+import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
 import {
   pushPendingMarcadores,
   pushPendingMediciones,
+  pushPendingPrecipitaciones,
 } from "@/lib/sync/syncManager";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
+import type { Precipitacion } from "@/domain/precipitaciones/schema";
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 const INTERVALO_MS = 20_000;
@@ -25,6 +28,7 @@ export function useSync(): void {
   const setSyncing = useMarcadoresStore((s) => s.setSyncing);
   const mPending = useMarcadoresStore((s) => s.pending);
   const medPending = useMedicionesStore((s) => s.pending);
+  const precPending = usePrecipitacionesStore((s) => s.pending);
   const enCurso = useRef(false);
 
   const flush = useCallback(async () => {
@@ -88,12 +92,41 @@ export function useSync(): void {
         for (const m of localPending) byId.set(m.id, m);
         cur.replaceAll([...byId.values()]);
       }
+
+      // Precipitaciones: subir pendientes y bajar TODAS (lectura compartida).
+      const prec = usePrecipitacionesStore.getState();
+      prec.setSyncing(true);
+      prec.setUserId(user.id);
+      if (prec.pending.length > 0) {
+        const res = await pushPendingPrecipitaciones(
+          supabase,
+          prec.items,
+          prec.pending,
+          user.id,
+        );
+        if (res.syncedIds.length > 0) prec.markSynced(res.syncedIds);
+      }
+      const { data: precipitaciones } = await supabase
+        .from("precipitaciones")
+        .select("*");
+      if (precipitaciones) {
+        const cur = usePrecipitacionesStore.getState();
+        const localPending = cur.items.filter((p) =>
+          cur.pending.includes(p.id),
+        );
+        const byId = new Map<string, Precipitacion>();
+        for (const p of precipitaciones as unknown as Precipitacion[])
+          byId.set(p.id, p);
+        for (const p of localPending) byId.set(p.id, p);
+        cur.replaceAll([...byId.values()]);
+      }
     } catch {
       /* reintenta en el próximo ciclo */
     } finally {
       enCurso.current = false;
       setSyncing(false);
       useMedicionesStore.getState().setSyncing(false);
+      usePrecipitacionesStore.getState().setSyncing(false);
     }
   }, [user, setSyncing]);
 
@@ -106,5 +139,5 @@ export function useSync(): void {
       clearInterval(id);
       window.removeEventListener("online", onOnline);
     };
-  }, [flush, mPending.length, medPending.length]);
+  }, [flush, mPending.length, medPending.length, precPending.length]);
 }
