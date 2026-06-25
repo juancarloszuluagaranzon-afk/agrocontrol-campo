@@ -12,6 +12,7 @@ interface Entrada {
 const ENTRADAS: Entrada[] = [
   { id: "plano", icon: "📄", label: "Plano de campo" },
   { id: "foto", icon: "📷", label: "Foto de campo" },
+  { id: "lluvia", icon: "🌧️", label: "Lluvia (precipitación)" },
   { id: "medir", icon: "📏", label: "Dibujar y medir" },
   { id: "marcadores", icon: "📍", label: "Marcadores" },
   { id: "mediciones", icon: "📐", label: "Mediciones guardadas" },

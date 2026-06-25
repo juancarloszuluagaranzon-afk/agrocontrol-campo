@@ -74,10 +74,11 @@ contexto **depuradas** (ADR-0002). Diccionario en
 Fases 0–7 completas (cimientos, mapa de tablones, GPS y medición,
 persistencia/offline, endurecimiento, cartografía oficial de tablones, modo Plano +
 marcadores), **multi-planta** (Riopaila + Castilla, ADR-0007), **Plano de campo**
-(muestreo de suelos: sube un GeoPDF y camina a los puntos con GPS, ADR-0008) y **Foto
+(muestreo de suelos: sube un GeoPDF y camina a los puntos con GPS, ADR-0008), **Foto
 de campo** (toma una foto y queda sellada con ubicación, suerte/hacienda y fecha para
-compartir). El módulo de maquinaria se retiró (ADR-0005). Ver `CHANGELOG.md` y el
-[manual de uso](docs/MANUAL.md).
+compartir) y **Lluvia** (reporte diario de precipitación por pluviómetro, dato
+compartido y offline, ADR-0009). El módulo de maquinaria se retiró (ADR-0005). Ver
+`CHANGELOG.md` y el [manual de uso](docs/MANUAL.md).
 
 ## Despliegue (Vercel)
 

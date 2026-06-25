@@ -13,6 +13,7 @@ import { MarcadorControl } from "@/components/map/MarcadorControl";
 import { MedicionesControl } from "@/components/map/MedicionesControl";
 import { PdfPlanControl } from "@/components/map/PdfPlanControl";
 import { FotoCampoControl } from "@/components/map/FotoCampoControl";
+import { PrecipitacionControl } from "@/components/map/PrecipitacionControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
 import { PlantaSelector } from "@/components/PlantaSelector";
@@ -55,6 +56,7 @@ export function MapScreen() {
         <div className="absolute top-28 left-2 z-10 flex max-w-[calc(100vw-1rem)] flex-col items-start gap-2">
           {activeTool === "plano" && <PdfPlanControl />}
           {activeTool === "foto" && <FotoCampoControl />}
+          {activeTool === "lluvia" && <PrecipitacionControl />}
           {activeTool === "medir" && <MeasureControl />}
           {activeTool === "marcadores" && <MarcadorControl />}
           {activeTool === "mediciones" && <MedicionesControl />}

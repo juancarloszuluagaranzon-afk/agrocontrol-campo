@@ -32,7 +32,8 @@ export type ToolId =
   | "marcadores"
   | "mediciones"
   | "plano"
-  | "foto";
+  | "foto"
+  | "lluvia";
 
 interface MapState {
   /** Tablón seleccionado (properties del feature tocado), o null. */

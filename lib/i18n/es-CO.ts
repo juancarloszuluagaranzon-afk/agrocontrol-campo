@@ -60,6 +60,21 @@ export const t = {
     muestreados: (h: number, n: number) => `${h}/${n} muestreados`,
     sinPuntos: "No se detectaron puntos. Toca el mapa para marcarlos.",
   },
+  lluvia: {
+    titulo: "Precipitación",
+    ayuda: "Registra la lluvia del día (mm) leída en un pluviómetro.",
+    pluviometro: "Pluviómetro",
+    elegirPluviometro: "Elige un pluviómetro",
+    fecha: "Fecha",
+    mm: "Milímetros (mm)",
+    nota: "Nota (opcional)",
+    guardar: "Guardar lectura",
+    historial: "Lecturas recientes",
+    sinLecturas: "Aún no hay lecturas registradas.",
+    sinPluviometros: "Esta planta no tiene pluviómetros registrados.",
+    borrar: (p: number, f: string) =>
+      `Borrar lectura del pluviómetro ${p} (${f})`,
+  },
 } as const;
 
 export type Textos = typeof t;

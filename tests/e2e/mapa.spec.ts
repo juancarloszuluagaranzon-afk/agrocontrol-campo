@@ -87,6 +87,26 @@ test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("mapa: registrar una lectura de lluvia la lista en el historial", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Lluvia (precipitación)" }).click();
+
+  // Elige el primer pluviómetro disponible (cargado del GeoJSON) y anota los mm.
+  const select = page.getByLabel("Pluviómetro");
+  await expect(select.locator("option").nth(1)).toBeAttached();
+  await select.selectOption({ index: 1 });
+  await page.getByLabel("Milímetros (mm)").fill("12.5");
+  await page.getByRole("button", { name: "Guardar lectura" }).click();
+
+  // Aparece en el historial reciente.
+  await expect(page.getByText("12.5 mm")).toBeVisible();
+});
+
 test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();

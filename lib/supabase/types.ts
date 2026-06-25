@@ -165,6 +165,36 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["marcadores"]["Insert"]>;
         Relationships: [];
       };
+      precipitaciones: {
+        Row: {
+          id: string;
+          autor: string;
+          planta: string;
+          pluviometro: number;
+          fecha: string;
+          mm: number;
+          nota: string;
+          deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          autor?: string;
+          planta: string;
+          pluviometro: number;
+          fecha: string;
+          mm: number;
+          nota?: string;
+          deleted?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["precipitaciones"]["Insert"]
+        >;
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: number;
