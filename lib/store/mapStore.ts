@@ -98,6 +98,10 @@ interface MapState {
   /** Modo "colocar marcador" activo (muestra retícula). */
   placingMarker: boolean;
   setPlacingMarker: (v: boolean) => void;
+
+  /** Capa "Lluvia de hoy": pluviómetros pintados por mm del día (estilo Gotas). */
+  mostrarLluviaHoy: boolean;
+  setMostrarLluviaHoy: (v: boolean) => void;
 }
 
 const initialContext: Record<string, boolean> = Object.fromEntries(
@@ -164,4 +168,7 @@ export const useMapStore = create<MapState>((set) => ({
     set((s) => ({ markVertexNonce: s.markVertexNonce + 1 })),
   placingMarker: false,
   setPlacingMarker: (placingMarker) => set({ placingMarker }),
+
+  mostrarLluviaHoy: false,
+  setMostrarLluviaHoy: (mostrarLluviaHoy) => set({ mostrarLluviaHoy }),
 }));

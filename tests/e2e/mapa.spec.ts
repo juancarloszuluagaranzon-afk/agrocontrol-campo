@@ -89,7 +89,7 @@ test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("mapa: registrar una lectura de lluvia la lista en el historial", async ({
+test("mapa: planilla de lluvia por técnico guarda y acumula", async ({
   page,
 }) => {
   await page.goto("/mapa");
@@ -98,15 +98,18 @@ test("mapa: registrar una lectura de lluvia la lista en el historial", async ({
   await page.getByRole("button", { name: "Herramientas" }).click();
   await page.getByRole("button", { name: "Lluvia (precipitación)" }).click();
 
-  // Elige el primer pluviómetro disponible (cargado del GeoJSON) y anota los mm.
-  const select = page.getByLabel("Pluviómetro");
-  await expect(select.locator("option").nth(1)).toBeAttached();
-  await select.selectOption({ index: 1 });
-  await page.getByLabel("Milímetros (mm)").fill("12.5");
-  await page.getByRole("button", { name: "Guardar lectura" }).click();
+  // Elige el primer técnico → aparecen sus pluviómetros.
+  const tecnico = page.getByLabel("Técnico");
+  await expect(tecnico.locator("option").nth(1)).toBeAttached();
+  await tecnico.selectOption({ index: 1 });
 
-  // Aparece en el historial reciente.
-  await expect(page.getByText("12.5 mm")).toBeVisible();
+  // Anota los mm del primer pluviómetro de su lista y guarda la planilla.
+  const mm = page.locator('input[type="number"]').first();
+  await mm.fill("12.5");
+  await page.getByRole("button", { name: "Guardar planilla" }).click();
+
+  // El acumulado del mes/año refleja la lectura recién guardada.
+  await expect(page.getByText(/mes 12\.5 mm/)).toBeVisible();
 });
 
 test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {

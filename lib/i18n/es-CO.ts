@@ -62,18 +62,23 @@ export const t = {
   },
   lluvia: {
     titulo: "Precipitación",
-    ayuda: "Registra la lluvia del día (mm) leída en un pluviómetro.",
-    pluviometro: "Pluviómetro",
-    elegirPluviometro: "Elige un pluviómetro",
+    ayuda:
+      "Planilla diaria de lluvia: elige técnico y anota los mm de sus pluviómetros.",
     fecha: "Fecha",
-    mm: "Milímetros (mm)",
-    nota: "Nota (opcional)",
-    guardar: "Guardar lectura",
-    historial: "Lecturas recientes",
-    sinLecturas: "Aún no hay lecturas registradas.",
+    tecnico: "Técnico",
+    elegirTecnico: "Elige un técnico",
+    zona: (z: number | string) => `Zona ${z}`,
+    pluviometro: "Pluviómetro",
+    mm: "mm",
+    guardar: "Guardar planilla",
+    guardado: (n: number) =>
+      `${n} lectura${n === 1 ? "" : "s"} guardada${n === 1 ? "" : "s"}`,
+    nadaQueGuardar: "Anota al menos un valor.",
+    acumMes: "mes",
+    acumAnio: "año",
+    verMapa: "Ver la lluvia de hoy en el mapa",
+    sinTecnico: "Elige un técnico para ver sus pluviómetros.",
     sinPluviometros: "Esta planta no tiene pluviómetros registrados.",
-    borrar: (p: number, f: string) =>
-      `Borrar lectura del pluviómetro ${p} (${f})`,
   },
 } as const;
 

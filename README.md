@@ -76,9 +76,10 @@ persistencia/offline, endurecimiento, cartografía oficial de tablones, modo Pla
 marcadores), **multi-planta** (Riopaila + Castilla, ADR-0007), **Plano de campo**
 (muestreo de suelos: sube un GeoPDF y camina a los puntos con GPS, ADR-0008), **Foto
 de campo** (toma una foto y queda sellada con ubicación, suerte/hacienda y fecha para
-compartir) y **Lluvia** (reporte diario de precipitación por pluviómetro, dato
-compartido y offline, ADR-0009). El módulo de maquinaria se retiró (ADR-0005). Ver
-`CHANGELOG.md` y el [manual de uso](docs/MANUAL.md).
+compartir) y **Lluvia** (planilla diaria de precipitación **por técnico** —cada uno con
+sus pluviómetros asignados—, con acumulado mes/año y mapa de "gotas de colores" por mm
+del día, dato compartido y offline, ADR-0009/0010). El módulo de maquinaria se retiró
+(ADR-0005). Ver `CHANGELOG.md` y el [manual de uso](docs/MANUAL.md).
 
 ## Despliegue (Vercel)
 

@@ -37,6 +37,9 @@ import {
   MEDICIONES_LABEL,
   MEDICIONES_LINE,
   MEDICIONES_SOURCE,
+  LLUVIA_HOY_SOURCE,
+  LLUVIA_HOY_DOT,
+  LLUVIA_HOY_LABEL,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -54,6 +57,9 @@ import { getImage } from "@/lib/storage/imageBlobStore";
 import { plantaConfig } from "@/lib/plantas";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
+import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
+import { usePluviometros } from "@/lib/data/usePluviometros";
+import { lecturaDelDia } from "@/domain/precipitaciones/acumulado";
 import type { TablonProperties } from "@/domain/suertes/schema";
 
 /** Construye las capas de una capa de contexto según su geometría. */
@@ -408,6 +414,54 @@ export function MapView() {
         paint: { "text-color": "#ffffff" },
       });
 
+      // "Lluvia de hoy": pluviómetros como gotas de color por mm (estilo Gotas).
+      // Se llena desde el store (efecto aparte); oculta hasta activarla.
+      map.addSource(LLUVIA_HOY_SOURCE, { type: "geojson", data: emptyFc });
+      map.addLayer({
+        id: LLUVIA_HOY_DOT,
+        type: "circle",
+        source: LLUVIA_HOY_SOURCE,
+        layout: { visibility: "none" },
+        paint: {
+          "circle-radius": 13,
+          // Escala baja→alta (mm del día): celeste → azul → morado.
+          "circle-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "mm"],
+            0,
+            "#cbd5e1",
+            1,
+            "#7dd3fc",
+            10,
+            "#38bdf8",
+            25,
+            "#2563eb",
+            50,
+            "#7c3aed",
+          ],
+          "circle-opacity": 0.9,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: LLUVIA_HOY_LABEL,
+        type: "symbol",
+        source: LLUVIA_HOY_SOURCE,
+        layout: {
+          visibility: "none",
+          "text-field": ["get", "etiqueta"],
+          "text-size": 11,
+          "text-font": ["Open Sans Regular"],
+        },
+        paint: {
+          "text-color": "#0f172a",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1.4,
+        },
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
@@ -576,6 +630,39 @@ export function MapView() {
     };
     source.setData(fc);
   }, [marcadores]);
+
+  // ── "Lluvia de hoy": pluviómetros pintados por mm del día (estilo Gotas) ──
+  const lluviaItems = usePrecipitacionesStore((s) => s.items);
+  const pluviometrosRef = usePluviometros();
+  const mostrarLluviaHoy = useMapStore((s) => s.mostrarLluviaHoy);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    const source = map.getSource(LLUVIA_HOY_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!source) return;
+    const hoy = new Date();
+    const local = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000);
+    const fecha = local.toISOString().slice(0, 10);
+    const fc: FeatureCollection<Point> = {
+      type: "FeatureCollection",
+      features: pluviometrosRef.map((p) => {
+        const mm =
+          lecturaDelDia(lluviaItems, planta ?? "", p.id, fecha)?.mm ?? 0;
+        return {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+          properties: { mm, etiqueta: String(mm) },
+        };
+      }),
+    };
+    source.setData(fc);
+    const vis = mostrarLluviaHoy ? "visible" : "none";
+    for (const id of [LLUVIA_HOY_DOT, LLUVIA_HOY_LABEL]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+    }
+  }, [lluviaItems, pluviometrosRef, mostrarLluviaHoy, mapReady, planta]);
 
   // ── Mediciones guardadas sobre el mapa (§5) ──
   const mediciones = useMedicionesStore((s) => s.items);
