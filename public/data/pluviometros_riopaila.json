@@ -1,0 +1,362 @@
+[
+{
+"id": 207,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "La Luisa 2",
+"sitio": "Estación Luisa 2",
+"area_ha": 66.8,
+"lat": 4.3577484,
+"lon": -76.1064524
+},
+{
+"id": 208,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "La Luisa 2",
+"sitio": "Estación Luisa 1",
+"area_ha": 119.8,
+"lat": 4.371905,
+"lon": -76.129305
+},
+{
+"id": 209,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "La Luisa 2",
+"sitio": "Entre ste 450 -740",
+"area_ha": 357.5,
+"lat": 4.356235,
+"lon": -76.1186883
+},
+{
+"id": 210,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "La Luisa 2",
+"sitio": "Lago Vinaza",
+"area_ha": 239.55,
+"lat": 4.3470633,
+"lon": -76.1053183
+},
+{
+"id": 211,
+"zona": 1,
+"tecnico": "Luis Enrique Millan",
+"hacienda": "La Luisa 1",
+"sitio": "Suerte 260",
+"area_ha": 250.52,
+"lat": 4.3429535,
+"lon": -76.1300808
+},
+{
+"id": 212,
+"zona": 1,
+"tecnico": "Luis Enrique Millan",
+"hacienda": "La Luisa 1",
+"sitio": "Estación Luisa 3",
+"area_ha": 98.88,
+"lat": 4.3367747,
+"lon": -76.1030511
+},
+{
+"id": 213,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "Zambrano",
+"sitio": "Estación la Isla",
+"area_ha": 84.49,
+"lat": 4.3620983,
+"lon": -76.1404791
+},
+{
+"id": 214,
+"zona": 1,
+"tecnico": "Luis Enrique Millan",
+"hacienda": "Lagunas",
+"sitio": "Suerte 080",
+"area_ha": 85.87,
+"lat": 4.3377367,
+"lon": -76.1391733
+},
+{
+"id": 215,
+"zona": 1,
+"tecnico": "Luis Enrique Millan",
+"hacienda": "Lagunas",
+"sitio": "Estación Lagunas",
+"area_ha": 51.61,
+"lat": 4.3463394,
+"lon": -76.141778
+},
+{
+"id": 303,
+"zona": 1,
+"tecnico": "Jhon Erick Sanmiguel",
+"hacienda": "Paila Arriba",
+"sitio": "Casa Paila Arriba",
+"area_ha": 62.89,
+"lat": 4.3164584,
+"lon": -76.0645384
+},
+{
+"id": 304,
+"zona": 1,
+"tecnico": "Jhon Erick Sanmiguel",
+"hacienda": "Riopila La Ranchera",
+"sitio": "Estación La Ranchera",
+"area_ha": 235.2,
+"lat": 4.3276879,
+"lon": -76.1240423
+},
+{
+"id": 305,
+"zona": 1,
+"tecnico": "Jhon Erick Sanmiguel",
+"hacienda": "Riopaila La Pista",
+"sitio": "Estación La Pista",
+"area_ha": 221.95,
+"lat": 4.3179867,
+"lon": -76.1035983
+},
+{
+"id": 306,
+"zona": 1,
+"tecnico": "Raul Arciniegas",
+"hacienda": "Pluviometro riopaila castilla",
+"sitio": "Est.met Ideam",
+"area_ha": null,
+"lat": 4.3246983,
+"lon": -76.084475
+},
+{
+"id": 307,
+"zona": 2,
+"tecnico": "Hector Lopez",
+"hacienda": "Valparaiso",
+"sitio": "Suerte 301",
+"area_ha": 121.79,
+"lat": 4.2785505,
+"lon": -76.1050728
+},
+{
+"id": 308,
+"zona": 2,
+"tecnico": "Hector Lopez",
+"hacienda": "Valparaiso",
+"sitio": "Suerte 160(Monte de las abejas)",
+"area_ha": 226.41,
+"lat": 4.2943386,
+"lon": -76.1100904
+},
+{
+"id": 401,
+"zona": 2,
+"tecnico": "Freddy Reyes",
+"hacienda": "Venecia 1",
+"sitio": null,
+"area_ha": 287.45,
+"lat": 4.303405,
+"lon": -76.12271
+},
+{
+"id": 402,
+"zona": 2,
+"tecnico": "Freddy Reyes",
+"hacienda": "Venecia 2",
+"sitio": "Estación de Venecia",
+"area_ha": 210.86,
+"lat": 4.3086628,
+"lon": -76.1458566
+},
+{
+"id": 403,
+"zona": 2,
+"tecnico": "Sebastian Rodriguez",
+"hacienda": "Peralonso El Mateo",
+"sitio": "Estación el Mateo",
+"area_ha": 236.04,
+"lat": 4.3345717,
+"lon": -76.14886
+},
+{
+"id": 404,
+"zona": 2,
+"tecnico": "Sebastian Rodriguez",
+"hacienda": "Peralonso",
+"sitio": "Entre ste 100-111",
+"area_ha": 195.95,
+"lat": 4.3141038,
+"lon": -76.161191
+},
+{
+"id": 405,
+"zona": 2,
+"tecnico": "Sebastian Rodriguez",
+"hacienda": "Peralonso Los Chivos",
+"sitio": "Estación los Chivos",
+"area_ha": 60.95,
+"lat": 4.3199973,
+"lon": -76.1659447
+},
+{
+"id": 406,
+"zona": 2,
+"tecnico": "Andres Mesa",
+"hacienda": "Normandia",
+"sitio": "Entre ste  151-161",
+"area_ha": 201.12,
+"lat": 4.2885433,
+"lon": -76.1459683
+},
+{
+"id": 407,
+"zona": 2,
+"tecnico": "Andres Mesa",
+"hacienda": "Normandia - Duran",
+"sitio": "Estación el Durán",
+"area_ha": 130.85,
+"lat": 4.2808367,
+"lon": -76.1371083
+},
+{
+"id": 408,
+"zona": 2,
+"tecnico": "Andres Mesa",
+"hacienda": "Normandia",
+"sitio": "Suerte 090",
+"area_ha": 185.96,
+"lat": 4.2988367,
+"lon": -76.1556317
+},
+{
+"id": 409,
+"zona": 2,
+"tecnico": "Andres Mesa",
+"hacienda": "Normandia Estación Drenaje",
+"sitio": "Estación Encanecada",
+"area_ha": 134.2,
+"lat": 4.2965807,
+"lon": -76.1434337
+},
+{
+"id": 411,
+"zona": 2,
+"tecnico": "Sebastian Rodriguez",
+"hacienda": "1/2 Luna caseta Caida",
+"sitio": "Caseta Caída",
+"area_ha": 94.0,
+"lat": 4.3066467,
+"lon": -76.1697467
+},
+{
+"id": 412,
+"zona": 2,
+"tecnico": "Freddy Reyes",
+"hacienda": "Tequendama",
+"sitio": "Pozo Tequendama",
+"area_ha": 38.77,
+"lat": 4.2769302,
+"lon": -76.1683698
+},
+{
+"id": 414,
+"zona": 2,
+"tecnico": "Freddy Reyes",
+"hacienda": "Ukrania Venecia",
+"sitio": null,
+"area_ha": 70.52,
+"lat": 4.2915758,
+"lon": -76.1239284
+},
+{
+"id": 417,
+"zona": 1,
+"tecnico": "Jhon Erick Sanmiguel",
+"hacienda": "Riopaila Agricola",
+"sitio": "La palma ste 180",
+"area_ha": 172.75,
+"lat": 4.3319017,
+"lon": -76.0924217
+},
+{
+"id": 501,
+"zona": 2,
+"tecnico": "Hector Lopez",
+"hacienda": "Ukrania Morillo",
+"sitio": "Parte alta (ste 430)",
+"area_ha": 176.96,
+"lat": 4.2756924,
+"lon": -76.095584
+},
+{
+"id": 502,
+"zona": 2,
+"tecnico": "Andres Mesa",
+"hacienda": "Morillo",
+"sitio": "Casa Murillo",
+"area_ha": 171.6,
+"lat": 4.2660443,
+"lon": -76.1180595
+},
+{
+"id": 503,
+"zona": 2,
+"tecnico": "Alberto Arce",
+"hacienda": "Gertrudis",
+"sitio": null,
+"area_ha": 167.46,
+"lat": 4.2621549,
+"lon": -76.1351453
+},
+{
+"id": 504,
+"zona": 2,
+"tecnico": "Alberto Arce",
+"hacienda": "Gertrudis-Porteria la Gertrudis",
+"sitio": "Portería Gertrudis",
+"area_ha": 85.18,
+"lat": 4.2454945,
+"lon": -76.1298099
+},
+{
+"id": 505,
+"zona": 2,
+"tecnico": "Alberto Arce",
+"hacienda": "San Nicolas",
+"sitio": "Suerte 201",
+"area_ha": 196.09,
+"lat": 4.2714,
+"lon": -76.1304967
+},
+{
+"id": 506,
+"zona": 2,
+"tecnico": "Alberto Arce",
+"hacienda": "San Nicolas",
+"sitio": "Suerte 160",
+"area_ha": 271.16,
+"lat": 4.2691833,
+"lon": -76.1424167
+},
+{
+"id": 700,
+"zona": 1,
+"tecnico": "Manuel Primero",
+"hacienda": "San carlos",
+"sitio": "San Carlos",
+"area_ha": 245.36,
+"lat": 4.3540987,
+"lon": -76.0952803
+},
+{
+"id": 701,
+"zona": 1,
+"tecnico": "Jaime Giraldo",
+"hacienda": "Mangos",
+"sitio": "Casa Mangos",
+"area_ha": 13.01,
+"lat": 4.3145083,
+"lon": -76.0622933
+}
+]

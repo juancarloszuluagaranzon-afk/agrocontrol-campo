@@ -10,6 +10,11 @@ export const PLANO_PUNTOS_SOURCE = "plano-puntos";
 export const PLANO_PUNTOS_DOT = "plano-puntos-dot";
 export const PLANO_PUNTOS_LABEL = "plano-puntos-label";
 
+// Lluvia de hoy: pluviómetros pintados por mm del día (estilo Gotas).
+export const LLUVIA_HOY_SOURCE = "lluvia-hoy";
+export const LLUVIA_HOY_DOT = "lluvia-hoy-dot";
+export const LLUVIA_HOY_LABEL = "lluvia-hoy-label";
+
 export const SUERTES_SOURCE = "suertes";
 export const SUERTES_FILL = "suertes-fill";
 export const SUERTES_LINE = "suertes-line";

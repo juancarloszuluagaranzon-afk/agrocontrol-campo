@@ -2,45 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import {
+  pluviometrosRefSchema,
+  type PluviometroRef,
+} from "@/domain/pluviometros/schema";
 
 /**
- * Lista ordenada de IDs de pluviómetro (campo `Pluviometr`) leída de
- * `/data/contexto_pluviometros.geojson` (ya cacheado offline por el SW). Es la
- * red oficial de Riopaila; en otras plantas no hay pluviómetros → lista vacía.
+ * Red de pluviómetros de referencia (con técnico/zona/hacienda/sitio/área/coords)
+ * desde `/data/pluviometros_riopaila.json` (generado del Excel + geojson, ya
+ * cacheado offline por el SW). Es la red de Riopaila; en otras plantas → [].
  */
-export function usePluviometros(): number[] {
+export function usePluviometros(): PluviometroRef[] {
   const planta = usePlantaStore((s) => s.planta);
-  const [ids, setIds] = useState<number[]>([]);
+  const [lista, setLista] = useState<PluviometroRef[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    // Solo Riopaila tiene pluviómetros; en otras plantas se resuelve a [].
-    const cargar: Promise<number[]> =
+    const cargar: Promise<PluviometroRef[]> =
       planta === "riopaila"
-        ? fetch("/data/contexto_pluviometros.geojson")
+        ? fetch("/data/pluviometros_riopaila.json")
             .then((r) => r.json())
-            .then(
-              (fc: {
-                features?: { properties?: { Pluviometr?: number } }[];
-              }) => {
-                const nums = (fc.features ?? [])
-                  .map((f) => f.properties?.Pluviometr)
-                  .filter((n): n is number => typeof n === "number");
-                return [...new Set(nums)].sort((a, b) => a - b);
-              },
-            )
+            .then((data: unknown) => pluviometrosRefSchema.parse(data))
         : Promise.resolve([]);
     void cargar
-      .then((nums) => {
-        if (!cancelled) setIds(nums);
+      .then((p) => {
+        if (!cancelled) setLista(p);
       })
       .catch(() => {
-        /* sin pluviómetros, el selector queda vacío */
+        /* sin red de pluviómetros, la planilla queda vacía */
       });
     return () => {
       cancelled = true;
     };
   }, [planta]);
 
-  return ids;
+  return lista;
 }

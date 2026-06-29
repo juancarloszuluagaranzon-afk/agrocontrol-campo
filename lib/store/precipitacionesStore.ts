@@ -22,6 +22,17 @@ interface PrecipitacionesState {
   setUserId: (id: string) => void;
   setSyncing: (v: boolean) => void;
   addLectura: (input: PrecipitacionInput, planta: string) => void;
+  /**
+   * Registra/actualiza la lectura de un pluviómetro en una fecha: si ya existe
+   * una lectura **propia** (no borrada) de ese (planta, pluviómetro, fecha), la
+   * actualiza; si no, crea una nueva. Evita duplicados al editar la planilla.
+   */
+  setLectura: (
+    planta: string,
+    pluviometro: number,
+    fecha: string,
+    mm: number,
+  ) => void;
   removeLectura: (id: string) => void;
   markSynced: (ids: string[]) => void;
   replaceAll: (items: Precipitacion[]) => void;
@@ -53,6 +64,42 @@ export const usePrecipitacionesStore = create<PrecipitacionesState>()(
             fecha: input.fecha,
             mm: input.mm,
             nota: input.nota,
+            deleted: false,
+            created_at: now,
+            updated_at: now,
+          };
+          return { items: [...s.items, p], pending: enqueue(s.pending, p.id) };
+        }),
+
+      setLectura: (planta, pluviometro, fecha, mm) =>
+        set((s) => {
+          const now = new Date().toISOString();
+          const esMia = (p: Precipitacion) =>
+            p.autor === s.userId || s.pending.includes(p.id);
+          const existente = s.items.find(
+            (p) =>
+              !p.deleted &&
+              p.planta === planta &&
+              p.pluviometro === pluviometro &&
+              p.fecha === fecha &&
+              esMia(p),
+          );
+          if (existente) {
+            return {
+              items: s.items.map((p) =>
+                p.id === existente.id ? { ...p, mm, updated_at: now } : p,
+              ),
+              pending: enqueue(s.pending, existente.id),
+            };
+          }
+          const p: Precipitacion = {
+            id: newId(),
+            autor: s.userId,
+            planta,
+            pluviometro,
+            fecha,
+            mm,
+            nota: "",
             deleted: false,
             created_at: now,
             updated_at: now,

@@ -5,6 +5,19 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — planilla por técnico, acumulado y mapa de gotas
+
+- La herramienta **🌧️ Lluvia** pasa a ser una **planilla por técnico**: eliges fecha y
+  **técnico** y anotas los mm de **todos sus pluviómetros** de una. Cada estación muestra su
+  **hacienda · sitio** y el **acumulado del mes y del año**. La asignación técnico→pluviómetro
+  sale del Excel oficial de Riopaila (36 estaciones, 2 zonas), unida a la cartografía con
+  `scripts/convertir_pluviometros.py` → `pluviometros_riopaila.json`.
+- **Sin duplicados**: re-guardar un pluviómetro del mismo día **actualiza** la lectura (no
+  apila). Sin cambios de BD (sigue la tabla `precipitaciones`).
+- **Mapa "Lluvia de hoy"** (idea tomada de la app _Gotas_ de Cenicaña): los pluviómetros se
+  pintan como **gotas de colores** según los mm del día (escala baja→alta) con su valor. Se
+  activa desde el panel de lluvia. Ver **ADR-0010**.
+
 ### Mapa — área total de la suerte en el panel del tablón
 
 - Al tocar un tablón, el panel muestra ahora también el **Área de la suerte** (área

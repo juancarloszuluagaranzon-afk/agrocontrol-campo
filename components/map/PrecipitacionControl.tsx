@@ -1,18 +1,17 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  precipitacionInputSchema,
-  type PrecipitacionInput,
-} from "@/domain/precipitaciones/schema";
-import {
-  activas,
-  usePrecipitacionesStore,
-} from "@/lib/store/precipitacionesStore";
+import { useState } from "react";
+import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { usePluviometros } from "@/lib/data/usePluviometros";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { etiquetaPluviometro } from "@/domain/pluviometros/schema";
+import {
+  acumulado,
+  inicioAnio,
+  inicioMes,
+  lecturaDelDia,
+} from "@/domain/precipitaciones/acumulado";
 import { t } from "@/lib/i18n/es-CO";
 
 const campo =
@@ -26,57 +25,83 @@ function hoyLocal(): string {
 }
 
 /**
- * Herramienta "Lluvia (precipitación)": el administrador registra los mm leídos
- * en un pluviómetro en una fecha. Es un dato **compartido** (toda la empresa lo
- * ve, RLS de lectura abierta). Offline-first (outbox); historial reciente debajo.
+ * Herramienta "Lluvia (precipitación)": planilla diaria **por técnico**. Se elige
+ * fecha y técnico, y se anotan los mm de cada uno de sus pluviómetros (con su
+ * hacienda/sitio y el acumulado mes/año). Dato compartido, offline (ADR-0009).
  */
 export function PrecipitacionControl() {
   const planta = usePlantaStore((s) => s.planta) ?? "";
   const pluviometros = usePluviometros();
   const items = usePrecipitacionesStore((s) => s.items);
-  const pending = usePrecipitacionesStore((s) => s.pending);
-  const userId = usePrecipitacionesStore((s) => s.userId);
-  const addLectura = usePrecipitacionesStore((s) => s.addLectura);
-  const removeLectura = usePrecipitacionesStore((s) => s.removeLectura);
+  const setLectura = usePrecipitacionesStore((s) => s.setLectura);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
+  const mostrarLluviaHoy = useMapStore((s) => s.mostrarLluviaHoy);
+  const setMostrarLluviaHoy = useMapStore((s) => s.setMostrarLluviaHoy);
 
   const hoy = hoyLocal();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<PrecipitacionInput>({
-    resolver: zodResolver(precipitacionInputSchema),
-    defaultValues: { fecha: hoy, nota: "" },
-  });
+  const [fecha, setFecha] = useState(hoy);
+  const [tecnico, setTecnico] = useState("");
+  // Valores tecleados por el usuario (pv id → texto). Vacío = sin tocar.
+  const [valores, setValores] = useState<Record<number, string>>({});
+  const [aviso, setAviso] = useState<string | null>(null);
 
-  const lista = activas(items)
-    .filter((p) => p.planta === planta)
-    .sort((a, b) =>
-      a.fecha === b.fecha
-        ? b.created_at.localeCompare(a.created_at)
-        : b.fecha.localeCompare(a.fecha),
-    )
-    .slice(0, 40);
+  // Técnicos únicos agrupados por zona (para el <select> con optgroups).
+  const porZona = new Map<string, string[]>();
+  for (const p of pluviometros) {
+    if (!p.tecnico) continue;
+    const z = String(p.zona ?? "");
+    const arr = porZona.get(z) ?? [];
+    if (!arr.includes(p.tecnico)) arr.push(p.tecnico);
+    porZona.set(z, arr);
+  }
+  const zonas = [...porZona.keys()].sort();
 
-  function guardar(values: PrecipitacionInput) {
-    addLectura(values, planta);
-    // Mantiene pluviómetro y fecha para registrar varios seguidos; limpia mm/nota.
-    reset({
-      pluviometro: values.pluviometro,
-      fecha: values.fecha,
-      mm: undefined,
-      nota: "",
-    });
+  const susPv = pluviometros
+    .filter((p) => p.tecnico === tecnico)
+    .sort((a, b) => a.id - b.id);
+
+  /** Valor a mostrar en el input de un PV: lo tecleado, o la lectura del día. */
+  function valorMostrado(id: number): string {
+    if (valores[id] !== undefined) return valores[id];
+    const l = lecturaDelDia(items, planta, id, fecha);
+    return l ? String(l.mm) : "";
   }
 
-  function esMia(id: string, autor: string): boolean {
-    return autor === userId || pending.includes(id);
+  function cambiarTecnico(v: string) {
+    setTecnico(v);
+    setValores({});
+    setAviso(null);
+  }
+
+  function cambiarFecha(v: string) {
+    setFecha(v);
+    setValores({});
+    setAviso(null);
+  }
+
+  function guardar() {
+    let n = 0;
+    for (const [idStr, txt] of Object.entries(valores)) {
+      const s = txt.trim();
+      if (s === "") continue;
+      const mm = Number(s.replace(",", "."));
+      if (!Number.isFinite(mm) || mm < 0) {
+        setAviso(t.lluvia.nadaQueGuardar);
+        return;
+      }
+      setLectura(planta, Number(idStr), fecha, Math.round(mm * 10) / 10);
+      n += 1;
+    }
+    if (n === 0) {
+      setAviso(t.lluvia.nadaQueGuardar);
+      return;
+    }
+    setValores({});
+    setAviso(t.lluvia.guardado(n));
   }
 
   return (
-    <div className="pointer-events-auto w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
+    <div className="pointer-events-auto w-80 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">🌧️ {t.lluvia.titulo}</span>
         <button
@@ -96,113 +121,120 @@ export function PrecipitacionControl() {
       ) : (
         <>
           <p className="mt-1 text-[12px] text-slate-500">{t.lluvia.ayuda}</p>
-          <form onSubmit={handleSubmit(guardar)} className="mt-2 space-y-2">
-            <div>
+
+          <div className="mt-2 flex gap-2">
+            <label className="w-32">
+              <span className="text-[11px] text-slate-500">
+                {t.lluvia.fecha}
+              </span>
+              <input
+                type="date"
+                max={hoy}
+                value={fecha}
+                onChange={(e) => cambiarFecha(e.target.value)}
+                className={campo}
+              />
+            </label>
+            <label className="min-w-0 flex-1">
+              <span className="text-[11px] text-slate-500">
+                {t.lluvia.tecnico}
+              </span>
               <select
-                {...register("pluviometro", { valueAsNumber: true })}
-                aria-label={t.lluvia.pluviometro}
-                defaultValue=""
+                value={tecnico}
+                onChange={(e) => cambiarTecnico(e.target.value)}
+                aria-label={t.lluvia.tecnico}
                 className={campo}
               >
-                <option value="" disabled>
-                  {t.lluvia.elegirPluviometro}
-                </option>
-                {pluviometros.map((id) => (
-                  <option key={id} value={id}>
-                    {t.lluvia.pluviometro} {id}
-                  </option>
+                <option value="">{t.lluvia.elegirTecnico}</option>
+                {zonas.map((z) => (
+                  <optgroup key={z} label={t.lluvia.zona(z)}>
+                    {(porZona.get(z) ?? []).sort().map((tec) => (
+                      <option key={tec} value={tec}>
+                        {tec}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
-              {errors.pluviometro && (
-                <p className="mt-0.5 text-[11px] text-red-600">
-                  {errors.pluviometro.message}
+            </label>
+          </div>
+
+          {tecnico === "" ? (
+            <p className="mt-3 text-[12px] text-slate-500">
+              {t.lluvia.sinTecnico}
+            </p>
+          ) : (
+            <>
+              <ul className="mt-2 max-h-72 space-y-1.5 overflow-y-auto">
+                {susPv.map((p) => {
+                  const mes = acumulado(
+                    items,
+                    planta,
+                    p.id,
+                    inicioMes(fecha),
+                    fecha,
+                  );
+                  const anio = acumulado(
+                    items,
+                    planta,
+                    p.id,
+                    inicioAnio(fecha),
+                    fecha,
+                  );
+                  return (
+                    <li key={p.id} className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {etiquetaPluviometro(p)}
+                        </p>
+                        <p className="text-[11px] text-slate-500 tabular-nums">
+                          PV {p.id} · {t.lluvia.acumMes} {mes} mm ·{" "}
+                          {t.lluvia.acumAnio} {anio} mm
+                        </p>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        inputMode="decimal"
+                        placeholder="—"
+                        aria-label={`${t.lluvia.mm} ${etiquetaPluviometro(p)}`}
+                        value={valorMostrado(p.id)}
+                        onChange={(e) =>
+                          setValores((v) => ({ ...v, [p.id]: e.target.value }))
+                        }
+                        className="w-16 rounded-lg bg-white px-2 py-1.5 text-right text-sm tabular-nums ring-1 ring-black/15"
+                      />
+                      <span className="text-[11px] text-slate-400">mm</span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <button
+                type="button"
+                onClick={guardar}
+                className="bg-primary mt-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
+              >
+                {t.lluvia.guardar}
+              </button>
+              {aviso && (
+                <p className="mt-1 text-center text-[11px] text-slate-600">
+                  {aviso}
                 </p>
               )}
-            </div>
+            </>
+          )}
 
-            <div className="flex gap-2">
-              <label className="flex-1">
-                <span className="text-[11px] text-slate-500">
-                  {t.lluvia.fecha}
-                </span>
-                <input
-                  type="date"
-                  max={hoy}
-                  {...register("fecha")}
-                  className={campo}
-                />
-              </label>
-              <label className="w-24">
-                <span className="text-[11px] text-slate-500">
-                  {t.lluvia.mm}
-                </span>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  inputMode="decimal"
-                  placeholder="0.0"
-                  aria-label={t.lluvia.mm}
-                  {...register("mm", { valueAsNumber: true })}
-                  className={campo}
-                />
-              </label>
-            </div>
-            {(errors.fecha || errors.mm) && (
-              <p className="text-[11px] text-red-600">
-                {errors.mm?.message ?? errors.fecha?.message}
-              </p>
-            )}
-
-            <textarea
-              {...register("nota")}
-              placeholder={t.lluvia.nota}
-              rows={2}
-              className={campo}
+          <label className="mt-3 flex items-center gap-2 border-t border-black/5 pt-2 text-sm">
+            <input
+              type="checkbox"
+              checked={mostrarLluviaHoy}
+              onChange={(e) => setMostrarLluviaHoy(e.target.checked)}
+              className="size-4"
             />
-
-            <button
-              type="submit"
-              className="bg-primary w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
-            >
-              {t.lluvia.guardar}
-            </button>
-          </form>
-
-          <p className="text-accent/60 mt-3 mb-1 text-[11px] font-bold uppercase">
-            {t.lluvia.historial}
-          </p>
-          <ul className="max-h-44 space-y-1 overflow-y-auto">
-            {lista.length === 0 && (
-              <li className="px-1 py-2 text-[12px] text-slate-500">
-                {t.lluvia.sinLecturas}
-              </li>
-            )}
-            {lista.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center gap-2 rounded px-1 py-1 text-sm hover:bg-slate-50"
-                title={p.nota || undefined}
-              >
-                <span className="min-w-0 flex-1 truncate tabular-nums">
-                  <span className="font-medium">
-                    {t.lluvia.pluviometro} {p.pluviometro}
-                  </span>{" "}
-                  · {p.fecha} · <span className="font-semibold">{p.mm} mm</span>
-                </span>
-                {esMia(p.id, p.autor) && (
-                  <button
-                    type="button"
-                    onClick={() => removeLectura(p.id)}
-                    aria-label={t.lluvia.borrar(p.pluviometro, p.fecha)}
-                    className="rounded px-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                  >
-                    🗑
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+            {t.lluvia.verMapa}
+          </label>
         </>
       )}
     </div>
