@@ -28,9 +28,12 @@ referencia (acumulado por estación, mapa con gotas de colores por intensidad).
   las lecturas (una por día, la más reciente). Se calcula de lo registrado; **no** se importa
   el histórico 2026 todavía.
 - **Mapa "Lluvia de hoy"** (de Gotas): capa dinámica (`LLUVIA_HOY_*`) construida en `MapView`
-  desde los pluviómetros de referencia + las lecturas de hoy; `circle` con color por
-  `interpolate` sobre los mm y etiqueta. Se activa con un flag del store
-  (`mostrarLluviaHoy`), gateada por `mapReady` (mismo cuidado que el backdrop del plano).
+  desde los pluviómetros de referencia + las lecturas de hoy, gateada por `mapReady` (mismo
+  cuidado que el backdrop del plano). **Se dibuja como "gotas" de color** (un icono por nivel
+  de mm registrado con `map.addImage`, elegido por `step`; umbrales en `lib/geo/lluvia.ts`) con
+  el número de mm dentro. La **enciende cualquier usuario** desde la capa "Pluviómetros (lluvia
+  hoy)" de 🗂️ Capas (visibilidad ligada a `activeContext["pluviometros"]`), no solo el
+  supervisor. (Antes era un flag `mostrarLluviaHoy` dentro del panel de captura, retirado.)
 
 ## Consecuencias
 
