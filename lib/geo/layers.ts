@@ -10,10 +10,10 @@ export const PLANO_PUNTOS_SOURCE = "plano-puntos";
 export const PLANO_PUNTOS_DOT = "plano-puntos-dot";
 export const PLANO_PUNTOS_LABEL = "plano-puntos-label";
 
-// Lluvia de hoy: pluviómetros pintados por mm del día (estilo Gotas).
+// Lluvia de hoy: pluviómetros pintados como gotas de color por mm (estilo Gotas).
+// La capa muestra el icono de gota + el número de mm en un solo símbolo.
 export const LLUVIA_HOY_SOURCE = "lluvia-hoy";
 export const LLUVIA_HOY_DOT = "lluvia-hoy-dot";
-export const LLUVIA_HOY_LABEL = "lluvia-hoy-label";
 
 export const SUERTES_SOURCE = "suertes";
 export const SUERTES_FILL = "suertes-fill";
@@ -113,10 +113,12 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     defaultOn: false,
   },
   {
+    // Se dibuja como "gotas" de color con los mm de hoy (capa propia en MapView),
+    // no como el círculo plano de contexto. El toggle/leyenda usan esta entrada.
     id: "pluviometros",
-    label: "Pluviómetros",
+    label: "Pluviómetros (lluvia hoy)",
     geometry: "point",
-    color: "#f472b6",
+    color: "#38bdf8",
     defaultOn: false,
   },
   {

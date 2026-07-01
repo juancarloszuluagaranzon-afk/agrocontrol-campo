@@ -35,8 +35,6 @@ export function PrecipitacionControl() {
   const items = usePrecipitacionesStore((s) => s.items);
   const setLectura = usePrecipitacionesStore((s) => s.setLectura);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
-  const mostrarLluviaHoy = useMapStore((s) => s.mostrarLluviaHoy);
-  const setMostrarLluviaHoy = useMapStore((s) => s.setMostrarLluviaHoy);
 
   const hoy = hoyLocal();
   const [fecha, setFecha] = useState(hoy);
@@ -226,15 +224,9 @@ export function PrecipitacionControl() {
             </>
           )}
 
-          <label className="mt-3 flex items-center gap-2 border-t border-black/5 pt-2 text-sm">
-            <input
-              type="checkbox"
-              checked={mostrarLluviaHoy}
-              onChange={(e) => setMostrarLluviaHoy(e.target.checked)}
-              className="size-4"
-            />
-            {t.lluvia.verMapa}
-          </label>
+          <p className="mt-3 border-t border-black/5 pt-2 text-[11px] text-slate-500">
+            {t.lluvia.verCapas}
+          </p>
         </>
       )}
     </div>

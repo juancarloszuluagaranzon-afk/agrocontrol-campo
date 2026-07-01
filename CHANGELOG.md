@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — gotas en el mapa para todos (desde 🗂️ Capas)
+
+- La **lluvia de hoy** se ve ahora activando la capa **"Pluviómetros (lluvia hoy)"** desde
+  🗂️ **Capas** — la puede ver **cualquier usuario**, no solo el supervisor que captura. Cada
+  pluviómetro se dibuja como una **gota de color** (estilo Gotas) con los **mm del día** dentro
+  (gris sin lluvia → morado en extrema). Se retiró el interruptor que vivía en el panel de
+  captura.
+
 ### Lluvia — planilla por técnico, acumulado y mapa de gotas
 
 - La herramienta **🌧️ Lluvia** pasa a ser una **planilla por técnico**: eliges fecha y

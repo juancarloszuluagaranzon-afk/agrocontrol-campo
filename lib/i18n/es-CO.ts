@@ -76,7 +76,8 @@ export const t = {
     nadaQueGuardar: "Anota al menos un valor.",
     acumMes: "mes",
     acumAnio: "año",
-    verMapa: "Ver la lluvia de hoy en el mapa",
+    verCapas:
+      "Para ver la lluvia de hoy en el mapa, activa la capa “Pluviómetros (lluvia hoy)” en 🗂️ Capas.",
     sinTecnico: "Elige un técnico para ver sus pluviómetros.",
     sinPluviometros: "Esta planta no tiene pluviómetros registrados.",
   },

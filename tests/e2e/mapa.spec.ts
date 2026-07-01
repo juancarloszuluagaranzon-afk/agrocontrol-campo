@@ -121,3 +121,20 @@ test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await redHidrica.check();
   await expect(redHidrica).toBeChecked();
 });
+
+test("mapa: la capa de lluvia (gotas) se activa desde Capas sin romper el mapa", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  // Cualquier usuario enciende la lluvia de hoy desde el panel de Capas.
+  const lluvia = page.getByRole("checkbox", {
+    name: "Pluviómetros (lluvia hoy)",
+  });
+  await lluvia.check();
+  await expect(lluvia).toBeChecked();
+  // El mapa sigue en pie (la capa de gotas no lo desestabiliza).
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+});

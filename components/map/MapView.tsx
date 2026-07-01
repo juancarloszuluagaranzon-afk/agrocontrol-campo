@@ -39,7 +39,6 @@ import {
   MEDICIONES_SOURCE,
   LLUVIA_HOY_SOURCE,
   LLUVIA_HOY_DOT,
-  LLUVIA_HOY_LABEL,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -60,7 +59,38 @@ import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { usePluviometros } from "@/lib/data/usePluviometros";
 import { lecturaDelDia } from "@/domain/precipitaciones/acumulado";
+import { NIVELES_LLUVIA, iconoGotaStep } from "@/lib/geo/lluvia";
 import type { TablonProperties } from "@/domain/suertes/schema";
+
+/**
+ * Dibuja una "gota" (pin teardrop) del color dado en un canvas y devuelve su
+ * ImageData para registrarla con `map.addImage`. Una imagen por nivel de color;
+ * el número de mm va como texto encima (capa LLUVIA_HOY_DOT).
+ */
+function gotaImage(color: string): ImageData {
+  const S = 100;
+  const canvas = document.createElement("canvas");
+  canvas.width = S;
+  canvas.height = S;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return new ImageData(S, S);
+  const cx = S / 2;
+  const cy = S * 0.4; // centro del bulbo (la punta cae más abajo)
+  const r = S * 0.3;
+  const tipY = S * 0.95;
+  ctx.beginPath();
+  ctx.moveTo(cx, tipY);
+  ctx.quadraticCurveTo(cx - r * 1.4, cy + r * 0.2, cx - r, cy);
+  ctx.arc(cx, cy, r, Math.PI, 0, false);
+  ctx.quadraticCurveTo(cx + r * 1.4, cy + r * 0.2, cx, tipY);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.lineWidth = S * 0.05;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+  return ctx.getImageData(0, 0, S, S);
+}
 
 /** Construye las capas de una capa de contexto según su geometría. */
 function addContextLayer(map: MlMap, id: string): void {
@@ -184,6 +214,9 @@ export function MapView() {
 
       // Capas de contexto (ocultas por defecto) antes de las suertes.
       for (const cfg of CONTEXT_LAYERS) {
+        // "pluviometros" no es un círculo plano: se dibuja como gotas de color con
+        // los mm de hoy (capa LLUVIA_HOY, más abajo).
+        if (cfg.id === "pluviometros") continue;
         map.addSource(contextSourceId(cfg.id), {
           type: "geojson",
           data: `/data/contexto_${cfg.id}.geojson`,
@@ -414,51 +447,37 @@ export function MapView() {
         paint: { "text-color": "#ffffff" },
       });
 
-      // "Lluvia de hoy": pluviómetros como gotas de color por mm (estilo Gotas).
-      // Se llena desde el store (efecto aparte); oculta hasta activarla.
+      // "Lluvia de hoy": pluviómetros como gotas de color con los mm del día
+      // (estilo Gotas). Una imagen de gota por nivel de color; el icono se elige
+      // por `step` sobre `mm`. Se llena desde el store (efecto aparte) y su
+      // visibilidad la controla la capa "Pluviómetros (lluvia hoy)" de 🗂️ Capas.
+      for (const nivel of NIVELES_LLUVIA) {
+        if (!map.hasImage(nivel.icon)) {
+          map.addImage(nivel.icon, gotaImage(nivel.color), { pixelRatio: 2 });
+        }
+      }
       map.addSource(LLUVIA_HOY_SOURCE, { type: "geojson", data: emptyFc });
       map.addLayer({
         id: LLUVIA_HOY_DOT,
-        type: "circle",
-        source: LLUVIA_HOY_SOURCE,
-        layout: { visibility: "none" },
-        paint: {
-          "circle-radius": 13,
-          // Escala baja→alta (mm del día): celeste → azul → morado.
-          "circle-color": [
-            "interpolate",
-            ["linear"],
-            ["get", "mm"],
-            0,
-            "#cbd5e1",
-            1,
-            "#7dd3fc",
-            10,
-            "#38bdf8",
-            25,
-            "#2563eb",
-            50,
-            "#7c3aed",
-          ],
-          "circle-opacity": 0.9,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#ffffff",
-        },
-      });
-      map.addLayer({
-        id: LLUVIA_HOY_LABEL,
         type: "symbol",
         source: LLUVIA_HOY_SOURCE,
         layout: {
           visibility: "none",
+          "icon-image": iconoGotaStep(),
+          "icon-size": 0.7,
+          "icon-anchor": "center",
+          "icon-allow-overlap": true,
+          // Número de mm dentro del bulbo de la gota.
           "text-field": ["get", "etiqueta"],
           "text-size": 11,
           "text-font": ["Open Sans Regular"],
+          "text-offset": [0, -0.55],
+          "text-allow-overlap": true,
         },
         paint: {
-          "text-color": "#0f172a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.4,
+          "text-color": "#ffffff",
+          "text-halo-color": "#0f172a",
+          "text-halo-width": 1.2,
         },
       });
 
@@ -631,10 +650,13 @@ export function MapView() {
     source.setData(fc);
   }, [marcadores]);
 
-  // ── "Lluvia de hoy": pluviómetros pintados por mm del día (estilo Gotas) ──
+  // ── "Lluvia de hoy": pluviómetros pintados como gotas por mm (estilo Gotas) ──
+  // La enciende cualquiera con la capa "Pluviómetros (lluvia hoy)" de 🗂️ Capas.
   const lluviaItems = usePrecipitacionesStore((s) => s.items);
   const pluviometrosRef = usePluviometros();
-  const mostrarLluviaHoy = useMapStore((s) => s.mostrarLluviaHoy);
+  const verLluvia = useMapStore(
+    (s) => s.activeContext["pluviometros"] ?? false,
+  );
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
@@ -658,11 +680,11 @@ export function MapView() {
       }),
     };
     source.setData(fc);
-    const vis = mostrarLluviaHoy ? "visible" : "none";
-    for (const id of [LLUVIA_HOY_DOT, LLUVIA_HOY_LABEL]) {
-      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+    const vis = verLluvia ? "visible" : "none";
+    if (map.getLayer(LLUVIA_HOY_DOT)) {
+      map.setLayoutProperty(LLUVIA_HOY_DOT, "visibility", vis);
     }
-  }, [lluviaItems, pluviometrosRef, mostrarLluviaHoy, mapReady, planta]);
+  }, [lluviaItems, pluviometrosRef, verLluvia, mapReady, planta]);
 
   // ── Mediciones guardadas sobre el mapa (§5) ──
   const mediciones = useMedicionesStore((s) => s.items);
