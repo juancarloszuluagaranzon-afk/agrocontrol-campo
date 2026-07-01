@@ -71,6 +71,7 @@ export const t = {
     pluviometro: "Pluviómetro",
     mm: "mm",
     guardar: "Guardar planilla",
+    descargar: "⬇️ Descargar consolidado del mes (CSV)",
     guardado: (n: number) =>
       `${n} lectura${n === 1 ? "" : "s"} guardada${n === 1 ? "" : "s"}`,
     nadaQueGuardar: "Anota al menos un valor.",

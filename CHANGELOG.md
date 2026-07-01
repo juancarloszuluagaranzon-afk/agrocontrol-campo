@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — descargar el consolidado del mes (CSV para Recursos Hídricos)
+
+- Nuevo botón **⬇️ Descargar consolidado del mes (CSV)** en la herramienta 🌧️ Lluvia: baja
+  un archivo con el **mismo formato de la planilla** de Recursos Hídricos —pluviómetros en
+  filas (zona, hacienda, localización, técnico, PLUV No, área de influencia), **los días del
+  mes en columnas** y **Acumul. MES / AÑO**— más una fila **"Promedio Zona"** por zona y el
+  **total** de la planta, **ponderados por área de influencia** (Thiessen). Así Recursos
+  Hídricos actualiza su acumulado pegando el archivo.
+- Formato es-CO (separador `;`, decimales con coma, BOM para los acentos); abre directo en
+  Excel. Sin dependencias nuevas. Nota: **Acumul. AÑO** refleja solo lo registrado en la app
+  hasta que se importe el histórico 2026.
+
 ### Lluvia — gotas en el mapa para todos (desde 🗂️ Capas)
 
 - La **lluvia de hoy** se ve ahora activando la capa **"Pluviómetros (lluvia hoy)"** desde

@@ -12,6 +12,7 @@ import {
   inicioMes,
   lecturaDelDia,
 } from "@/domain/precipitaciones/acumulado";
+import { csvConsolidadoMensual } from "@/domain/precipitaciones/export";
 import { t } from "@/lib/i18n/es-CO";
 
 const campo =
@@ -75,6 +76,25 @@ export function PrecipitacionControl() {
     setFecha(v);
     setValores({});
     setAviso(null);
+  }
+
+  /** Descarga el consolidado del mes (planilla PV × días + ponderado) en CSV. */
+  function descargar() {
+    const anioMes = fecha.slice(0, 7);
+    const csv = csvConsolidadoMensual(
+      pluviometros,
+      items,
+      planta,
+      anioMes,
+      "RIOPAILA AGRICOLA S.A.",
+    );
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lluvia_${planta}_${anioMes}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function guardar() {
@@ -156,6 +176,14 @@ export function PrecipitacionControl() {
               </select>
             </label>
           </div>
+
+          <button
+            type="button"
+            onClick={descargar}
+            className="mt-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-black/15 hover:bg-slate-50"
+          >
+            {t.lluvia.descargar}
+          </button>
 
           {tecnico === "" ? (
             <p className="mt-3 text-[12px] text-slate-500">
