@@ -112,6 +112,30 @@ test("mapa: planilla de lluvia por técnico guarda y acumula", async ({
   await expect(page.getByText(/mes 12\.5 mm/)).toBeVisible();
 });
 
+test("mapa: el reporte de lluvia muestra la tabla y descarga el XLSX", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Reporte de lluvia" }).click();
+
+  // Panel de pantalla completa con la tabla del consolidado (encabezados de semana).
+  await expect(page.getByText("Reporte de lluvia")).toBeVisible();
+  await expect(page.getByText(/SEMANA \d+/).first()).toBeVisible();
+  await expect(page.getByText("RIOPAILA AGRICOLA S.A.")).toBeVisible();
+
+  // Descargar XLSX no rompe la página (se dispara la descarga del archivo).
+  const descarga = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Descargar XLSX" }).click();
+  const download = await descarga;
+  expect(download.suggestedFilename()).toMatch(/^reporte_lluvia_.*\.xlsx$/);
+
+  await page.getByRole("button", { name: "Cerrar" }).click();
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+});
+
 test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();

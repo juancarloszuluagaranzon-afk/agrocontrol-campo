@@ -5,6 +5,22 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — panel "Reporte de lluvia" y descarga en XLSX con el formato oficial
+
+- Nueva herramienta **📊 Reporte de lluvia** (pantalla completa, abierta a cualquier usuario):
+  selector de mes + tabla con el **mismo look del reporte oficial** de Recursos Hídricos —
+  zonas por color, encabezados **"SEMANA N"** agrupando los días, celda de **técnico
+  combinada**, filas **"Promedio Zona"** y el **total** resaltadas.
+- Botón **⬇️ Descargar XLSX**: genera un Excel real (no CSV) con esa misma estructura visual
+  —colores, semanas agrupadas, celdas combinadas y logo si hay uno disponible—, usando
+  **exceljs** (import dinámico, no entra al bundle inicial; ver **ADR-0011**).
+- La agregación (ponderado por área, acumulado por día) se unificó en
+  `domain/precipitaciones/reporteMensual.ts`: una sola fuente de verdad para el CSV, la tabla
+  en pantalla y el XLSX.
+- Nota de alcance: la estación "Bella vista" (zona GAN) del reporte del usuario no está en la
+  cartografía oficial de pluviómetros (36 estaciones validadas) ni en los datos ya integrados;
+  no aparece en el reporte de la app (diferencia despreciable, ~0,04% del área total).
+
 ### Lluvia — descargar el consolidado del mes (CSV para Recursos Hídricos)
 
 - Nuevo botón **⬇️ Descargar consolidado del mes (CSV)** en la herramienta 🌧️ Lluvia: baja
