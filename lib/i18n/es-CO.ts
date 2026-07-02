@@ -71,6 +71,7 @@ export const t = {
     pluviometro: "Pluviómetro",
     mm: "mm",
     guardar: "Guardar planilla",
+    descargar: "⬇️ Descargar consolidado del mes (CSV)",
     guardado: (n: number) =>
       `${n} lectura${n === 1 ? "" : "s"} guardada${n === 1 ? "" : "s"}`,
     nadaQueGuardar: "Anota al menos un valor.",
@@ -80,6 +81,15 @@ export const t = {
       "Para ver la lluvia de hoy en el mapa, activa la capa “Pluviómetros (lluvia hoy)” en 🗂️ Capas.",
     sinTecnico: "Elige un técnico para ver sus pluviómetros.",
     sinPluviometros: "Esta planta no tiene pluviómetros registrados.",
+  },
+  reporte: {
+    titulo: "Reporte de lluvia",
+    subtitulo: "Reporte diario de precipitación",
+    mes: "Mes",
+    descargarXlsx: "⬇️ Descargar XLSX",
+    sinDatos: "Esta planta no tiene pluviómetros registrados.",
+    promedioZona: (z: string | number) => `Promedio Zona ${z}`,
+    semana: (n: number) => `SEMANA ${n}`,
   },
 } as const;
 

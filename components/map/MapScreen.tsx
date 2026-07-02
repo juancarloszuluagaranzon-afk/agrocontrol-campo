@@ -14,6 +14,7 @@ import { MedicionesControl } from "@/components/map/MedicionesControl";
 import { PdfPlanControl } from "@/components/map/PdfPlanControl";
 import { FotoCampoControl } from "@/components/map/FotoCampoControl";
 import { PrecipitacionControl } from "@/components/map/PrecipitacionControl";
+import { ReporteLluviaControl } from "@/components/map/ReporteLluviaControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
 import { PlantaSelector } from "@/components/PlantaSelector";
@@ -52,7 +53,7 @@ export function MapScreen() {
       </div>
 
       {/* Panel de la herramienta abierta desde el menú (arriba-izq.). */}
-      {activeTool !== "none" && (
+      {activeTool !== "none" && activeTool !== "reporte" && (
         <div className="absolute top-28 left-2 z-10 flex max-w-[calc(100vw-1rem)] flex-col items-start gap-2">
           {activeTool === "plano" && <PdfPlanControl />}
           {activeTool === "foto" && <FotoCampoControl />}
@@ -68,6 +69,10 @@ export function MapScreen() {
           )}
         </div>
       )}
+
+      {/* Reporte de lluvia: panel de pantalla completa (tabla ancha), fuera
+          del recuadro flotante angosto que usan las demás herramientas. */}
+      {activeTool === "reporte" && <ReporteLluviaControl />}
 
       {/* Mi ubicación (GPS): FAB propio a la derecha (alcance con el pulgar). */}
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 -translate-y-1/2">

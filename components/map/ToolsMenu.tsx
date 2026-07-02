@@ -13,6 +13,7 @@ const ENTRADAS: Entrada[] = [
   { id: "plano", icon: "📄", label: "Plano de campo" },
   { id: "foto", icon: "📷", label: "Foto de campo" },
   { id: "lluvia", icon: "🌧️", label: "Lluvia (precipitación)" },
+  { id: "reporte", icon: "📊", label: "Reporte de lluvia" },
   { id: "medir", icon: "📏", label: "Dibujar y medir" },
   { id: "marcadores", icon: "📍", label: "Marcadores" },
   { id: "mediciones", icon: "📐", label: "Mediciones guardadas" },
