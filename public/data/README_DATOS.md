@@ -127,3 +127,39 @@ Reproducir:
 python scripts/convertir_castilla.py            # shapefile -> geojson + catálogo
 python scripts/convertir_maestro.py castilla    # maestro.csv -> maestro_castilla.json
 ```
+
+---
+
+## Histórico de lluvia enero–junio 2026 (importado a la tabla `precipitaciones`)
+
+Fuente: `Ponderado de Precipitaciones año 2026.xlsx` (Recursos Hídricos), 36 pluviómetros de
+Riopaila. El libro tiene **varias hojas por mes** (ediciones sucesivas); se validó cada
+candidata contra la hoja resumen oficial **`Precip. Acum 2026`** (total mensual por estación,
+fuente de verdad) sumando sus columnas de día y comparando:
+
+| Mes | Hoja usada | Coincide con el resumen oficial |
+|---|---|---|
+| Enero | `Precip.Enero` | 22/36 (ver nota) |
+| Febrero | `Precip. Febrero` | 36/36 |
+| Marzo | `Precip. Marzo` | 36/36 |
+| Abril | `Precip.Abril ` | 35/36 (ver nota) |
+| Mayo | `Precip Mayo` | 36/36 |
+| Junio | `Precip Junio ` (**no** `Precip.Junio` ni `Precip Jun`: son borradores desfasados 100–250 mm) | 36/36 |
+
+- **Julio–diciembre no se importaron**: el resumen oficial los tiene vacíos para las 36
+  estaciones (sin conciliar); las hojas de esos meses en el libro son borradores (hojas
+  duplicadas, celdas `#REF!`).
+- **Enero (14 estaciones de zona 2, 1–3 mm de diferencia)**: la hoja de enero trae **dos
+  columnas "Acumul." lado a lado** — una es un ajuste manual reconciliado, la otra es la suma
+  cruda de los días. El ajuste no quedó reflejado en las celdas diarias. Se importó la **suma
+  de los días** (el dato más granular), sin alterarla para forzar el calce.
+- **Abril, PV 411**: tiene datos diarios reales (81 mm) pero el resumen oficial muestra 0
+  (hueco/fórmula rota en su hoja). Se importó el dato diario real.
+- **6.336 lecturas** en total, autor `rhriop@agricolas.co`, aplicadas en 6 lotes mensuales
+  (el SQL Editor de Supabase rechaza payloads grandes de una sola vez).
+
+Reproducir (genera 6 `.sql`, uno por mes, en `scripts/out/` — no se commitean):
+
+```bash
+python scripts/importar_historico_lluvia.py <uuid-autor> [ruta_excel]
+```
