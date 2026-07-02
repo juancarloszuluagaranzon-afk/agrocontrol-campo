@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — histórico enero–junio 2026 importado
+
+- Se cargaron **6.336 lecturas históricas reales** (enero–junio 2026, 36 pluviómetros de
+  Riopaila) desde el Excel "Ponderado de Precipitaciones" de Recursos Hídricos. Ahora el
+  acumulado mes/año de la planilla 🌧️ y el consolidado descargable reflejan el histórico real
+  desde el principio del año, no solo lo que se capture desde ahora. Detalle de qué hoja se
+  usó por mes (el libro tenía varias versiones por mes) y las 2 discrepancias menores
+  encontradas (ajustes manuales del propio Excel, no corregidos artificialmente): ver
+  `public/data/README_DATOS.md`. Julio–diciembre no se importaron (sin dato oficial
+  conciliado todavía). Importado con `scripts/importar_historico_lluvia.py` vía SQL que el
+  usuario corrió directamente en Supabase.
+
 ### Lluvia — gotas en el mapa para todos (desde 🗂️ Capas)
 
 - La **lluvia de hoy** se ve ahora activando la capa **"Pluviómetros (lluvia hoy)"** desde
