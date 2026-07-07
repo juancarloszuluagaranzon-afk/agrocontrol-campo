@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — confirmación y limpieza al guardar la planilla
+
+- Al guardar la planilla de lluvia (mm por pluviómetro + nivel de río/evaporación), ahora se
+  ve una confirmación clara ("✓ N lectura(s) guardada(s)") y los campos quedan en blanco
+  (listos para seguir anotando), sin perder lo ya guardado: si se cambia de técnico o de fecha
+  y se vuelve, el dato guardado se vuelve a mostrar.
+
 ### Lluvia — nivel de río (cota) y evaporación en la planilla
 
 - La planilla 🌧️ Lluvia ahora captura, además de los mm por pluviómetro, **nivel de río

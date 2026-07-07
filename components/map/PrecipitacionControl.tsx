@@ -54,7 +54,9 @@ export function PrecipitacionControl() {
   const [valores, setValores] = useState<Record<number, string>>({});
   // Valores de nivel de río / evaporación tecleados (punto → texto).
   const [valoresHidro, setValoresHidro] = useState<Record<string, string>>({});
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ ok: boolean; texto: string } | null>(
+    null,
+  );
 
   // Técnicos únicos agrupados por zona (para el <select> con optgroups).
   const porZona = new Map<string, string[]>();
@@ -113,6 +115,12 @@ export function PrecipitacionControl() {
     setAviso(null);
   }
 
+  /** Limpia los inputs (los deja en "—") sin perder lo ya guardado en el store. */
+  function limpiarCampos() {
+    setValores(Object.fromEntries(susPv.map((p) => [p.id, ""])));
+    setValoresHidro(Object.fromEntries(susPuntos.map((p) => [p.punto, ""])));
+  }
+
   /** Descarga el consolidado del mes (planilla PV × días + ponderado) en CSV. */
   function descargar() {
     const anioMes = fecha.slice(0, 7);
@@ -139,7 +147,7 @@ export function PrecipitacionControl() {
       if (s === "") continue;
       const mm = Number(s.replace(",", "."));
       if (!Number.isFinite(mm) || mm < 0) {
-        setAviso(t.lluvia.nadaQueGuardar);
+        setAviso({ ok: false, texto: t.lluvia.nadaQueGuardar });
         return;
       }
       setLectura(planta, Number(idStr), fecha, Math.round(mm * 10) / 10);
@@ -152,7 +160,7 @@ export function PrecipitacionControl() {
       if (s === "") continue;
       const valor = Number(s.replace(",", "."));
       if (!Number.isFinite(valor)) {
-        setAviso(t.lluvia.nadaQueGuardar);
+        setAviso({ ok: false, texto: t.lluvia.nadaQueGuardar });
         return;
       }
       setLecturaHidro(
@@ -165,12 +173,11 @@ export function PrecipitacionControl() {
       n += 1;
     }
     if (n === 0) {
-      setAviso(t.lluvia.nadaQueGuardar);
+      setAviso({ ok: false, texto: t.lluvia.nadaQueGuardar });
       return;
     }
-    setValores({});
-    setValoresHidro({});
-    setAviso(t.lluvia.guardado(n));
+    limpiarCampos();
+    setAviso({ ok: true, texto: t.lluvia.guardado(n) });
   }
 
   return (
@@ -361,8 +368,13 @@ export function PrecipitacionControl() {
                 {t.lluvia.guardar}
               </button>
               {aviso && (
-                <p className="mt-1 text-center text-[11px] text-slate-600">
-                  {aviso}
+                <p
+                  className={`mt-1 text-center text-[11px] ${
+                    aviso.ok ? "font-medium text-green-700" : "text-slate-600"
+                  }`}
+                >
+                  {aviso.ok ? "✓ " : ""}
+                  {aviso.texto}
                 </p>
               )}
             </>
