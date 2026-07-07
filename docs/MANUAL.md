@@ -53,16 +53,56 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   y **Guardar aquí**. La lista permite **ir** a un marcador o **borrarlo**. Se
   guardan sin conexión y se sincronizan a tus otros dispositivos.
 
-## 4. Sin conexión
+## 4. Plano de campo (muestreo de suelos)
+
+- Menú ✏️ → **Plano de campo**. Sube el **GeoPDF** de muestreo de tu suerte; la
+  app lo muestra como una capa de imagen ubicada sobre el mapa, con los **puntos
+  de muestreo** ya numerados.
+- Toca cada punto para marcarlo **muestreado** (o agrégalo a mano si el punto no
+  quedó en el PDF). Se ve tu distancia GPS a cada punto para ubicarte.
+- Con un plano activo, las suertes se ocultan para ver el plano solo (como en
+  Avenza); se puede quitar/ocultar para volver a verlas.
+- El plano queda guardado **por dispositivo** (no se sincroniza entre equipos ni
+  requiere conexión una vez cargado).
+
+## 5. Foto de campo
+
+- Menú ✏️ → **Foto de campo**. Toma una foto con la cámara del celular; la app la
+  **sella** automáticamente con tus coordenadas, la suerte/hacienda detectada por
+  tu ubicación (editable si no es la correcta) y la fecha.
+- Descarga la foto sellada o compártela directo (WhatsApp, correo, etc.).
+- Funciona sin conexión; no queda guardada en una galería dentro de la app.
+
+## 6. Lluvia (precipitación), nivel de río y evaporación
+
+- Menú ✏️ → **Lluvia (precipitación)**: planilla diaria por técnico. Elige la
+  **fecha** y tu **nombre** en el desplegable; verás tus pluviómetros con su
+  acumulado del mes y del año.
+- Anota los **mm** de cada pluviómetro y, si tienes puntos asignados, el
+  **nivel de río (cota)** o la **evaporación** del día, en la misma planilla.
+  Si un punto de nivel de río tiene umbrales definidos y el valor los alcanza,
+  aparece una insignia **Alerta / Crítico / Emergencia**.
+- **Guardar planilla**: confirma cuántas lecturas se guardaron (✓ en verde) y
+  deja los campos en blanco para seguir anotando; si vuelves a elegir la misma
+  fecha y técnico más tarde, tus datos guardados reaparecen.
+- El dato de lluvia y nivel de río es **compartido**: todos los usuarios lo ven
+  (no solo quien lo escribió), pero cada quien solo edita lo suyo.
+- **📊 Reporte de lluvia** (menú ✏️): tabla mensual con el mismo formato del
+  reporte oficial de Recursos Hídricos, y botón para descargarla en Excel.
+- **⬇️ Descargar consolidado del mes (CSV)**: dentro del panel de Lluvia, exporta
+  el mes completo en CSV.
+
+## 7. Sin conexión
 
 - Tras la primera carga, la app **abre y funciona sin señal**.
-- Lo que registres sin red queda **pendiente**; la cabecera muestra
-  _"N pendientes"_. Al volver la conexión se **sincroniza** solo
-  (verás _"Sincronizando…"_ y luego _"Sincronizado"_).
+- Lo que registres sin red queda **pendiente** hasta que vuelva la conexión,
+  momento en que se **sincroniza solo**. El punto de color junto a tu nombre
+  (arriba a la derecha) indica el estado: verde = sincronizado, ámbar = sin
+  conexión o con pendientes, celeste = sincronizando.
 - Para llevar el **mapa offline**: navega por la zona con conexión antes de ir a
   campo (los mosaicos se guardan en caché).
 
-## 5. Consejos de campo
+## 8. Consejos de campo
 
 - Botones grandes y alto contraste para uso con guantes y bajo sol.
 - El GPS necesita **HTTPS** (la app desplegada lo cumple) o `localhost`.
