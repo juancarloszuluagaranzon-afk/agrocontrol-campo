@@ -10,6 +10,37 @@ export interface PushResult {
   error: string | null;
 }
 
+const PAGE_SIZE = 1000;
+
+type TableName = keyof Database["public"]["Tables"];
+
+/**
+ * Trae TODAS las filas de una tabla, paginando de a `PAGE_SIZE`. PostgREST
+ * limita `select("*")` a 1000 filas por defecto: sin esto, tablas
+ * compartidas que crecen (precipitaciones, lecturas_hidrologicas) pierden
+ * silenciosamente las filas más allá del límite al sincronizar.
+ * Devuelve `null` si alguna página falla (igual que un `data` nulo).
+ */
+export async function fetchAllRows<T>(
+  supabase: SupabaseClient<Database>,
+  table: TableName,
+): Promise<T[] | null> {
+  const rows: T[] = [];
+  let offset = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (error) return null;
+    if (!data || data.length === 0) break;
+    rows.push(...(data as T[]));
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return rows;
+}
+
 type MarcadorRow = Database["public"]["Tables"]["marcadores"]["Insert"];
 
 /**

@@ -12,6 +12,7 @@ import {
   pushPendingMediciones,
   pushPendingPrecipitaciones,
   pushPendingLecturasHidro,
+  fetchAllRows,
 } from "@/lib/sync/syncManager";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
@@ -56,16 +57,14 @@ export function useSync(): void {
         );
         if (res.syncedIds.length > 0) mar.markSynced(res.syncedIds);
       }
-      const { data: marcadores } = await supabase
-        .from("marcadores")
-        .select("*");
+      const marcadores = await fetchAllRows<Marcador>(supabase, "marcadores");
       if (marcadores) {
         const cur = useMarcadoresStore.getState();
         const localPending = cur.items.filter((m) =>
           cur.pending.includes(m.id),
         );
         const byId = new Map<string, Marcador>();
-        for (const m of marcadores as Marcador[]) byId.set(m.id, m);
+        for (const m of marcadores) byId.set(m.id, m);
         for (const m of localPending) byId.set(m.id, m);
         cur.replaceAll([...byId.values()]);
       }
@@ -83,16 +82,14 @@ export function useSync(): void {
         );
         if (res.syncedIds.length > 0) med.markSynced(res.syncedIds);
       }
-      const { data: mediciones } = await supabase
-        .from("mediciones")
-        .select("*");
+      const mediciones = await fetchAllRows<Medicion>(supabase, "mediciones");
       if (mediciones) {
         const cur = useMedicionesStore.getState();
         const localPending = cur.items.filter((m) =>
           cur.pending.includes(m.id),
         );
         const byId = new Map<string, Medicion>();
-        for (const m of mediciones as unknown as Medicion[]) byId.set(m.id, m);
+        for (const m of mediciones) byId.set(m.id, m);
         for (const m of localPending) byId.set(m.id, m);
         cur.replaceAll([...byId.values()]);
       }
@@ -110,17 +107,17 @@ export function useSync(): void {
         );
         if (res.syncedIds.length > 0) prec.markSynced(res.syncedIds);
       }
-      const { data: precipitaciones } = await supabase
-        .from("precipitaciones")
-        .select("*");
+      const precipitaciones = await fetchAllRows<Precipitacion>(
+        supabase,
+        "precipitaciones",
+      );
       if (precipitaciones) {
         const cur = usePrecipitacionesStore.getState();
         const localPending = cur.items.filter((p) =>
           cur.pending.includes(p.id),
         );
         const byId = new Map<string, Precipitacion>();
-        for (const p of precipitaciones as unknown as Precipitacion[])
-          byId.set(p.id, p);
+        for (const p of precipitaciones) byId.set(p.id, p);
         for (const p of localPending) byId.set(p.id, p);
         cur.replaceAll([...byId.values()]);
       }
@@ -138,17 +135,17 @@ export function useSync(): void {
         );
         if (res.syncedIds.length > 0) hidro.markSynced(res.syncedIds);
       }
-      const { data: lecturasHidro } = await supabase
-        .from("lecturas_hidrologicas")
-        .select("*");
+      const lecturasHidro = await fetchAllRows<LecturaHidro>(
+        supabase,
+        "lecturas_hidrologicas",
+      );
       if (lecturasHidro) {
         const cur = useHidrologiaStore.getState();
         const localPending = cur.items.filter((l) =>
           cur.pending.includes(l.id),
         );
         const byId = new Map<string, LecturaHidro>();
-        for (const l of lecturasHidro as unknown as LecturaHidro[])
-          byId.set(l.id, l);
+        for (const l of lecturasHidro) byId.set(l.id, l);
         for (const l of localPending) byId.set(l.id, l);
         cur.replaceAll([...byId.values()]);
       }
