@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fix — datos de fechas pasadas que no aparecían en la planilla de lluvia
+
+- Al elegir una fecha con historial, los pluviómetros podían mostrarse vacíos aunque el dato
+  sí estuviera guardado en Supabase: la descarga de sincronización no paginaba y PostgREST la
+  cortaba en 1000 filas. Ahora se paginan las cuatro tablas del sync (marcadores, mediciones,
+  precipitaciones, lecturas hidrológicas) para traer siempre el total real. Ver **ADR-0013**.
+
 ### Lluvia — confirmación y limpieza al guardar la planilla
 
 - Al guardar la planilla de lluvia (mm por pluviómetro + nivel de río/evaporación), ahora se
