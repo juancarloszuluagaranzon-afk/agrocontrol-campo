@@ -4,16 +4,19 @@ import { useCallback, useEffect, useRef } from "react";
 import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
+import { useHidrologiaStore } from "@/lib/store/hidrologiaStore";
 import { useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
 import {
   pushPendingMarcadores,
   pushPendingMediciones,
   pushPendingPrecipitaciones,
+  pushPendingLecturasHidro,
 } from "@/lib/sync/syncManager";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
 import type { Precipitacion } from "@/domain/precipitaciones/schema";
+import type { LecturaHidro } from "@/domain/hidrologia/schema";
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 const INTERVALO_MS = 20_000;
@@ -29,6 +32,7 @@ export function useSync(): void {
   const mPending = useMarcadoresStore((s) => s.pending);
   const medPending = useMedicionesStore((s) => s.pending);
   const precPending = usePrecipitacionesStore((s) => s.pending);
+  const hidroPending = useHidrologiaStore((s) => s.pending);
   const enCurso = useRef(false);
 
   const flush = useCallback(async () => {
@@ -120,6 +124,34 @@ export function useSync(): void {
         for (const p of localPending) byId.set(p.id, p);
         cur.replaceAll([...byId.values()]);
       }
+
+      // Lecturas hidrológicas: subir pendientes y bajar TODAS (compartidas).
+      const hidro = useHidrologiaStore.getState();
+      hidro.setSyncing(true);
+      hidro.setUserId(user.id);
+      if (hidro.pending.length > 0) {
+        const res = await pushPendingLecturasHidro(
+          supabase,
+          hidro.items,
+          hidro.pending,
+          user.id,
+        );
+        if (res.syncedIds.length > 0) hidro.markSynced(res.syncedIds);
+      }
+      const { data: lecturasHidro } = await supabase
+        .from("lecturas_hidrologicas")
+        .select("*");
+      if (lecturasHidro) {
+        const cur = useHidrologiaStore.getState();
+        const localPending = cur.items.filter((l) =>
+          cur.pending.includes(l.id),
+        );
+        const byId = new Map<string, LecturaHidro>();
+        for (const l of lecturasHidro as unknown as LecturaHidro[])
+          byId.set(l.id, l);
+        for (const l of localPending) byId.set(l.id, l);
+        cur.replaceAll([...byId.values()]);
+      }
     } catch {
       /* reintenta en el próximo ciclo */
     } finally {
@@ -127,6 +159,7 @@ export function useSync(): void {
       setSyncing(false);
       useMedicionesStore.getState().setSyncing(false);
       usePrecipitacionesStore.getState().setSyncing(false);
+      useHidrologiaStore.getState().setSyncing(false);
     }
   }, [user, setSyncing]);
 
@@ -139,5 +172,11 @@ export function useSync(): void {
       clearInterval(id);
       window.removeEventListener("online", onOnline);
     };
-  }, [flush, mPending.length, medPending.length, precPending.length]);
+  }, [
+    flush,
+    mPending.length,
+    medPending.length,
+    precPending.length,
+    hidroPending.length,
+  ]);
 }

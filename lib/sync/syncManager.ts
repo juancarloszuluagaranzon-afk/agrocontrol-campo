@@ -3,6 +3,7 @@ import type { Database, Json } from "@/lib/supabase/types";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
 import type { Precipitacion } from "@/domain/precipitaciones/schema";
+import type { LecturaHidro } from "@/domain/hidrologia/schema";
 
 export interface PushResult {
   syncedIds: string[];
@@ -128,4 +129,46 @@ export async function pushPendingPrecipitaciones(
 
   if (error) return { syncedIds: [], error: error.message };
   return { syncedIds: pendientes.map((p) => p.id), error: null };
+}
+
+type LecturaHidroRow =
+  Database["public"]["Tables"]["lecturas_hidrologicas"]["Insert"];
+
+/** Mapea una lectura hidrológica local a una fila de Supabase (`autor` = dueño, RLS). */
+export function lecturaHidroToRow(
+  l: LecturaHidro,
+  authUid: string,
+): LecturaHidroRow {
+  return {
+    id: l.id,
+    autor: authUid,
+    planta: l.planta,
+    punto: l.punto,
+    tipo: l.tipo,
+    fecha: l.fecha,
+    valor: l.valor,
+    nota: l.nota,
+    deleted: l.deleted,
+    created_at: l.created_at,
+    updated_at: l.updated_at,
+  };
+}
+
+/** Vacía el outbox de lecturas hidrológicas (upsert idempotente por id). */
+export async function pushPendingLecturasHidro(
+  supabase: SupabaseClient<Database>,
+  items: LecturaHidro[],
+  pendingIds: string[],
+  authUid: string,
+): Promise<PushResult> {
+  const pendientes = items.filter((l) => pendingIds.includes(l.id));
+  if (pendientes.length === 0) return { syncedIds: [], error: null };
+
+  const rows = pendientes.map((l) => lecturaHidroToRow(l, authUid));
+  const { error } = await supabase
+    .from("lecturas_hidrologicas")
+    .upsert(rows, { onConflict: "id" });
+
+  if (error) return { syncedIds: [], error: error.message };
+  return { syncedIds: pendientes.map((l) => l.id), error: null };
 }

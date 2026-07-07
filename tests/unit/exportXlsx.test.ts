@@ -50,6 +50,8 @@ describe("xlsxConsolidadoMensual", () => {
     );
   });
 
+  // El import dinámico de exceljs + armar el workbook es más lento que el
+  // timeout por defecto (5s) cuando corre junto al resto de la suite.
   it("genera un Blob de Excel no vacío sin lanzar, con o sin logo", async () => {
     const { xlsxConsolidadoMensual } =
       await import("@/domain/precipitaciones/exportXlsx");
@@ -69,5 +71,5 @@ describe("xlsxConsolidadoMensual", () => {
     expect(blob.type).toBe(
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-  });
+  }, 15_000);
 });

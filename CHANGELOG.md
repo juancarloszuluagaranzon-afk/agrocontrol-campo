@@ -5,6 +5,23 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — nivel de río (cota) y evaporación en la planilla
+
+- La planilla 🌧️ Lluvia ahora captura, además de los mm por pluviómetro, **nivel de río
+  (cota)** en puntos de monitoreo con nombre propio y **evaporación** (un valor por
+  técnico/día) — todo en la misma acción de "Guardar planilla". Cobertura inicial: 4 técnicos
+  (Jhon Erick Sanmiguel, Sebastian Rodriguez, Manuel Primero, Andrés Mesa); el resto sigue solo
+  con pluviómetros. Agregar más técnicos/puntos es solo editar el archivo de referencia, sin
+  tocar código.
+- **Alertas por umbral**: si un punto de nivel de río tiene definidos alerta/crítico/emergencia
+  (hoy solo "Nivel Río Cauca Luisa 1": 916,50/917,00/917,50 m), el formulario muestra una
+  insignia cuando la lectura los alcanza. Los demás puntos capturan el dato sin insignia hasta
+  que se suministren sus umbrales.
+- **Dato compartido y offline**, mismo patrón que la lluvia: tabla nueva `lecturas_hidrologicas`
+  (RLS de lectura abierta, escritura del propio autor, migración **0010**), outbox/sync
+  reutilizado. Ver **ADR-0012**. No se refleja aún en el reporte/CSV/XLSX de lluvia (siguiente
+  entrega).
+
 ### Lluvia — panel "Reporte de lluvia" y descarga en XLSX con el formato oficial
 
 - Nueva herramienta **📊 Reporte de lluvia** (pantalla completa, abierta a cualquier usuario):

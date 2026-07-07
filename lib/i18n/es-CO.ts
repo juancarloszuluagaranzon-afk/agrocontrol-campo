@@ -91,6 +91,14 @@ export const t = {
     promedioZona: (z: string | number) => `Promedio Zona ${z}`,
     semana: (n: number) => `SEMANA ${n}`,
   },
+  hidrologia: {
+    titulo: "Nivel de río / Evaporación",
+    severidad: {
+      alerta: "Alerta",
+      critico: "Crítico",
+      emergencia: "Emergencia",
+    },
+  },
 } as const;
 
 export type Textos = typeof t;
