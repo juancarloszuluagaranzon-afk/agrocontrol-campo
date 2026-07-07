@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### UI — indicador de sincronización más discreto
+
+- El badge de estado en el header ("Sincronizado"/"Sincronizando…"/pendientes) ahora solo
+  muestra el punto de color (verde/ámbar/celeste); el texto pasa a `sr-only` (se mantiene
+  para lectores de pantalla, ya no ocupa espacio visual junto al selector de planta).
+
 ### Fix — datos de fechas pasadas que no aparecían en la planilla de lluvia
 
 - Al elegir una fecha con historial, los pluviómetros podían mostrarse vacíos aunque el dato

@@ -78,8 +78,12 @@ marcadores), **multi-planta** (Riopaila + Castilla, ADR-0007), **Plano de campo*
 de campo** (toma una foto y queda sellada con ubicación, suerte/hacienda y fecha para
 compartir) y **Lluvia** (planilla diaria de precipitación **por técnico** —cada uno con
 sus pluviómetros asignados—, con acumulado mes/año y mapa de "gotas de colores" por mm
-del día, dato compartido y offline, ADR-0009/0010). El módulo de maquinaria se retiró
-(ADR-0005). Ver `CHANGELOG.md` y el [manual de uso](docs/MANUAL.md).
+del día, dato compartido y offline, ADR-0009/0010), con **reporte mensual descargable
+en Excel** con el formato oficial (ADR-0011) y **nivel de río (cota) + evaporación**
+en la misma planilla, con alertas por umbral (ADR-0012). El sync de tablas
+compartidas pagina la descarga completa (PostgREST corta en 1000 filas por defecto,
+ADR-0013). El módulo de maquinaria se retiró (ADR-0005). Ver `CHANGELOG.md` y el
+[manual de uso](docs/MANUAL.md).
 
 ## Despliegue (Vercel)
 
