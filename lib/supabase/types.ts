@@ -195,6 +195,38 @@ export interface Database {
         >;
         Relationships: [];
       };
+      lecturas_hidrologicas: {
+        Row: {
+          id: string;
+          autor: string;
+          planta: string;
+          punto: string;
+          tipo: "nivel_rio" | "evaporacion";
+          fecha: string;
+          valor: number;
+          nota: string;
+          deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          autor?: string;
+          planta: string;
+          punto: string;
+          tipo: "nivel_rio" | "evaporacion";
+          fecha: string;
+          valor: number;
+          nota?: string;
+          deleted?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["lecturas_hidrologicas"]["Insert"]
+        >;
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: number;

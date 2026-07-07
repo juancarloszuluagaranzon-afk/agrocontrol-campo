@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
+import { useHidrologiaStore } from "@/lib/store/hidrologiaStore";
 import { usePluviometros } from "@/lib/data/usePluviometros";
+import { usePuntosHidrologicos } from "@/lib/data/usePuntosHidrologicos";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
 import { etiquetaPluviometro } from "@/domain/pluviometros/schema";
@@ -13,6 +15,11 @@ import {
   lecturaDelDia,
 } from "@/domain/precipitaciones/acumulado";
 import { csvConsolidadoMensual } from "@/domain/precipitaciones/export";
+import {
+  etiquetaPunto,
+  nivelAlerta,
+  unidadLectura,
+} from "@/domain/hidrologia/schema";
 import { t } from "@/lib/i18n/es-CO";
 
 const campo =
@@ -33,8 +40,11 @@ function hoyLocal(): string {
 export function PrecipitacionControl() {
   const planta = usePlantaStore((s) => s.planta) ?? "";
   const pluviometros = usePluviometros();
+  const puntosHidro = usePuntosHidrologicos();
   const items = usePrecipitacionesStore((s) => s.items);
   const setLectura = usePrecipitacionesStore((s) => s.setLectura);
+  const hidroItems = useHidrologiaStore((s) => s.items);
+  const setLecturaHidro = useHidrologiaStore((s) => s.setLectura);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
 
   const hoy = hoyLocal();
@@ -42,6 +52,8 @@ export function PrecipitacionControl() {
   const [tecnico, setTecnico] = useState("");
   // Valores tecleados por el usuario (pv id → texto). Vacío = sin tocar.
   const [valores, setValores] = useState<Record<number, string>>({});
+  // Valores de nivel de río / evaporación tecleados (punto → texto).
+  const [valoresHidro, setValoresHidro] = useState<Record<string, string>>({});
   const [aviso, setAviso] = useState<string | null>(null);
 
   // Técnicos únicos agrupados por zona (para el <select> con optgroups).
@@ -58,6 +70,7 @@ export function PrecipitacionControl() {
   const susPv = pluviometros
     .filter((p) => p.tecnico === tecnico)
     .sort((a, b) => a.id - b.id);
+  const susPuntos = puntosHidro.filter((p) => p.tecnico === tecnico);
 
   /** Valor a mostrar en el input de un PV: lo tecleado, o la lectura del día. */
   function valorMostrado(id: number): string {
@@ -66,15 +79,37 @@ export function PrecipitacionControl() {
     return l ? String(l.mm) : "";
   }
 
+  /** Lectura hidrológica propia del día para un punto, o null. */
+  function lecturaHidroDelDia(punto: string) {
+    return (
+      hidroItems.find(
+        (l) =>
+          !l.deleted &&
+          l.planta === planta &&
+          l.punto === punto &&
+          l.fecha === fecha,
+      ) ?? null
+    );
+  }
+
+  /** Valor a mostrar en el input de un punto hidrológico: lo tecleado, o la lectura del día. */
+  function valorHidroMostrado(punto: string): string {
+    if (valoresHidro[punto] !== undefined) return valoresHidro[punto];
+    const l = lecturaHidroDelDia(punto);
+    return l ? String(l.valor) : "";
+  }
+
   function cambiarTecnico(v: string) {
     setTecnico(v);
     setValores({});
+    setValoresHidro({});
     setAviso(null);
   }
 
   function cambiarFecha(v: string) {
     setFecha(v);
     setValores({});
+    setValoresHidro({});
     setAviso(null);
   }
 
@@ -110,11 +145,31 @@ export function PrecipitacionControl() {
       setLectura(planta, Number(idStr), fecha, Math.round(mm * 10) / 10);
       n += 1;
     }
+    for (const punto of susPuntos) {
+      const txt = valoresHidro[punto.punto];
+      if (txt === undefined) continue;
+      const s = txt.trim();
+      if (s === "") continue;
+      const valor = Number(s.replace(",", "."));
+      if (!Number.isFinite(valor)) {
+        setAviso(t.lluvia.nadaQueGuardar);
+        return;
+      }
+      setLecturaHidro(
+        planta,
+        punto.punto,
+        punto.tipo,
+        fecha,
+        Math.round(valor * 100) / 100,
+      );
+      n += 1;
+    }
     if (n === 0) {
       setAviso(t.lluvia.nadaQueGuardar);
       return;
     }
     setValores({});
+    setValoresHidro({});
     setAviso(t.lluvia.guardado(n));
   }
 
@@ -236,6 +291,67 @@ export function PrecipitacionControl() {
                   );
                 })}
               </ul>
+
+              {susPuntos.length > 0 && (
+                <>
+                  <p className="text-accent/60 mt-3 mb-1 text-[11px] font-bold uppercase">
+                    {t.hidrologia.titulo}
+                  </p>
+                  <ul className="max-h-56 space-y-1.5 overflow-y-auto">
+                    {susPuntos.map((p) => {
+                      const txt = valorHidroMostrado(p.punto);
+                      const num =
+                        txt.trim() === ""
+                          ? null
+                          : Number(txt.replace(",", "."));
+                      const severidad =
+                        num != null && Number.isFinite(num)
+                          ? nivelAlerta(num, p)
+                          : "normal";
+                      return (
+                        <li key={p.punto} className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">
+                              {etiquetaPunto(p)}
+                            </p>
+                            {severidad !== "normal" && (
+                              <p
+                                className={`text-[11px] font-semibold ${
+                                  severidad === "emergencia"
+                                    ? "text-red-600"
+                                    : severidad === "critico"
+                                      ? "text-orange-600"
+                                      : "text-amber-600"
+                                }`}
+                              >
+                                {t.hidrologia.severidad[severidad]}
+                              </p>
+                            )}
+                          </div>
+                          <input
+                            type="number"
+                            step="0.01"
+                            inputMode="decimal"
+                            placeholder="—"
+                            aria-label={`${etiquetaPunto(p)} (${unidadLectura(p.tipo)})`}
+                            value={valorHidroMostrado(p.punto)}
+                            onChange={(e) =>
+                              setValoresHidro((v) => ({
+                                ...v,
+                                [p.punto]: e.target.value,
+                              }))
+                            }
+                            className="w-20 rounded-lg bg-white px-2 py-1.5 text-right text-sm tabular-nums ring-1 ring-black/15"
+                          />
+                          <span className="text-[11px] text-slate-400">
+                            {unidadLectura(p.tipo)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              )}
 
               <button
                 type="button"

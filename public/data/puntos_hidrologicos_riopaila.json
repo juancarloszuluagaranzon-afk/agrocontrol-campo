@@ -1,0 +1,65 @@
+[
+  {
+    "punto": "Río La Paila - Bocatoma",
+    "tipo": "nivel_rio",
+    "tecnico": "Jhon Erick Sanmiguel",
+    "zona": 1,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  },
+  {
+    "punto": "Río La Paila - Luisa 3",
+    "tipo": "nivel_rio",
+    "tecnico": "Jhon Erick Sanmiguel",
+    "zona": 1,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  },
+  {
+    "punto": "Bombeo Los Chivos",
+    "tipo": "nivel_rio",
+    "tecnico": "Sebastian Rodriguez",
+    "zona": 2,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  },
+  {
+    "punto": "Mateo",
+    "tipo": "nivel_rio",
+    "tecnico": "Sebastian Rodriguez",
+    "zona": 2,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  },
+  {
+    "punto": "Paila",
+    "tipo": "nivel_rio",
+    "tecnico": "Sebastian Rodriguez",
+    "zona": 2,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  },
+  {
+    "punto": "Nivel Río Cauca Luisa 1",
+    "tipo": "nivel_rio",
+    "tecnico": "Manuel Primero",
+    "zona": 1,
+    "alerta": 916.5,
+    "critico": 917.0,
+    "emergencia": 917.5
+  },
+  {
+    "punto": "Andres Mesa",
+    "tipo": "evaporacion",
+    "tecnico": "Andres Mesa",
+    "zona": 2,
+    "alerta": null,
+    "critico": null,
+    "emergencia": null
+  }
+]

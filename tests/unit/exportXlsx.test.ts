@@ -69,5 +69,7 @@ describe("xlsxConsolidadoMensual", () => {
     expect(blob.type).toBe(
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-  });
+  }, // El import dinámico de exceljs + armar el workbook es más lento que el
+  // timeout por defecto (5s) cuando corre junto al resto de la suite.
+  15_000);
 });
