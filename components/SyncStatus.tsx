@@ -55,10 +55,10 @@ export function SyncStatus() {
     <span
       role="status"
       aria-live="polite"
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${tono}`}
+      className={`inline-flex items-center rounded-full p-1.5 ${tono}`}
     >
       <span aria-hidden className={`size-2 rounded-full ${punto}`} />
-      {texto}
+      <span className="sr-only">{texto}</span>
     </span>
   );
 }
