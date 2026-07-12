@@ -1,34 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { catalogoSchema, type CatalogoEntry } from "@/domain/suertes/schema";
+import { useMemo, useState } from "react";
+import type { CatalogoEntry } from "@/domain/suertes/schema";
 import { searchCatalogo } from "@/domain/suertes/search";
 import { useMapStore } from "@/lib/store/mapStore";
+import { useCatalogo } from "@/lib/data/useCatalogo";
 
 /**
- * Buscador de suertes por `sec_ste` o hacienda (§5). Carga el catálogo ligero,
- * filtra con la lógica de dominio y, al elegir, vuela al lote y lo resalta.
+ * Buscador de suertes por `sec_ste` o hacienda (§5). Carga el catálogo ligero
+ * **de la planta activa**, filtra con la lógica de dominio y, al elegir, vuela
+ * al lote y lo resalta.
  */
 export function SearchBox() {
-  const [catalogo, setCatalogo] = useState<CatalogoEntry[]>([]);
+  const catalogo = useCatalogo();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const flyTo = useMapStore((s) => s.flyTo);
-
-  useEffect(() => {
-    let cancelled = false;
-    void fetch("/data/tablones_catalogo.json")
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        if (!cancelled) setCatalogo(catalogoSchema.parse(data));
-      })
-      .catch(() => {
-        /* el mapa sigue usable sin buscador */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const resultados = useMemo(
     () => searchCatalogo(catalogo, query),
