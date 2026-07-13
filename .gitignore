@@ -57,3 +57,6 @@ next-env.d.ts
 
 # Artefactos de revisión local (capturas)
 shots/
+
+.vercel
+.env*

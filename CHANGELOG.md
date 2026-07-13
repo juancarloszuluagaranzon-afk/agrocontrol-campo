@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fix — el buscador de suertes no funcionaba en Castilla
+
+- `SearchBox` cargaba el catálogo de Riopaila con una ruta fija, sin importar la planta
+  activa. En Castilla, escribir un código real de suerte (ej. `2108-122`) no encontraba
+  nada porque comparaba contra suertes de otro ingenio. Ahora usa `useCatalogo()` (ya
+  usado en la tabla de área neta), que carga el catálogo de la planta activa y se
+  recarga al cambiar de planta.
+
 ### Fix — datos de fechas pasadas que no aparecían en la planilla de lluvia
 
 - Al elegir una fecha con historial, los pluviómetros podían mostrarse vacíos aunque el dato
