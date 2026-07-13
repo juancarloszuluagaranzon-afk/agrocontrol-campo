@@ -11,6 +11,8 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { baseStyle } from "@/lib/geo/basemap";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
+import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
+import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import { accuracyCircle } from "@/lib/geo/gps";
 import {
@@ -26,6 +28,8 @@ import {
   GPS_DOT,
   GPS_HALO,
   GPS_SOURCE,
+  HACIENDA_LABEL_LAYER,
+  HACIENDA_LABEL_SOURCE,
   MARCADORES_DOT,
   MARCADORES_LABEL,
   MARCADORES_SOURCE,
@@ -132,6 +136,8 @@ function addContextLayer(map: MlMap, id: string): void {
     });
   }
 }
+
+const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 
 export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -261,12 +267,55 @@ export function MapView() {
           // número de tablón se ve en el panel al tocar el lote.
           "text-field": ["get", "sec_ste"],
           "text-size": 11,
-          "text-font": ["Open Sans Regular"],
+          // "Open Sans Regular" no existe en el servidor de glyphs configurado
+          // (demotiles.maplibre.org solo sirve "Open Sans Semibold") — con
+          // Regular el texto no se veía. Mismo fix en todas las capas symbol
+          // de este archivo (mediciones, marcadores, plano de puntos, gotas).
+          "text-font": ["Open Sans Semibold"],
         },
         paint: {
           "text-color": "#ffffff",
           "text-halo-color": "#0f172a",
           "text-halo-width": 1.2,
+        },
+      });
+
+      // Marca de agua del nombre de hacienda, solo visible en modo Plano y
+      // alejado — se apaga justo donde SUERTES_LABEL (minzoom 13) toma el
+      // relevo (§ADR-0014). Se llena vía useHaciendasLabel más abajo.
+      map.addSource(HACIENDA_LABEL_SOURCE, {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: HACIENDA_LABEL_LAYER,
+        type: "symbol",
+        source: HACIENDA_LABEL_SOURCE,
+        maxzoom: 13,
+        layout: {
+          visibility: "none",
+          "text-field": ["get", "hacienda"],
+          "text-font": ["Open Sans Semibold"],
+          "text-transform": "uppercase",
+          "text-letter-spacing": 0.05,
+          "text-size": ["interpolate", ["linear"], ["zoom"], 9, 16, 13, 34],
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+        },
+        paint: {
+          "text-color":
+            haciendaLabelColorExpression() as unknown as ExpressionSpecification,
+          "text-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            9,
+            0.35,
+            12,
+            0.35,
+            13,
+            0,
+          ],
         },
       });
 
@@ -344,7 +393,7 @@ export function MapView() {
           "text-size": 11,
           "text-offset": [0, 0.6],
           "text-anchor": "top",
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Open Sans Semibold"],
         },
         paint: {
           "text-color": "#ffffff",
@@ -412,7 +461,7 @@ export function MapView() {
           "text-size": 11,
           "text-offset": [0, 1.2],
           "text-anchor": "top",
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Open Sans Semibold"],
         },
         paint: {
           "text-color": "#ffffff",
@@ -442,7 +491,7 @@ export function MapView() {
         layout: {
           "text-field": ["get", "etiqueta"],
           "text-size": 10,
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Open Sans Semibold"],
         },
         paint: { "text-color": "#ffffff" },
       });
@@ -470,7 +519,7 @@ export function MapView() {
           // Número de mm dentro del bulbo de la gota.
           "text-field": ["get", "etiqueta"],
           "text-size": 11,
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Open Sans Semibold"],
           "text-offset": [0, -0.55],
           "text-allow-overlap": true,
         },
@@ -500,6 +549,12 @@ export function MapView() {
         if (useMapStore.getState().measureMode === "off") return;
         useMapStore.getState().addVertex([e.lngLat.lng, e.lngLat.lat]);
       });
+
+      // Expone la instancia solo en e2e (Playwright), para inspeccionar
+      // capas/fuentes sin acceso DOM — nunca en producción real.
+      if (E2E) {
+        (window as unknown as { __e2eMap: MlMap }).__e2eMap = map;
+      }
 
       setMapReady(true);
     });
@@ -708,11 +763,31 @@ export function MapView() {
     source.setData({ type: "FeatureCollection", features });
   }, [mediciones]);
 
+  // ── Marca de agua del nombre de hacienda (modo Plano, ADR-0014) ──
+  const haciendasLabel = useHaciendasLabel();
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    const source = map.getSource(HACIENDA_LABEL_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!source) return;
+    const features: Feature<Point>[] = haciendasLabel.map((h) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [h.lon, h.lat] },
+      properties: { hacienda: h.hacienda },
+    }));
+    source.setData({ type: "FeatureCollection", features });
+  }, [haciendasLabel, mapReady]);
+
   // ── Modo de base: satélite ↔ plano (tablones por hacienda) ──
   const baseMode = useMapStore((s) => s.baseMode);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getLayer(SUERTES_FILL)) return;
+    // `mapReady` en las deps: si el usuario cambia de modo antes de que el
+    // mapa termine de montar todas las capas (map.on("load")), este efecto
+    // se reintenta al quedar listo en vez de perder el cambio en silencio.
+    if (!map || !mapReady || !map.getLayer(SUERTES_FILL)) return;
     const plano = baseMode === "plano";
     if (map.getLayer("esri-imagery")) {
       map.setLayoutProperty(
@@ -744,7 +819,14 @@ export function MapView() {
       "text-halo-color",
       plano ? "#ffffff" : "#0f172a",
     );
-  }, [baseMode]);
+    if (map.getLayer(HACIENDA_LABEL_LAYER)) {
+      map.setLayoutProperty(
+        HACIENDA_LABEL_LAYER,
+        "visibility",
+        plano ? "visible" : "none",
+      );
+    }
+  }, [baseMode, mapReady]);
 
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);

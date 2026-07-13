@@ -16,16 +16,19 @@ describe("config de plantas (§ ADR-0007)", () => {
     const tablones = PLANTA_IDS.map((id) => PLANTAS[id].tablones);
     const catalogos = PLANTA_IDS.map((id) => PLANTAS[id].catalogo);
     const maestros = PLANTA_IDS.map((id) => PLANTAS[id].maestro);
+    const haciendasLabel = PLANTA_IDS.map((id) => PLANTAS[id].haciendasLabel);
     // sin colisiones entre plantas
     expect(new Set(tablones).size).toBe(PLANTA_IDS.length);
     expect(new Set(catalogos).size).toBe(PLANTA_IDS.length);
     expect(new Set(maestros).size).toBe(PLANTA_IDS.length);
+    expect(new Set(haciendasLabel).size).toBe(PLANTA_IDS.length);
     for (const id of PLANTA_IDS) {
       const p = PLANTAS[id];
       expect(p.id).toBe(id);
       expect(p.tablones.endsWith(".geojson")).toBe(true);
       expect(p.catalogo.endsWith(".json")).toBe(true);
       expect(p.maestro.endsWith(".json")).toBe(true);
+      expect(p.haciendasLabel.endsWith(".json")).toBe(true);
     }
   });
 

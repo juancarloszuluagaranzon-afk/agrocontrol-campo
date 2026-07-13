@@ -10,3 +10,4 @@ añade una nueva.
 | 0002 | Limpieza de las capas de contexto del GeoPDF                      | Aceptada |
 | 0003 | Build de producción con webpack por Serwist (Next 16/Turbopack)   | Aceptada |
 | 0004 | Outbox de sincronización sobre el store persistido (no Dexie aún) | Aceptada |
+| 0014 | Marca de agua del nombre de hacienda en modo Plano                | Aceptada |

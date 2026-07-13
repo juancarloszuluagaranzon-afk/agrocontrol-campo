@@ -22,6 +22,10 @@ export const SUERTES_SELECTED = "suertes-selected";
 // Etiqueta de nomenclatura: cada tablón rotula el código de su suerte.
 export const SUERTES_LABEL = "suertes-label";
 
+// Marca de agua del nombre de hacienda, solo en modo Plano (§ADR-0014).
+export const HACIENDA_LABEL_SOURCE = "hacienda-label";
+export const HACIENDA_LABEL_LAYER = "hacienda-label-layer";
+
 // GPS (§5: Mi ubicación)
 export const GPS_SOURCE = "gps";
 // Disco de precisión (polígono de radio real `accuracy`); reemplaza al halo fijo.
