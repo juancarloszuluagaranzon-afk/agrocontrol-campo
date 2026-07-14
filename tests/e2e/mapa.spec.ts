@@ -47,6 +47,75 @@ test("mapa: el modo Plano muestra la leyenda de haciendas", async ({
   await expect(page.getByText("PERALONSO")).toBeVisible();
 });
 
+test("mapa: modo Plano muestra la marca de agua del nombre de hacienda (ADR-0014)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  // Espera a que el mapa termine de montar todas sus capas (map.on("load"))
+  // antes de interactuar, para no correr contra el efecto de baseMode a mitad
+  // de carga (el propio mapa expone __e2eMap solo en E2E, ver MapView.tsx).
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  await page.getByRole("button", { name: "🗺️ Plano" }).click();
+
+  // La capa se llena de forma asíncrona (fetch del JSON de etiquetas); espera
+  // a que la fuente tenga datos y la capa esté visible.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const w = window as unknown as {
+            __e2eMap?: {
+              querySourceFeatures: (
+                id: string,
+              ) => { properties: { hacienda: string } }[];
+              getLayoutProperty: (id: string, prop: string) => unknown;
+            };
+          };
+          const map = w.__e2eMap;
+          if (!map) return null;
+          // querySourceFeatures puede repetir features en bordes de tiles
+          // internos (comportamiento documentado de MapLibre); deduplica.
+          const nombres = new Set(
+            map
+              .querySourceFeatures("hacienda-label")
+              .map((f) => f.properties.hacienda),
+          );
+          return {
+            featureCount: nombres.size,
+            visibility: map.getLayoutProperty(
+              "hacienda-label-layer",
+              "visibility",
+            ),
+          };
+        }),
+      { timeout: 10_000 },
+    )
+    .toMatchObject({ featureCount: 17, visibility: "visible" });
+
+  // Al volver a Satélite, se apaga junto con el color por hacienda.
+  await page.getByRole("button", { name: "🛰️ Satélite" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const w = window as unknown as {
+          __e2eMap?: { getLayoutProperty: (id: string, p: string) => unknown };
+        };
+        return w.__e2eMap?.getLayoutProperty(
+          "hacienda-label-layer",
+          "visibility",
+        );
+      }),
+    )
+    .toBe("none");
+});
+
 test("mapa: en móvil el buscador y el conmutador no se solapan", async ({
   page,
 }) => {

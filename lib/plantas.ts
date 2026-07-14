@@ -31,6 +31,8 @@ export interface PlantaConfig {
   catalogo: string;
   /** Maestro agronómico por `sec_ste`. */
   maestro: string;
+  /** Puntos de etiqueta de hacienda (marca de agua del modo Plano, ADR-0014). */
+  haciendasLabel: string;
   /** Encuadre inicial del mapa. */
   aoi: PlantaAOI;
 }
@@ -43,6 +45,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     tablones: "/data/tablones_riopaila.geojson",
     catalogo: "/data/tablones_catalogo.json",
     maestro: "/data/maestro_suertes.json",
+    haciendasLabel: "/data/haciendas_label_riopaila.json",
     aoi: {
       center: AOI.center,
       zoom: AOI.zoom,
@@ -57,6 +60,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     tablones: "/data/tablones_castilla.geojson",
     catalogo: "/data/tablones_castilla_catalogo.json",
     maestro: "/data/maestro_castilla.json",
+    haciendasLabel: "/data/haciendas_label_castilla.json",
     // bbox cartografía Castilla: [-76.496, 3.058, -76.225, 3.443] (más amplia
     // que Riopaila → un punto de zoom menos).
     aoi: {

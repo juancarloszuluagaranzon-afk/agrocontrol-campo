@@ -5,6 +5,21 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — marca de agua del nombre de hacienda en modo Plano
+
+- En modo **Plano**, el nombre de cada hacienda aparece ahora como una marca de agua (texto
+  grande, semitransparente, en el color propio de la hacienda) sobre su área — se apaga al
+  acercar el zoom, justo donde ya aparecen los códigos de suerte individuales. Aplica a ambas
+  plantas (en Castilla, sin paleta de colores propia, usa un gris oscuro uniforme). Ver
+  **ADR-0014**.
+- De paso se corrigió un bug preexistente que afectaba **todo el texto del mapa**: códigos de
+  suerte, nombres de marcadores y mediciones, números de punto de muestreo y los mm sobre las
+  gotas de lluvia usaban una fuente (`"Open Sans Regular"`) que no existe en el servidor de
+  glyphs configurado — no se veían. Ahora usan `"Open Sans Semibold"`, la única disponible ahí.
+- También se corrigió una condición de carrera en el cambio Satélite↔Plano: si se tocaba el
+  conmutador antes de que el mapa terminara de montar sus capas, el cambio de modo no se
+  aplicaba y quedaba pegado hasta el siguiente clic.
+
 ### Fix — el buscador de suertes no funcionaba en Castilla
 
 - `SearchBox` cargaba el catálogo de Riopaila con una ruta fija, sin importar la planta
