@@ -99,6 +99,15 @@ export const t = {
       emergencia: "Emergencia",
     },
   },
+  encuesta: {
+    titulo: "Tu opinión nos ayuda",
+    pregunta: "¿Qué tan satisfecho estás con Rio Map?",
+    estrellaLabel: (n: number) => `${n} estrella${n === 1 ? "" : "s"}`,
+    comentarioLabel: "¿Algo que quieras contarnos? (opcional)",
+    comentarioPlaceholder: "Escribe aquí…",
+    enviar: "Enviar",
+    obligatorio: "Elige una calificación para continuar.",
+  },
 } as const;
 
 export type Textos = typeof t;

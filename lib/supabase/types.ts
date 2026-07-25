@@ -227,6 +227,26 @@ export interface Database {
         >;
         Relationships: [];
       };
+      encuesta_satisfaccion: {
+        Row: {
+          id: string;
+          user_id: string;
+          estrellas: number;
+          comentario: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          estrellas: number;
+          comentario?: string;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["encuesta_satisfaccion"]["Insert"]
+        >;
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: number;

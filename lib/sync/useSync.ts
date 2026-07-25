@@ -5,6 +5,7 @@ import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { useHidrologiaStore } from "@/lib/store/hidrologiaStore";
+import { useEncuestaStore } from "@/lib/store/encuestaStore";
 import { useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -12,12 +13,14 @@ import {
   pushPendingMediciones,
   pushPendingPrecipitaciones,
   pushPendingLecturasHidro,
+  pushPendingEncuesta,
   fetchAllRows,
 } from "@/lib/sync/syncManager";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
 import type { Precipitacion } from "@/domain/precipitaciones/schema";
 import type { LecturaHidro } from "@/domain/hidrologia/schema";
+import type { RespuestaEncuesta } from "@/domain/encuesta/schema";
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 const INTERVALO_MS = 20_000;
@@ -34,6 +37,7 @@ export function useSync(): void {
   const medPending = useMedicionesStore((s) => s.pending);
   const precPending = usePrecipitacionesStore((s) => s.pending);
   const hidroPending = useHidrologiaStore((s) => s.pending);
+  const encuestaPending = useEncuestaStore((s) => s.pending);
   const enCurso = useRef(false);
 
   const flush = useCallback(async () => {
@@ -149,6 +153,35 @@ export function useSync(): void {
         for (const l of localPending) byId.set(l.id, l);
         cur.replaceAll([...byId.values()]);
       }
+
+      // Encuesta de satisfacción: subir pendiente y bajar la propia (RLS ya
+      // filtra a "solo mi fila" — a lo sumo una, por el índice único).
+      const enc = useEncuestaStore.getState();
+      enc.setSyncing(true);
+      enc.setUserId(user.id);
+      if (enc.pending.length > 0) {
+        const res = await pushPendingEncuesta(
+          supabase,
+          enc.items,
+          enc.pending,
+          user.id,
+        );
+        if (res.syncedIds.length > 0) enc.markSynced(res.syncedIds);
+      }
+      const encuesta = await fetchAllRows<RespuestaEncuesta>(
+        supabase,
+        "encuesta_satisfaccion",
+      );
+      if (encuesta) {
+        const cur = useEncuestaStore.getState();
+        const localPending = cur.items.filter((r) =>
+          cur.pending.includes(r.id),
+        );
+        const byId = new Map<string, RespuestaEncuesta>();
+        for (const r of encuesta) byId.set(r.id, r);
+        for (const r of localPending) byId.set(r.id, r);
+        cur.replaceAll([...byId.values()]);
+      }
     } catch {
       /* reintenta en el próximo ciclo */
     } finally {
@@ -157,6 +190,10 @@ export function useSync(): void {
       useMedicionesStore.getState().setSyncing(false);
       usePrecipitacionesStore.getState().setSyncing(false);
       useHidrologiaStore.getState().setSyncing(false);
+      useEncuestaStore.getState().setSyncing(false);
+      // Se marca sin importar éxito/fallo: el popup de encuesta ya puede
+      // decidir si mostrarse con lo que haya en el store (§ADR-0015).
+      useEncuestaStore.getState().setHydratedFromServer(true);
     }
   }, [user, setSyncing]);
 
@@ -175,5 +212,6 @@ export function useSync(): void {
     medPending.length,
     precPending.length,
     hidroPending.length,
+    encuestaPending.length,
   ]);
 }
