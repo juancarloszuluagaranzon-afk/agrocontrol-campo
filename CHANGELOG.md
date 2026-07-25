@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Encuesta de satisfacción (popup obligatorio de 5 estrellas)
+
+- Al entrar, cada usuario ve una sola vez un popup para calificar la app de 1 a 5 estrellas, con
+  un comentario opcional — obligatorio, sin opción de posponer. Funciona sin conexión (se guarda
+  y sincroniza cuando vuelve la señal) y no se vuelve a mostrar una vez respondido, ni siquiera
+  desde otro dispositivo. Tabla nueva `encuesta_satisfaccion` (RLS privada, migración **0011**).
+  Ver **ADR-0015**.
+
 ### Mapa — marca de agua del nombre de hacienda en modo Plano
 
 - En modo **Plano**, el nombre de cada hacienda aparece ahora como una marca de agua (texto

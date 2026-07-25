@@ -4,6 +4,7 @@ import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
 import type { Precipitacion } from "@/domain/precipitaciones/schema";
 import type { LecturaHidro } from "@/domain/hidrologia/schema";
+import type { RespuestaEncuesta } from "@/domain/encuesta/schema";
 
 export interface PushResult {
   syncedIds: string[];
@@ -202,4 +203,47 @@ export async function pushPendingLecturasHidro(
 
   if (error) return { syncedIds: [], error: error.message };
   return { syncedIds: pendientes.map((l) => l.id), error: null };
+}
+
+type EncuestaRow =
+  Database["public"]["Tables"]["encuesta_satisfaccion"]["Insert"];
+
+/** Mapea una respuesta local a una fila de Supabase (`user_id` = dueño, RLS). */
+export function respuestaEncuestaToRow(
+  r: RespuestaEncuesta,
+  authUid: string,
+): EncuestaRow {
+  return {
+    id: r.id,
+    user_id: authUid,
+    estrellas: r.estrellas,
+    comentario: r.comentario,
+    created_at: r.created_at,
+  };
+}
+
+/**
+ * Vacía el outbox de la encuesta (upsert idempotente por id). Como solo cabe
+ * una respuesta por usuario (índice único `user_id`), una carrera entre dos
+ * dispositivos del mismo usuario puede violar ese índice — se trata como
+ * "ya sincronizado" (se limpia de `pending`) en vez de reintentar para siempre.
+ */
+export async function pushPendingEncuesta(
+  supabase: SupabaseClient<Database>,
+  items: RespuestaEncuesta[],
+  pendingIds: string[],
+  authUid: string,
+): Promise<PushResult> {
+  const pendientes = items.filter((r) => pendingIds.includes(r.id));
+  if (pendientes.length === 0) return { syncedIds: [], error: null };
+
+  const rows = pendientes.map((r) => respuestaEncuestaToRow(r, authUid));
+  const { error } = await supabase
+    .from("encuesta_satisfaccion")
+    .upsert(rows, { onConflict: "id" });
+
+  if (error && error.code !== "23505") {
+    return { syncedIds: [], error: error.message };
+  }
+  return { syncedIds: pendientes.map((r) => r.id), error: null };
 }

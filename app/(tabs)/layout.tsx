@@ -3,6 +3,7 @@ import { SyncRunner } from "@/components/SyncRunner";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { PlantaSwitch } from "@/components/PlantaSwitch";
+import { EncuestaSatisfaccion } from "@/components/EncuestaSatisfaccion";
 import { t } from "@/lib/i18n/es-CO";
 
 /**
@@ -32,6 +33,7 @@ export default function TabsLayout({
         <AuthGate>{children}</AuthGate>
       </main>
       <SyncRunner />
+      <EncuestaSatisfaccion />
     </div>
   );
 }
