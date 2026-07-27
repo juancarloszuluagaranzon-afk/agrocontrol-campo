@@ -5,6 +5,16 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Seguridad — el rol no es auto-editable y la auditoría queda restringida
+
+- **Corrige un escalamiento de privilegios**: un usuario podía cambiar su propia columna `rol`
+  (la RLS de `profiles` no distinguía columnas) y ascenderse a "dirección". Ahora un trigger
+  bloquea el cambio de rol salvo que lo haga dirección o el administrador desde el SQL Editor.
+- **Cierra una fuga de datos**: `audit_log` (que guarda el antes/después completo de cada
+  cambio) tenía lectura abierta a cualquier usuario autenticado, exponiendo marcadores,
+  mediciones y encuestas privadas de todos. Ahora solo la lee dirección. Migración **0012**.
+  Ver **ADR-0016**.
+
 ### Encuesta de satisfacción (popup obligatorio de 5 estrellas)
 
 - Al entrar, cada usuario ve una sola vez un popup para calificar la app de 1 a 5 estrellas, con

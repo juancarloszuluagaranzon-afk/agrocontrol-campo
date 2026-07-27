@@ -21,3 +21,4 @@ añade una nueva.
 | 0013 | Paginar la descarga en el sync de tablas compartidas              | Aceptada |
 | 0014 | Marca de agua del nombre de hacienda en modo Plano                | Aceptada |
 | 0015 | Encuesta de satisfacción (popup obligatorio de 5 estrellas)       | Aceptada |
+| 0016 | Endurecimiento: rol no auto-editable y auditoría restringida      | Aceptada |
