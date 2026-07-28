@@ -47,7 +47,9 @@ def wgs(ring):
     return [[round(lon, 7), round(lat, 7)] for lon, lat in (tr.transform(x, y) for x, y in ring)]
 
 
-def convert(src_name, out_name, layer_name, geom, encoding="utf-8"):
+def convert(src_name, out_name, layer_name, geom, encoding="utf-8", filtro=None):
+    """`filtro`: predicado opcional sobre las props; solo se incluyen las que lo
+    cumplen (p. ej. separar canales de riego de drenajes por `RIEGO_DREN`)."""
     if not (BASE / f"{src_name}.shp").exists():
         print(f"{out_name}: omitido (no está '{src_name}.shp' en la carpeta)")
         return
@@ -56,6 +58,8 @@ def convert(src_name, out_name, layer_name, geom, encoding="utf-8"):
     features = []
     for shp, rec in zip(r.shapes(), r.records()):
         props = {k: (v.strip() if isinstance(v, str) else v) for k, v in zip(fields, rec)}
+        if filtro is not None and not filtro(props):
+            continue
         if geom == "point":
             if not shp.points:
                 continue
@@ -87,7 +91,12 @@ def convert(src_name, out_name, layer_name, geom, encoding="utf-8"):
 
 if __name__ == "__main__":
     # Reemplazos con el dato oficial.
-    convert("Canales de riego y drenaje", "contexto_canales.geojson", "CANALES", "line", "utf-8")
+    # Los canales vienen etiquetados por `RIEGO_DREN` ("Riego"/"Drenaje"); se
+    # separan en dos capas para poder ver solo una u otra.
+    convert("Canales de riego y drenaje", "contexto_canales_riego.geojson", "CANALES DE RIEGO",
+            "line", "utf-8", filtro=lambda p: p.get("RIEGO_DREN") == "Riego")
+    convert("Canales de riego y drenaje", "contexto_drenajes.geojson", "DRENAJES",
+            "line", "utf-8", filtro=lambda p: p.get("RIEGO_DREN") == "Drenaje")
     convert("Cuerpos de agua", "contexto_cuerpos_agua.geojson", "CUERPOS DE AGUA", "polygon", "cp1252")
     convert("Redes Hídricas", "contexto_red_hidrica.geojson", "RED HIDRICA", "line", "utf-8")
     convert("Vias de acceso", "contexto_vias_acceso.geojson", "VIAS DE ACCESO", "line", "cp1252")

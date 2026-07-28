@@ -81,10 +81,18 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     defaultOn: false,
   },
   {
-    id: "canales",
-    label: "Canales riego/drenaje",
+    id: "canales_riego",
+    label: "Canales de riego",
     geometry: "line",
     color: "#22d3ee",
+    defaultOn: false,
+  },
+  {
+    id: "drenajes",
+    label: "Drenajes",
+    geometry: "line",
+    // Ámbar: se distingue del cian del riego cuando ambas capas están activas.
+    color: "#f59e0b",
     defaultOn: false,
   },
   {
