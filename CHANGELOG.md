@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — canales de riego y drenajes en capas separadas
+
+- La capa "Canales riego/drenaje" se dividió en dos interruptores independientes en 🗂️ Capas:
+  **Canales de riego** (50, cian) y **Drenajes** (88, ámbar). Así se puede ver solo riego, solo
+  drenaje, o ambos. Los canales oficiales ya venían etiquetados por tipo (`RIEGO_DREN`).
+
 ### Seguridad — el rol no es auto-editable y la auditoría queda restringida
 
 - **Corrige un escalamiento de privilegios**: un usuario podía cambiar su propia columna `rol`
