@@ -9,6 +9,8 @@ extraídas del GeoPDF (que tenían artefactos / menor calidad).
     - Canales de riego y drenaje (líneas)  -> contexto_canales.geojson
     - Cuerpos de agua (polígonos)          -> contexto_cuerpos_agua.geojson
     - Redes hídricas (líneas)              -> contexto_red_hidrica.geojson
+    - Vías de acceso (líneas)              -> contexto_vias_acceso.geojson
+    - Estaciones de bombeo (puntos)        -> contexto_estaciones_bombeo.geojson
   Nuevas:
     - Freatímetros (puntos, nivel freático) -> contexto_freatimetros.geojson
     - Pluviómetros (puntos)                 -> contexto_pluviometros.geojson
@@ -18,14 +20,20 @@ extraídas del GeoPDF (que tenían artefactos / menor calidad).
 Las .cpg de origen NO son uniformes: unas capas vienen en UTF-8 y otras en
 Windows-1252; por eso `convert()` recibe la codificación por capa (si no, los
 acentos salen rotos, p. ej. "André s" en vez de "Andrés").
+
+Uso:
+    python scripts/convertir_contexto.py                 # carpeta canónica por defecto
+    python scripts/convertir_contexto.py "ruta/carpeta"  # otra entrega de Ingeniería Agrícola
 """
 
 import json
+import sys
 from pathlib import Path
 import shapefile  # pyshp
 from pyproj import Transformer
 
-BASE = Path(r"C:\Users\Agr349\Documents\Rio Maps\Elementos qGIS\Elementos qGIS")
+DEFAULT_BASE = Path(r"C:\Users\Agr349\Documents\Rio Maps\Elementos qGIS\Elementos qGIS")
+BASE = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_BASE
 OUT_DIR = Path(__file__).resolve().parent.parent / "public" / "data"
 tr = Transformer.from_crs("EPSG:3115", "EPSG:4326", always_xy=True)
 
@@ -40,6 +48,9 @@ def wgs(ring):
 
 
 def convert(src_name, out_name, layer_name, geom, encoding="utf-8"):
+    if not (BASE / f"{src_name}.shp").exists():
+        print(f"{out_name}: omitido (no está '{src_name}.shp' en la carpeta)")
+        return
     r = shapefile.Reader(str(BASE / src_name), encoding=encoding)
     fields = [f[0] for f in r.fields[1:]]
     features = []
@@ -79,6 +90,8 @@ if __name__ == "__main__":
     convert("Canales de riego y drenaje", "contexto_canales.geojson", "CANALES", "line", "utf-8")
     convert("Cuerpos de agua", "contexto_cuerpos_agua.geojson", "CUERPOS DE AGUA", "polygon", "cp1252")
     convert("Redes Hídricas", "contexto_red_hidrica.geojson", "RED HIDRICA", "line", "utf-8")
+    convert("Vias de acceso", "contexto_vias_acceso.geojson", "VIAS DE ACCESO", "line", "cp1252")
+    convert("Estaciones de bombeo", "contexto_estaciones_bombeo.geojson", "ESTACIONES DE BOMBEO", "point", "utf-8")
     # Capas nuevas.
     convert("Freatímetros", "contexto_freatimetros.geojson", "FREATIMETROS", "point", "utf-8")
     convert("Pluviómetros", "contexto_pluviometros.geojson", "PLUVIOMETROS", "point", "utf-8")
