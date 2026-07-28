@@ -238,14 +238,14 @@ export function MapView() {
         id: SUERTES_FILL,
         type: "fill",
         source: SUERTES_SOURCE,
-        paint: { "fill-color": "#facc15", "fill-opacity": 0.12 },
+        paint: { "fill-color": "#000000", "fill-opacity": 0.12 },
       });
       map.addLayer({
         id: SUERTES_LINE,
         type: "line",
         source: SUERTES_SOURCE,
         paint: {
-          "line-color": "#facc15",
+          "line-color": "#000000",
           "line-width": 1.2,
           "line-opacity": 0.9,
         },
@@ -801,13 +801,13 @@ export function MapView() {
       "fill-color",
       plano
         ? (haciendaMatchExpression() as unknown as ExpressionSpecification)
-        : "#facc15",
+        : "#000000",
     );
     map.setPaintProperty(SUERTES_FILL, "fill-opacity", plano ? 0.62 : 0.12);
     map.setPaintProperty(
       SUERTES_LINE,
       "line-color",
-      plano ? "#475569" : "#facc15",
+      plano ? "#475569" : "#000000",
     );
     map.setPaintProperty(
       SUERTES_LABEL,
