@@ -15,6 +15,12 @@ versionado [SemVer](https://semver.org/lang/es/).
   mediciones y encuestas privadas de todos. Ahora solo la lee dirección. Migración **0012**.
   Ver **ADR-0016**.
 
+### Mapa — capas de contexto actualizadas con cartografía oficial nueva
+
+- Nueva entrega de shapefiles de Ingeniería Agrícola. Al regenerar, 7 de las 9 capas quedaron
+  idénticas a lo ya integrado; se refrescaron **vías de acceso** (79→80) y **estaciones de
+  bombeo** (16→17), ahora del dato oficial (antes salían de una extracción del GeoPDF).
+
 ### Encuesta de satisfacción (popup obligatorio de 5 estrellas)
 
 - Al entrar, cada usuario ve una sola vez un popup para calificar la app de 1 a 5 estrellas, con
