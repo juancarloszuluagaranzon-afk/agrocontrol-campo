@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — Castilla ahora tiene sus propias capas de contexto
+
+- Las capas de contexto (red hídrica, canales de riego, drenajes, vías, pozos, haciendas) pasan a
+  ser **por planta**: antes solo mostraban datos de Riopaila y en Castilla salían vacías. Castilla
+  suma además capas nuevas de infraestructura de riego: **hidrantes, llaves y tubería enterrada**.
+- La red hídrica de Castilla se limita a los **ríos con nombre** (se descartaron ~38 mil
+  micro-drenajes sin nombre que la hacían pesar 18 MB) y municipios se omitió por bajo valor/peso.
+  Los shapefiles vienen en datum Bogotá/West y se reproyectan leyendo el `.prj`. Ver **ADR-0017**.
+
 ### Mapa — canales de riego y drenajes en capas separadas
 
 - La capa "Canales riego/drenaje" se dividió en dos interruptores independientes en 🗂️ Capas:

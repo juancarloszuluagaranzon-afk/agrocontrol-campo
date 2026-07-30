@@ -32,6 +32,22 @@ describe("config de plantas (§ ADR-0007)", () => {
     }
   });
 
+  it("cada planta tiene sus capas de contexto, con archivos sin colisión entre plantas", () => {
+    for (const id of PLANTA_IDS) {
+      const capas = PLANTAS[id].contextLayers;
+      expect(capas.length).toBeGreaterThan(0);
+      // ids únicos dentro de la planta
+      expect(new Set(capas.map((l) => l.id)).size).toBe(capas.length);
+    }
+    // el archivo efectivo de cada capa (explícito o por convención) no debe
+    // repetirse ENTRE plantas: Castilla usa prefijo, Riopaila no.
+    const archivo = (l: { id: string; file?: string }) =>
+      l.file ?? `/data/contexto_${l.id}.geojson`;
+    const rio = new Set(PLANTAS.riopaila.contextLayers.map(archivo));
+    const cas = PLANTAS.castilla.contextLayers.map(archivo);
+    for (const f of cas) expect(rio.has(f)).toBe(false);
+  });
+
   it("el AOI de cada planta es coherente (zoom dentro de [min,max])", () => {
     for (const id of PLANTA_IDS) {
       const { center, zoom, minZoom, maxZoom } = PLANTAS[id].aoi;

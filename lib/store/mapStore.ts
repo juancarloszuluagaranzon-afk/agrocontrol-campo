@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { TablonProperties } from "@/domain/suertes/schema";
-import { CONTEXT_LAYERS } from "@/lib/geo/layers";
+import { PLANTA_IDS, PLANTAS } from "@/lib/plantas";
 import type { LngLat } from "@/lib/geo/measure";
 
 /** Objetivo de vuelo solicitado por el buscador (o un click externo). */
@@ -101,8 +101,13 @@ interface MapState {
   setPlacingMarker: (v: boolean) => void;
 }
 
+// Unión de las capas de todas las plantas (la lista es por planta): así el
+// toggle funciona sea cual sea la planta activa. No se persiste.
 const initialContext: Record<string, boolean> = Object.fromEntries(
-  CONTEXT_LAYERS.map((l) => [l.id, l.defaultOn]),
+  PLANTA_IDS.flatMap((id) => PLANTAS[id].contextLayers).map((l) => [
+    l.id,
+    l.defaultOn,
+  ]),
 );
 
 export const useMapStore = create<MapState>((set) => ({

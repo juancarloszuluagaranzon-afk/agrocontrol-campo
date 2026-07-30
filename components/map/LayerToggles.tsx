@@ -1,7 +1,8 @@
 "use client";
 
-import { CONTEXT_LAYERS } from "@/lib/geo/layers";
+import { plantaConfig } from "@/lib/plantas";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
 
 /**
  * Panel de capas de contexto conmutables (§5). Se abre desde el menú de
@@ -12,6 +13,8 @@ export function LayerToggles() {
   const activeContext = useMapStore((s) => s.activeContext);
   const toggleContext = useMapStore((s) => s.toggleContext);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
+  const planta = usePlantaStore((s) => s.planta);
+  const capas = plantaConfig(planta).contextLayers;
 
   return (
     <div className="bg-background pointer-events-auto w-56 max-w-[calc(100vw-1rem)] rounded-xl p-2 shadow-lg ring-1 ring-black/10">
@@ -28,7 +31,7 @@ export function LayerToggles() {
       </div>
       <fieldset className="mt-1">
         <legend className="sr-only">Capas de contexto</legend>
-        {CONTEXT_LAYERS.map((layer) => (
+        {capas.map((layer) => (
           <label
             key={layer.id}
             className="hover:bg-accent/5 flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm"

@@ -56,7 +56,7 @@ export const MARCADORES_LABEL = "marcadores-label";
 export type ContextGeometry = "line" | "fill" | "point";
 
 export interface ContextLayer {
-  /** id estable, también nombre del archivo en /data/contexto_<id>.geojson */
+  /** id estable; también nombre por defecto del archivo /data/contexto_<id>.geojson */
   id: string;
   label: string;
   geometry: ContextGeometry;
@@ -66,11 +66,22 @@ export interface ContextLayer {
   defaultOn: boolean;
   /** opacidad del relleno (solo geometry "fill"); por defecto 0.5 */
   fillOpacity?: number;
+  /**
+   * Ruta explícita del geojson. Si falta, se usa `/data/contexto_<id>.geojson`.
+   * Las capas de Castilla la fijan (`/data/contexto_castilla_<id>.geojson`);
+   * las de Riopaila la omiten (archivos históricos sin prefijo).
+   */
+  file?: string;
+}
+
+/** Ruta del geojson de una capa (explícita o convención por id). */
+export function contextLayerFile(layer: ContextLayer): string {
+  return layer.file ?? `/data/contexto_${layer.id}.geojson`;
 }
 
 /**
- * Capas de contexto conmutables. Los archivos son las versiones depuradas
- * (ADR-0002) en /public/data.
+ * Capas de contexto de **Riopaila** (las versiones depuradas, ADR-0002).
+ * La lista de capas es por planta (ver `PlantaConfig.contextLayers`).
  */
 export const CONTEXT_LAYERS: ContextLayer[] = [
   {
@@ -149,6 +160,86 @@ export const CONTEXT_LAYERS: ContextLayer[] = [
     geometry: "line",
     color: "#eab308",
     defaultOn: false,
+  },
+];
+
+/**
+ * Capas de contexto de **Castilla** (shapefiles oficiales convertidos por
+ * `scripts/convertir_contexto_castilla.py`, ADR-0017). Archivos con prefijo de
+ * planta; incluye tipos que Riopaila no tiene (hidrantes, llaves, tubería).
+ */
+export const CASTILLA_CONTEXT_LAYERS: ContextLayer[] = [
+  {
+    id: "red_hidrica",
+    label: "Red hídrica",
+    geometry: "line",
+    color: "#38bdf8",
+    defaultOn: false,
+    file: "/data/contexto_castilla_red_hidrica.geojson",
+  },
+  {
+    id: "canales_riego",
+    label: "Canales de riego",
+    geometry: "line",
+    color: "#22d3ee",
+    defaultOn: false,
+    file: "/data/contexto_castilla_canales_riego.geojson",
+  },
+  {
+    id: "drenajes",
+    label: "Drenajes",
+    geometry: "line",
+    color: "#f59e0b",
+    defaultOn: false,
+    file: "/data/contexto_castilla_drenajes.geojson",
+  },
+  {
+    id: "vias_acceso",
+    label: "Vías de acceso",
+    geometry: "line",
+    color: "#ef4444",
+    defaultOn: false,
+    file: "/data/contexto_castilla_vias_acceso.geojson",
+  },
+  {
+    id: "freatimetros",
+    label: "Pozos",
+    geometry: "point",
+    color: "#8b5cf6",
+    defaultOn: false,
+    file: "/data/contexto_castilla_freatimetros.geojson",
+  },
+  {
+    id: "hidrantes",
+    label: "Hidrantes",
+    geometry: "point",
+    color: "#16a34a",
+    defaultOn: false,
+    file: "/data/contexto_castilla_hidrantes.geojson",
+  },
+  {
+    id: "llaves",
+    label: "Llaves",
+    geometry: "point",
+    color: "#db2777",
+    defaultOn: false,
+    file: "/data/contexto_castilla_llaves.geojson",
+  },
+  {
+    id: "tuberia",
+    label: "Tubería enterrada",
+    geometry: "line",
+    color: "#a855f7",
+    defaultOn: false,
+    file: "/data/contexto_castilla_tuberia.geojson",
+  },
+  {
+    id: "haciendas",
+    label: "Haciendas (límites)",
+    geometry: "line",
+    color: "#eab308",
+    defaultOn: false,
+    file: "/data/contexto_castilla_haciendas.geojson",
   },
 ];
 
