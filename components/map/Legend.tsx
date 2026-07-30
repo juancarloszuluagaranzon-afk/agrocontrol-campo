@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { HACIENDA_COLORS } from "@/lib/geo/haciendas";
-import { CONTEXT_LAYERS } from "@/lib/geo/layers";
+import { plantaConfig } from "@/lib/plantas";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
 
 /**
  * Leyenda / convenciones del modo Plano (§5): color por hacienda y capas de
@@ -12,6 +13,8 @@ import { useMapStore } from "@/lib/store/mapStore";
 export function Legend() {
   const [open, setOpen] = useState(false);
   const baseMode = useMapStore((s) => s.baseMode);
+  const planta = usePlantaStore((s) => s.planta);
+  const capas = plantaConfig(planta).contextLayers;
 
   if (baseMode !== "plano") return null;
 
@@ -45,7 +48,7 @@ export function Legend() {
             Convenciones
           </p>
           <ul className="space-y-1">
-            {CONTEXT_LAYERS.map((l) => (
+            {capas.map((l) => (
               <li key={l.id} className="flex items-center gap-2">
                 <span
                   aria-hidden

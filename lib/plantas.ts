@@ -1,4 +1,9 @@
 import { AOI } from "@/lib/geo/basemap";
+import {
+  CONTEXT_LAYERS,
+  CASTILLA_CONTEXT_LAYERS,
+  type ContextLayer,
+} from "@/lib/geo/layers";
 
 /**
  * Multi-planta (§ ADR-0007). Rio Map sirve a más de una empresa del grupo
@@ -33,6 +38,8 @@ export interface PlantaConfig {
   maestro: string;
   /** Puntos de etiqueta de hacienda (marca de agua del modo Plano, ADR-0014). */
   haciendasLabel: string;
+  /** Capas de contexto conmutables de esta planta (ADR-0017). */
+  contextLayers: ContextLayer[];
   /** Encuadre inicial del mapa. */
   aoi: PlantaAOI;
 }
@@ -46,6 +53,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     catalogo: "/data/tablones_catalogo.json",
     maestro: "/data/maestro_suertes.json",
     haciendasLabel: "/data/haciendas_label_riopaila.json",
+    contextLayers: CONTEXT_LAYERS,
     aoi: {
       center: AOI.center,
       zoom: AOI.zoom,
@@ -61,6 +69,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     catalogo: "/data/tablones_castilla_catalogo.json",
     maestro: "/data/maestro_castilla.json",
     haciendasLabel: "/data/haciendas_label_castilla.json",
+    contextLayers: CASTILLA_CONTEXT_LAYERS,
     // bbox cartografía Castilla: [-76.496, 3.058, -76.225, 3.443] (más amplia
     // que Riopaila → un punto de zoom menos).
     aoi: {

@@ -22,3 +22,4 @@ añade una nueva.
 | 0014 | Marca de agua del nombre de hacienda en modo Plano                | Aceptada |
 | 0015 | Encuesta de satisfacción (popup obligatorio de 5 estrellas)       | Aceptada |
 | 0016 | Endurecimiento: rol no auto-editable y auditoría restringida      | Aceptada |
+| 0017 | Capas de contexto por planta (Castilla)                           | Aceptada |

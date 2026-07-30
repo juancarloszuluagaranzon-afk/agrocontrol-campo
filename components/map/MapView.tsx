@@ -16,7 +16,8 @@ import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
 import { accuracyCircle } from "@/lib/geo/gps";
 import {
-  CONTEXT_LAYERS,
+  type ContextLayer,
+  contextLayerFile,
   PDF_OVERLAY_SOURCE,
   PDF_OVERLAY_LAYER,
   PLANO_PUNTOS_SOURCE,
@@ -97,11 +98,9 @@ function gotaImage(color: string): ImageData {
 }
 
 /** Construye las capas de una capa de contexto según su geometría. */
-function addContextLayer(map: MlMap, id: string): void {
-  const cfg = CONTEXT_LAYERS.find((l) => l.id === id);
-  if (!cfg) return;
-  const layerId = contextLayerId(id);
-  const source = contextSourceId(id);
+function addContextLayer(map: MlMap, cfg: ContextLayer): void {
+  const layerId = contextLayerId(cfg.id);
+  const source = contextSourceId(cfg.id);
   const common = {
     id: layerId,
     source,
@@ -218,16 +217,17 @@ export function MapView() {
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
 
-      // Capas de contexto (ocultas por defecto) antes de las suertes.
-      for (const cfg of CONTEXT_LAYERS) {
+      // Capas de contexto de la planta activa (ocultas por defecto) antes de
+      // las suertes.
+      for (const layer of cfg.contextLayers) {
         // "pluviometros" no es un círculo plano: se dibuja como gotas de color con
         // los mm de hoy (capa LLUVIA_HOY, más abajo).
-        if (cfg.id === "pluviometros") continue;
-        map.addSource(contextSourceId(cfg.id), {
+        if (layer.id === "pluviometros") continue;
+        map.addSource(contextSourceId(layer.id), {
           type: "geojson",
-          data: `/data/contexto_${cfg.id}.geojson`,
+          data: contextLayerFile(layer),
         });
-        addContextLayer(map, cfg.id);
+        addContextLayer(map, layer);
       }
 
       // El backdrop del "Plano de campo" (image source) se crea bajo demanda en su
@@ -563,7 +563,7 @@ export function MapView() {
       map.remove();
       mapRef.current = null;
     };
-  }, [setSelected, cfg.tablones, cfg.aoi]);
+  }, [setSelected, cfg.tablones, cfg.aoi, cfg.contextLayers]);
 
   // ── Resaltado de la suerte seleccionada ──
   const selectedTabId = useMapStore((s) => s.selected?.tab_id ?? "");
@@ -578,16 +578,16 @@ export function MapView() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    for (const cfg of CONTEXT_LAYERS) {
-      const layerId = contextLayerId(cfg.id);
+    for (const layer of cfg.contextLayers) {
+      const layerId = contextLayerId(layer.id);
       if (!map.getLayer(layerId)) continue;
       map.setLayoutProperty(
         layerId,
         "visibility",
-        activeContext[cfg.id] ? "visible" : "none",
+        activeContext[layer.id] ? "visible" : "none",
       );
     }
-  }, [activeContext]);
+  }, [activeContext, cfg.contextLayers]);
 
   // ── Vuelo solicitado por el buscador ──
   const flyTarget = useMapStore((s) => s.flyTarget);
