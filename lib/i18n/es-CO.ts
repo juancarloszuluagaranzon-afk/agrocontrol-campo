@@ -108,6 +108,11 @@ export const t = {
     enviar: "Enviar",
     obligatorio: "Elige una calificación para continuar.",
   },
+  compartir: {
+    boton: "Compartir",
+    titulo: "Ubicación · Rio Map",
+    puntoCompartido: "Punto compartido",
+  },
 } as const;
 
 export type Textos = typeof t;

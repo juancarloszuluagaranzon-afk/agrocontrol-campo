@@ -18,8 +18,10 @@ import { ReporteLluviaControl } from "@/components/map/ReporteLluviaControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
 import { PlantaSelector } from "@/components/PlantaSelector";
+import { useEffect } from "react";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { isPlantaId } from "@/lib/plantas";
 
 /**
  * Pestaña Mapa / Campo (§5): mapa a pantalla completa. Estilo Avenza: el mapa
@@ -33,6 +35,15 @@ export function MapScreen() {
   const activeTool = useMapStore((s) => s.activeTool);
   const planta = usePlantaStore((s) => s.planta);
   const hydrated = usePlantaStore((s) => s.hydrated);
+  const setPlanta = usePlantaStore((s) => s.setPlanta);
+
+  // Deep-link compartido (§ADR-0018): si el link trae `?p=<planta>`, cae en esa
+  // planta antes de montar el mapa (el punto puede ser de la otra empresa).
+  useEffect(() => {
+    if (!hydrated) return;
+    const p = new URLSearchParams(window.location.search).get("p");
+    if (isPlantaId(p) && p !== planta) setPlanta(p);
+  }, [hydrated, planta, setPlanta]);
 
   // Aún leyendo localStorage: no parpadear el selector ni el mapa.
   if (!hydrated) return <div className="absolute inset-0" />;

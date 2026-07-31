@@ -15,6 +15,10 @@ import {
 } from "@/domain/marcadores/schema";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
+import { compartirUbicacion } from "@/lib/share/compartir";
+import { plantaConfig } from "@/lib/plantas";
+import { t } from "@/lib/i18n/es-CO";
 
 const campo =
   "rounded-lg ring-1 ring-black/15 px-3 py-2 text-sm w-full bg-white";
@@ -27,6 +31,7 @@ export function MarcadorControl() {
   const setPlacingMarker = useMapStore((s) => s.setPlacingMarker);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
   const flyTo = useMapStore((s) => s.flyTo);
+  const planta = usePlantaStore((s) => s.planta);
 
   const {
     register,
@@ -183,6 +188,21 @@ export function MarcadorControl() {
               title={m.nota || m.nombre}
             >
               {m.nombre}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                void compartirUbicacion({
+                  planta: plantaConfig(planta).id,
+                  lon: m.lon,
+                  lat: m.lat,
+                  nombre: m.nombre,
+                })
+              }
+              aria-label={`${t.compartir.boton} ${m.nombre}`}
+              className="rounded px-1 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+            >
+              📤
             </button>
             <button
               type="button"

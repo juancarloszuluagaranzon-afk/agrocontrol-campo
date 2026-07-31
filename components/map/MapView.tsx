@@ -34,6 +34,9 @@ import {
   MARCADORES_DOT,
   MARCADORES_LABEL,
   MARCADORES_SOURCE,
+  PUNTO_COMPARTIDO_SOURCE,
+  PUNTO_COMPARTIDO_DOT,
+  PUNTO_COMPARTIDO_LABEL,
   MEASURE_FILL,
   MEASURE_LINE,
   MEASURE_SOURCE,
@@ -59,6 +62,7 @@ import { usePlantaStore } from "@/lib/store/plantaStore";
 import { usePlanoStore } from "@/lib/store/planoStore";
 import { getImage } from "@/lib/storage/imageBlobStore";
 import { plantaConfig } from "@/lib/plantas";
+import { t } from "@/lib/i18n/es-CO";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
@@ -470,6 +474,42 @@ export function MapView() {
         },
       });
 
+      // Punto compartido (deep-link): pin verde + nombre, se llena si el link
+      // trae coordenadas (§ADR-0018).
+      map.addSource(PUNTO_COMPARTIDO_SOURCE, {
+        type: "geojson",
+        data: emptyFc,
+      });
+      map.addLayer({
+        id: PUNTO_COMPARTIDO_DOT,
+        type: "circle",
+        source: PUNTO_COMPARTIDO_SOURCE,
+        paint: {
+          "circle-radius": 9,
+          "circle-color": "#059669",
+          "circle-stroke-width": 3,
+          "circle-stroke-color": "#ffffff",
+        },
+      });
+      map.addLayer({
+        id: PUNTO_COMPARTIDO_LABEL,
+        type: "symbol",
+        source: PUNTO_COMPARTIDO_SOURCE,
+        layout: {
+          "text-field": ["get", "nombre"],
+          "text-size": 12,
+          "text-offset": [0, 1.3],
+          "text-anchor": "top",
+          "text-font": ["Open Sans Semibold"],
+          "text-allow-overlap": true,
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#065f46",
+          "text-halo-width": 1.6,
+        },
+      });
+
       // Puntos de muestreo del "Plano de campo": punto + número. Verde si ya se
       // muestreó, rojo si pendiente. Se llenan desde el store (efecto aparte).
       map.addSource(PLANO_PUNTOS_SOURCE, { type: "geojson", data: emptyFc });
@@ -704,6 +744,41 @@ export function MapView() {
     };
     source.setData(fc);
   }, [marcadores]);
+
+  // ── Punto compartido por deep-link (§ADR-0018) ──
+  // Si el link trae `?lat&lon&n`, vuela al punto y muestra un pin con el nombre,
+  // luego limpia la URL para no re-disparar en un refresh.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const latRaw = params.get("lat");
+    const lonRaw = params.get("lon");
+    // Solo si el link trae coords (evita que un `/mapa` normal, sin params,
+    // vuele a [0,0]: `Number(null)` es 0 y `Number.isFinite(0)` es true).
+    if (!latRaw || !lonRaw) return;
+    const lat = Number(latRaw);
+    const lon = Number(lonRaw);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const nombre = params.get("n") || t.compartir.puntoCompartido;
+    const source = map.getSource(PUNTO_COMPARTIDO_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    source?.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [lon, lat] },
+          properties: { nombre },
+        },
+      ],
+    });
+    map.flyTo({ center: [lon, lat], zoom: 17, duration: 1200 });
+    const limpia = new URL(window.location.href);
+    limpia.search = "";
+    window.history.replaceState(null, "", limpia.toString());
+  }, [mapReady]);
 
   // ── "Lluvia de hoy": pluviómetros pintados como gotas por mm (estilo Gotas) ──
   // La enciende cualquiera con la capa "Pluviómetros (lluvia hoy)" de 🗂️ Capas.
