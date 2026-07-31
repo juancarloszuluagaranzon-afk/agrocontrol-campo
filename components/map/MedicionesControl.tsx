@@ -2,7 +2,12 @@
 
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import { useMapStore } from "@/lib/store/mapStore";
+import { usePlantaStore } from "@/lib/store/plantaStore";
 import { formatHectareas, formatMetros } from "@/lib/geo/format";
+import { compartirUbicacion } from "@/lib/share/compartir";
+import { primerPuntoMedicion } from "@/lib/share/ubicacion";
+import { plantaConfig } from "@/lib/plantas";
+import { t } from "@/lib/i18n/es-CO";
 import type { Medicion } from "@/domain/mediciones/schema";
 
 function valorTexto(m: Medicion): string {
@@ -15,8 +20,19 @@ export function MedicionesControl() {
   const removeMedicion = useMedicionesStore((s) => s.removeMedicion);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
   const flyTo = useMapStore((s) => s.flyTo);
+  const planta = usePlantaStore((s) => s.planta);
 
   const lista = activas(items);
+
+  function compartir(m: Medicion) {
+    const [lon, lat] = primerPuntoMedicion(m.geom);
+    void compartirUbicacion({
+      planta: plantaConfig(planta).id,
+      lon,
+      lat,
+      nombre: m.nombre,
+    });
+  }
 
   return (
     <div className="pointer-events-auto w-64 max-w-[calc(100vw-1rem)] rounded-xl bg-white p-3 shadow-lg ring-1 ring-black/10">
@@ -58,6 +74,14 @@ export function MedicionesControl() {
               <span className="block text-[11px] text-slate-500 tabular-nums">
                 {m.tipo === "area" ? "Área" : "Distancia"} · {valorTexto(m)}
               </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => compartir(m)}
+              aria-label={`${t.compartir.boton} ${m.nombre}`}
+              className="rounded px-1 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+            >
+              📤
             </button>
             <button
               type="button"

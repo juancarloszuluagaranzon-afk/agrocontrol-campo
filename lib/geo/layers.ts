@@ -53,6 +53,11 @@ export const MARCADORES_SOURCE = "marcadores";
 export const MARCADORES_DOT = "marcadores-dot";
 export const MARCADORES_LABEL = "marcadores-label";
 
+// Punto compartido por deep-link (§ADR-0018): pin efímero al abrir un link.
+export const PUNTO_COMPARTIDO_SOURCE = "punto-compartido";
+export const PUNTO_COMPARTIDO_DOT = "punto-compartido-dot";
+export const PUNTO_COMPARTIDO_LABEL = "punto-compartido-label";
+
 export type ContextGeometry = "line" | "fill" | "point";
 
 export interface ContextLayer {

@@ -29,6 +29,13 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<Form>({ resolver: zodResolver(schema) });
 
+  /** Ruta de retorno tras el login (`?next=`), validada como ruta interna. */
+  function destinoTrasLogin(): string {
+    if (typeof window === "undefined") return "/mapa";
+    const next = new URLSearchParams(window.location.search).get("next");
+    return next && next.startsWith("/") ? next : "/mapa";
+  }
+
   async function onSubmit(values: Form) {
     setError(null);
     setAviso(null);
@@ -40,7 +47,7 @@ export default function LoginPage() {
         password: values.password,
       });
       if (error) return setError("Correo o contraseña incorrectos.");
-      router.replace("/mapa");
+      router.replace(destinoTrasLogin());
     } else {
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -54,7 +61,7 @@ export default function LoginPage() {
         );
         setModo("entrar");
       } else {
-        router.replace("/mapa");
+        router.replace(destinoTrasLogin());
       }
     }
   }

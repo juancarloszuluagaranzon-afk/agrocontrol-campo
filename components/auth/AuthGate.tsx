@@ -13,7 +13,12 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (!loading && !user) {
+      // Conserva la ruta+parámetros (p. ej. un link compartido /mapa?lat=…) para
+      // volver a ella tras el login, en vez de perderla (§ADR-0018).
+      const destino = window.location.pathname + window.location.search;
+      router.replace(`/login?next=${encodeURIComponent(destino)}`);
+    }
   }, [loading, user, router]);
 
   if (loading) {

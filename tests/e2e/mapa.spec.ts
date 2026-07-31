@@ -215,6 +215,70 @@ test("mapa: se pueden conmutar las capas de contexto", async ({ page }) => {
   await expect(redHidrica).toBeChecked();
 });
 
+test("mapa: un deep-link compartido vuela al punto, lo marca y limpia la URL (ADR-0018)", async ({
+  page,
+}) => {
+  // Link recibido por WhatsApp: planta + primer punto de referencia + nombre.
+  await page.goto(
+    "/mapa?p=riopaila&lat=4.31&lon=-76.119&n=Punto%20de%20prueba",
+  );
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  // El mapa termina de montar (map.on("load") expone __e2eMap).
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  // (a) Vuela al punto: el centro del mapa queda sobre esas coordenadas.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const map = (
+            window as unknown as {
+              __e2eMap?: { getCenter: () => { lng: number; lat: number } };
+            }
+          ).__e2eMap;
+          if (!map) return null;
+          const c = map.getCenter();
+          return {
+            lng: Math.round(c.lng * 100) / 100,
+            lat: Math.round(c.lat * 100) / 100,
+          };
+        }),
+      { timeout: 10_000 },
+    )
+    .toMatchObject({ lng: -76.12, lat: 4.31 });
+
+  // (b) Aparece el pin del punto compartido con el nombre del link.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const map = (
+            window as unknown as {
+              __e2eMap?: {
+                querySourceFeatures: (
+                  id: string,
+                ) => { properties: { nombre: string } }[];
+              };
+            }
+          ).__e2eMap;
+          if (!map) return null;
+          return map
+            .querySourceFeatures("punto-compartido")
+            .map((f) => f.properties.nombre);
+        }),
+      { timeout: 10_000 },
+    )
+    .toContain("Punto de prueba");
+
+  // (c) La URL queda limpia: un refresh no re-dispara el vuelo ni deja el pin pegado.
+  await expect.poll(() => new URL(page.url()).search).toBe("");
+});
+
 test("mapa: la capa de lluvia (gotas) se activa desde Capas sin romper el mapa", async ({
   page,
 }) => {

@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Compartir marcadores y mediciones por WhatsApp
+
+- En **📍 Marcadores** y **📐 Mediciones guardadas**, cada elemento tiene ahora un botón
+  **Compartir** (📤): abre la hoja de compartir del sistema (WhatsApp, correo…) con un link que
+  abre Rio Map en ese punto. Para una medición, el link apunta a su **primer punto de referencia**.
+  Quien reciba el link (y tenga cuenta) cae en la planta correcta, vuela al punto y ve un pin con
+  el nombre. Ver **ADR-0018**.
+
 ### Mapa — Castilla ahora tiene sus propias capas de contexto
 
 - Las capas de contexto (red hídrica, canales de riego, drenajes, vías, pozos, haciendas) pasan a
