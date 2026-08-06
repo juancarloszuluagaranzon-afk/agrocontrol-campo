@@ -24,3 +24,4 @@ añade una nueva.
 | 0016 | Endurecimiento: rol no auto-editable y auditoría restringida      | Aceptada |
 | 0017 | Capas de contexto por planta (Castilla)                           | Aceptada |
 | 0018 | Compartir marcador/medición por WhatsApp (deep-link)              | Aceptada |
+| 0019 | Maestro de suertes nativo dentro de Rio Map                       | Aceptada |

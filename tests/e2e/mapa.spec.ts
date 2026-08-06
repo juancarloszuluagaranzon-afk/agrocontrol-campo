@@ -279,6 +279,38 @@ test("mapa: un deep-link compartido vuela al punto, lo marca y limpia la URL (AD
   await expect.poll(() => new URL(page.url()).search).toBe("");
 });
 
+test("mapa: el Maestro nativo busca una suerte, abre su ficha y 'Ver en el mapa' cierra el panel (ADR-0019)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  // Abrir el Maestro desde el menú de Herramientas.
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Maestro de suertes" }).click();
+
+  const panel = page.getByRole("dialog", { name: "Maestro de suertes" });
+  await expect(panel).toBeVisible();
+
+  // Buscar una suerte conocida y abrir su ficha.
+  await panel.getByPlaceholder("Buscar suerte o hacienda…").fill("3111-020");
+  await panel
+    .getByRole("button", { name: /3111-020/ })
+    .first()
+    .click();
+
+  // La ficha muestra la agronomía del maestro y el botón de ubicación.
+  await expect(panel.getByText("Agronomía")).toBeVisible();
+  await expect(panel.getByText("Variedad")).toBeVisible();
+  const verEnMapa = panel.getByRole("button", { name: /Ver en el mapa/ });
+  await expect(verEnMapa).toBeVisible();
+
+  // "Ver en el mapa" cierra el panel y el mapa sigue en pie.
+  await verEnMapa.click();
+  await expect(panel).toBeHidden();
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+});
+
 test("mapa: la capa de lluvia (gotas) se activa desde Capas sin romper el mapa", async ({
   page,
 }) => {

@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Maestro de suertes nativo dentro de Rio Map
+
+- Nueva herramienta **📖 Maestro de suertes** en el menú ✏️: una consulta nativa del maestro de la
+  **planta activa**. Se busca por suerte o hacienda, se abre la ficha con toda la agronomía
+  (variedad, edad viva, cortes, fechas, área neta, toneladas, TCH, zona, técnico, responsable,
+  empresa) y un botón **"Ver en el mapa"** que vuela a la suerte y la resalta. Reutiliza los datos
+  ya cargados (`useMaestro`/`useCatalogo`) y el `flyTo` del buscador. Ver **ADR-0019**.
+
 ### Compartir marcadores y mediciones por WhatsApp
 
 - En **📍 Marcadores** y **📐 Mediciones guardadas**, cada elemento tiene ahora un botón
