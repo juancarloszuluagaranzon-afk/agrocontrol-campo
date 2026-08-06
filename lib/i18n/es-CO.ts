@@ -113,6 +113,20 @@ export const t = {
     titulo: "Ubicación · Rio Map",
     puntoCompartido: "Punto compartido",
   },
+  maestro: {
+    titulo: "Maestro de suertes",
+    buscar: "Buscar suerte o hacienda…",
+    verEnMapa: "Ver en el mapa",
+    volver: "Volver a la lista",
+    agronomia: "Agronomía",
+    sinDatos: "Sin datos del maestro para esta suerte.",
+    vacio: "No hay suertes para mostrar.",
+    cargando: "Cargando…",
+    conteo: (mostradas: number, total: number) =>
+      mostradas < total
+        ? `Mostrando ${mostradas} de ${total} · afina la búsqueda`
+        : `${total} suerte${total === 1 ? "" : "s"}`,
+  },
 } as const;
 
 export type Textos = typeof t;

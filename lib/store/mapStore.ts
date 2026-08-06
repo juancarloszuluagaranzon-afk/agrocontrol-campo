@@ -34,7 +34,8 @@ export type ToolId =
   | "plano"
   | "foto"
   | "lluvia"
-  | "reporte";
+  | "reporte"
+  | "maestro";
 
 interface MapState {
   /** Tablón seleccionado (properties del feature tocado), o null. */
