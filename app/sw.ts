@@ -4,7 +4,7 @@ import type {
   RuntimeCaching,
   SerwistGlobalConfig,
 } from "serwist";
-import { CacheFirst, ExpirationPlugin, Serwist } from "serwist";
+import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -74,12 +74,37 @@ const campoCaching: RuntimeCaching[] = [
   },
 ];
 
+/**
+ * Navegaciones de documento (§14, ADR-0020). Con señal se piden **siempre a la
+ * red** (para recibir el último despliegue). Sin señal, `NetworkOnly` falla y el
+ * plugin de `fallbacks` sirve el shell precacheado `/~offline` —consistente con
+ * los chunks del build— en vez de un HTML viejo con chunks purgados (pantalla en
+ * blanco). Va ANTES de `defaultCache`, cuyo NetworkFirst devolvería HTML viejo
+ * (éxito) sin llegar nunca al fallback.
+ */
+const navigationCaching: RuntimeCaching[] = [
+  {
+    matcher: ({ request }) => request.mode === "navigate",
+    handler: new NetworkOnly({ networkTimeoutSeconds: 3 }),
+  },
+];
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [...campoCaching, ...defaultCache],
+  runtimeCaching: [...campoCaching, ...navigationCaching, ...defaultCache],
+  // Respaldo offline: ante un error en una navegación de documento, sirve el
+  // shell `/~offline` precacheado (ADR-0020).
+  fallbacks: {
+    entries: [
+      {
+        url: "/~offline",
+        matcher: ({ request }) => request.destination === "document",
+      },
+    ],
+  },
 });
 
 serwist.addEventListeners();
