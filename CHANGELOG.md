@@ -5,6 +5,11 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — reasignación de responsable del pluviómetro 412
+
+- En la planilla de precipitación, el pluviómetro **412** (Tequendama · Pozo Tequendama, Zona 2)
+  pasa de **Freddy Reyes** a **Alberto Vasquez**.
+
 ### Maestro de suertes nativo dentro de Rio Map
 
 - Nueva herramienta **📖 Maestro de suertes** en el menú ✏️: una consulta nativa del maestro de la
