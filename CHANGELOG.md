@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### La app ahora **abre y funciona sin señal** (offline)
+
+- Antes, en campo sin conexión, Rio Map **no abría** (pantalla en blanco). Ahora el service worker
+  sirve un **shell offline precacheado** ante cualquier navegación sin red, así que la app **siempre
+  abre**: muestra el mapa con los datos de suertes y los tiles satelitales ya cacheados, y el **GPS
+  funciona**. El satélite se ve donde ya lo hayas navegado con señal (se cachea al vuelo). Sobrevive a
+  los despliegues (el shell se versiona junto a su código, sin quedar roto por chunks viejos). Ver
+  **ADR-0020**.
+
 ### Lluvia — reasignación de responsable del pluviómetro 412
 
 - En la planilla de precipitación, el pluviómetro **412** (Tequendama · Pozo Tequendama, Zona 2)
