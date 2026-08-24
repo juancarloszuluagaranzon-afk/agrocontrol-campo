@@ -33,6 +33,19 @@ function hoyLocal(): string {
 }
 
 /**
+ * Fecha local de ayer (YYYY-MM-DD). La pluviometría se registra **día vencido**
+ * (el día tiene que haber terminado), así que la planilla arranca en el día
+ * anterior por defecto; sigue siendo editable para corregir días previos.
+ */
+function ayerLocal(): string {
+  const d = new Date();
+  const local = new Date(
+    d.getTime() - d.getTimezoneOffset() * 60000 - 86_400_000,
+  );
+  return local.toISOString().slice(0, 10);
+}
+
+/**
  * Herramienta "Lluvia (precipitación)": planilla diaria **por técnico**. Se elige
  * fecha y técnico, y se anotan los mm de cada uno de sus pluviómetros (con su
  * hacienda/sitio y el acumulado mes/año). Dato compartido, offline (ADR-0009).
@@ -48,7 +61,8 @@ export function PrecipitacionControl() {
   const setActiveTool = useMapStore((s) => s.setActiveTool);
 
   const hoy = hoyLocal();
-  const [fecha, setFecha] = useState(hoy);
+  // Por defecto el día anterior: la pluviometría se carga día vencido.
+  const [fecha, setFecha] = useState(ayerLocal);
   const [tecnico, setTecnico] = useState("");
   // Valores tecleados por el usuario (pv id → texto). Vacío = sin tocar.
   const [valores, setValores] = useState<Record<number, string>>({});
