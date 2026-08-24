@@ -13,6 +13,8 @@ export function LayerToggles() {
   const activeContext = useMapStore((s) => s.activeContext);
   const toggleContext = useMapStore((s) => s.toggleContext);
   const setActiveTool = useMapStore((s) => s.setActiveTool);
+  const sentinelVisible = useMapStore((s) => s.sentinelVisible);
+  const toggleSentinel = useMapStore((s) => s.toggleSentinel);
   const planta = usePlantaStore((s) => s.planta);
   const capas = plantaConfig(planta).contextLayers;
 
@@ -29,6 +31,19 @@ export function LayerToggles() {
           ✕
         </button>
       </div>
+      {/* Satélite alterno (raster), aparte de las capas de contexto vectoriales. */}
+      <label className="hover:bg-accent/5 flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm">
+        <input
+          type="checkbox"
+          checked={sentinelVisible}
+          onChange={toggleSentinel}
+          className="size-4"
+        />
+        <span aria-hidden>🛰️</span>
+        Sentinel-2 (sin nubes)
+      </label>
+      <div className="my-1 border-t border-black/5" />
+
       <fieldset className="mt-1">
         <legend className="sr-only">Capas de contexto</legend>
         {capas.map((layer) => (

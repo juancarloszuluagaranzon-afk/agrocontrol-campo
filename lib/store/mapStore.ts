@@ -50,6 +50,10 @@ interface MapState {
   baseMode: "satelite" | "plano";
   setBaseMode: (m: "satelite" | "plano") => void;
 
+  /** Capa Sentinel-2 sin nubes (EOX) encendida sobre el satélite (ADR-0021). */
+  sentinelVisible: boolean;
+  toggleSentinel: () => void;
+
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
   toggleContext: (id: string) => void;
@@ -120,6 +124,10 @@ export const useMapStore = create<MapState>((set) => ({
 
   baseMode: "satelite",
   setBaseMode: (baseMode) => set({ baseMode }),
+
+  sentinelVisible: false,
+  toggleSentinel: () =>
+    set((state) => ({ sentinelVisible: !state.sentinelVisible })),
 
   activeContext: initialContext,
   toggleContext: (id) =>

@@ -26,3 +26,4 @@ añade una nueva.
 | 0018 | Compartir marcador/medición por WhatsApp (deep-link)              | Aceptada |
 | 0019 | Maestro de suertes nativo dentro de Rio Map                       | Aceptada |
 | 0020 | Apertura offline: shell precacheado + fallback de navegación      | Aceptada |
+| 0021 | Capa Sentinel-2 sin nubes (EOX s2cloudless) como satélite alterno | Aceptada |

@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — capa satelital Sentinel-2 sin nubes (EOX)
+
+- Nueva capa **🛰️ Sentinel-2 (sin nubes)** en 🗂️ Capas: un mosaico satelital de EOX
+  (`s2cloudless-2025`, gratis y sin clave) que se enciende **encima del satélite Esri** —a veces más
+  reciente y siempre libre de nubes— dejando las suertes visibles arriba. Sus teselas se cachean
+  (offline en zonas ya navegadas). Es un compuesto anual (no fecha específica ni NDVI, que vendrían
+  después). Ver **ADR-0021**.
+
 ### Lluvia — la planilla arranca en el día anterior (día vencido)
 
 - La pluviometría se registra **día vencido**, así que la planilla 🌧️ ahora trae por defecto el

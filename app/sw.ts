@@ -72,6 +72,21 @@ const campoCaching: RuntimeCaching[] = [
       ],
     }),
   },
+  {
+    // Tiles Sentinel-2 (EOX): cache-first, para verlos sin re-descargar y offline
+    // en las zonas ya navegadas (ADR-0021).
+    matcher: ({ url }) => url.hostname.endsWith("maps.eox.at"),
+    handler: new CacheFirst({
+      cacheName: "agrocontrol-tiles-sentinel",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 1500,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+          purgeOnQuotaError: true,
+        }),
+      ],
+    }),
+  },
 ];
 
 /**

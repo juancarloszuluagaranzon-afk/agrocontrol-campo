@@ -903,6 +903,20 @@ export function MapView() {
     }
   }, [baseMode, mapReady]);
 
+  // ── Capa Sentinel-2 sin nubes (EOX), conmutable desde 🗂️ Capas (ADR-0021) ──
+  const sentinelVisible = useMapStore((s) => s.sentinelVisible);
+  useEffect(() => {
+    const map = mapRef.current;
+    // `mapReady` en las deps: si se enciende antes de montar las capas, se
+    // reintenta al quedar listo (mismo criterio que baseMode).
+    if (!map || !mapReady || !map.getLayer("s2cloudless")) return;
+    map.setLayoutProperty(
+      "s2cloudless",
+      "visibility",
+      sentinelVisible ? "visible" : "none",
+    );
+  }, [sentinelVisible, mapReady]);
+
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);
   const measureMode = useMapStore((s) => s.measureMode);
