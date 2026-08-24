@@ -311,6 +311,41 @@ test("mapa: el Maestro nativo busca una suerte, abre su ficha y 'Ver en el mapa'
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 });
 
+test("mapa: la capa Sentinel-2 (EOX) se enciende desde Capas (ADR-0021)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  const sentinel = page.getByRole("checkbox", { name: /Sentinel-2/ });
+  await sentinel.check();
+  await expect(sentinel).toBeChecked();
+
+  // La capa raster s2cloudless queda visible en el estilo del mapa.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const m = (
+          window as unknown as {
+            __e2eMap?: {
+              getLayoutProperty: (id: string, p: string) => unknown;
+            };
+          }
+        ).__e2eMap;
+        return m?.getLayoutProperty("s2cloudless", "visibility");
+      }),
+    )
+    .toBe("visible");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+});
+
 test("mapa: la capa de lluvia (gotas) se activa desde Capas sin romper el mapa", async ({
   page,
 }) => {

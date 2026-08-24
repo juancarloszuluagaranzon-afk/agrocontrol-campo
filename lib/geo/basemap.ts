@@ -15,6 +15,12 @@ export const AOI = {
 const ESRI_IMAGERY =
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
+// Mosaico Sentinel-2 "cloudless" (sin nubes) de EOX, gratis y sin API key
+// (ADR-0021). WMTS RESTful en Web Mercator (`_3857`, orden {z}/{y}/{x}). Capa
+// alterna al satélite Esri (a veces más reciente), conmutable desde 🗂️ Capas.
+const S2CLOUDLESS =
+  "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg";
+
 /**
  * Estilo base de MapLibre con la capa satelital de Esri World Imagery.
  *
@@ -35,6 +41,14 @@ export function baseStyle(): StyleSpecification {
         attribution:
           "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       },
+      s2cloudless: {
+        type: "raster",
+        tiles: [S2CLOUDLESS],
+        tileSize: 256,
+        maxzoom: 15,
+        attribution:
+          "Sentinel-2 cloudless 2025 (s2maps.eu) © EOX — modified Copernicus Sentinel data",
+      },
     },
     layers: [
       // Fondo claro para el modo "Plano" (se ve al ocultar el satélite).
@@ -47,6 +61,14 @@ export function baseStyle(): StyleSpecification {
         id: "esri-imagery",
         type: "raster",
         source: "esri-imagery",
+      },
+      // Sentinel-2 sin nubes: encima del Esri y debajo de las suertes (que se
+      // añaden en map.on("load")). Oculta por defecto; se enciende desde 🗂️ Capas.
+      {
+        id: "s2cloudless",
+        type: "raster",
+        source: "s2cloudless",
+        layout: { visibility: "none" },
       },
     ],
   };
