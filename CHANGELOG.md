@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — la planilla arranca en el día anterior (día vencido)
+
+- La pluviometría se registra **día vencido**, así que la planilla 🌧️ ahora trae por defecto el
+  **día anterior** (p. ej. hoy 23 → 22) en vez de hoy. Sigue siendo editable para corregir días
+  previos.
+
 ### La app ahora **abre y funciona sin señal** (offline)
 
 - Antes, en campo sin conexión, Rio Map **no abría** (pantalla en blanco). Ahora el service worker
