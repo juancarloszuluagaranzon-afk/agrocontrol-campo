@@ -5,6 +5,17 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Maestro — refrescado al día (espejo del maestro del ingenio)
+
+- El maestro agronómico de Rio Map (`maestro_suertes.json` / `maestro_castilla.json`) estaba
+  **desactualizado**: mostraba cortes/edades viejos (p. ej. la suerte 2123-013 en corte 2 y "13,9
+  meses" cuando ya iba en corte 3 y ~1,7 meses tras la cosecha de julio 2026). El área sí coincidía,
+  por eso pasaba desapercibido. Ahora se **regenera desde el `maestro.csv` de maestro-riopaila** (la
+  fuente de verdad): **RIOP 605** y **Castilla 883** suertes (antes 595/821), con cortes, fechas,
+  toneladas y responsables al día. La **edad se calcula en vivo**, así que ahora sale correcta.
+- Nuevo importador reutilizable `scripts/import_maestro.mjs` para volver a sincronizar cuando el
+  ingenio corte/renueve: `node scripts/import_maestro.mjs [ruta/maestro.csv]`.
+
 ### Mapa — capa satelital Sentinel-2 sin nubes (EOX)
 
 - Nueva capa **🛰️ Sentinel-2 (sin nubes)** en 🗂️ Capas: un mosaico satelital de EOX
