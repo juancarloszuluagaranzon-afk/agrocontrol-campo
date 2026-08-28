@@ -66,11 +66,15 @@ describe("integridad del maestro (§5)", () => {
     );
 
     const claves = Object.keys(maestro);
-    expect(claves.length).toBeGreaterThan(590); // ~604 de 610 suertes
+    expect(claves.length).toBeGreaterThan(590); // ~605 suertes RIOP del maestro
 
-    // Toda clave del maestro existe como suerte en la cartografía.
+    // El maestro es **espejo del maestro del ingenio** (maestro-riopaila): puede
+    // incluir suertes que la cartografía de Rio Map aún no tiene geometría (p. ej.
+    // renovaciones/recodificaciones). Lo que importa es lo inverso: que las
+    // suertes del MAPA queden bien cubiertas por el maestro.
     const suertes = new Set(catalogo.map((c) => c.sec_ste));
-    for (const k of claves) expect(suertes.has(k)).toBe(true);
+    const conMaestro = [...suertes].filter((s) => maestro[s]).length;
+    expect(conMaestro / suertes.size).toBeGreaterThan(0.9); // ≥ 90 % de cobertura
 
     // Ejemplo conocido con datos.
     const ej = maestro["3104-123"];
