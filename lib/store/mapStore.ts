@@ -54,6 +54,13 @@ interface MapState {
   sentinelVisible: boolean;
   toggleSentinel: () => void;
 
+  /**
+   * Capas Sentinel Hub (CDSE) visibles, por id de capa (NDVI, NDMI…): Sentinel-2
+   * reciente / índices vía WMS (ADR-0022). No persistido.
+   */
+  sentinelHubVisible: Record<string, boolean>;
+  toggleSentinelHub: (layerId: string) => void;
+
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
   toggleContext: (id: string) => void;
@@ -128,6 +135,15 @@ export const useMapStore = create<MapState>((set) => ({
   sentinelVisible: false,
   toggleSentinel: () =>
     set((state) => ({ sentinelVisible: !state.sentinelVisible })),
+
+  sentinelHubVisible: {},
+  toggleSentinelHub: (layerId) =>
+    set((state) => ({
+      sentinelHubVisible: {
+        ...state.sentinelHubVisible,
+        [layerId]: !state.sentinelHubVisible[layerId],
+      },
+    })),
 
   activeContext: initialContext,
   toggleContext: (id) =>
