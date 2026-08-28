@@ -28,3 +28,4 @@ añade una nueva.
 | 0020 | Apertura offline: shell precacheado + fallback de navegación      | Aceptada |
 | 0021 | Capa Sentinel-2 sin nubes (EOX s2cloudless) como satélite alterno | Aceptada |
 | 0022 | Capa Sentinel Hub (Copernicus Data Space) por WMS (NDVI reciente) | Aceptada |
+| 0023 | Máscara "solo nuestras fincas" para las capas Sentinel Hub        | Aceptada |

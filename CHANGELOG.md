@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — Sentinel Hub solo sobre nuestras fincas (máscara)
+
+- Con una capa **🛰️ Sentinel Hub** encendida, el índice (NDVI/NDMI) ahora se ve **solo sobre las suertes
+  de Riopaila y Castilla**: alrededor el satélite queda **atenuado** (velo oscuro), para resaltar los
+  lotes propios manteniendo el contexto de ríos y vías. Es una **máscara inversa** cliente (las suertes
+  recortadas como huecos), 100% offline y sin dependencias nuevas; se arma desde la cartografía oficial
+  que la app ya carga, así que sigue en sincronía si cambian las suertes. Ver **ADR-0023**.
+
 ### Mapa — capas Sentinel Hub (Copernicus Data Space): NDVI + NDMI recientes
 
 - Nuevas capas **🛰️ Sentinel Hub** en 🗂️ Capas (una por índice, con su propio toggle): imágenes

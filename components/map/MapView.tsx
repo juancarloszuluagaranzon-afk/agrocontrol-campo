@@ -11,6 +11,11 @@ import maplibregl, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { baseStyle } from "@/lib/geo/basemap";
 import { sentinelHubConfig, sentinelHubMapId } from "@/lib/geo/sentinelHub";
+import {
+  buildFincasMask,
+  FINCAS_MASK_LAYER,
+  FINCAS_MASK_SOURCE,
+} from "@/lib/geo/fincasMask";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
@@ -225,6 +230,38 @@ export function MapView() {
 
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
+
+      // Máscara "solo nuestras fincas" (ADR-0023): velo oscuro semi-transparente
+      // con las suertes recortadas como huecos, encima del índice Sentinel Hub y
+      // debajo del contexto/suertes. Oculta salvo que una capa Sentinel Hub esté
+      // encendida. Al ir primero en el load, queda sobre los raster de baseStyle.
+      // Solo se construye si hay índice que recortar (Sentinel Hub configurado).
+      // `cfg.tablones` es la URL del geojson (MapLibre la descarga): se trae el
+      // FeatureCollection y se arma la máscara con setData (cacheado por el SW).
+      if (SENTINEL_HUB_LAYERS.length > 0) {
+        map.addSource(FINCAS_MASK_SOURCE, {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+        map.addLayer({
+          id: FINCAS_MASK_LAYER,
+          type: "fill",
+          source: FINCAS_MASK_SOURCE,
+          layout: { visibility: "none" },
+          paint: { "fill-color": "#0a0f1a", "fill-opacity": 0.6 },
+        });
+        fetch(cfg.tablones)
+          .then((r) => r.json() as Promise<FeatureCollection>)
+          .then((fc) => {
+            const src = map.getSource(FINCAS_MASK_SOURCE) as
+              | GeoJSONSource
+              | undefined;
+            src?.setData(buildFincasMask(fc));
+          })
+          .catch(() => {
+            // Sin máscara si falla la carga: la capa queda vacía (degradación limpia).
+          });
+      }
 
       // Capas de contexto de la planta activa (ocultas por defecto) antes de
       // las suertes.
@@ -930,13 +967,21 @@ export function MapView() {
     // si no); el guard `getLayer` evita tocar una capa ausente. `mapReady` en
     // deps por el mismo motivo que s2cloudless/baseMode.
     if (!map || !mapReady) return;
+    let anyOn = false;
     for (const layer of SENTINEL_HUB_LAYERS) {
       const mapId = sentinelHubMapId(layer.id);
+      const on = sentinelHubVisible[layer.id] ?? false;
+      if (on) anyOn = true;
       if (!map.getLayer(mapId)) continue;
+      map.setLayoutProperty(mapId, "visibility", on ? "visible" : "none");
+    }
+    // Máscara "solo nuestras fincas": visible solo con algún índice encendido
+    // (atenúa el satélite fuera de las suertes; ADR-0023).
+    if (map.getLayer(FINCAS_MASK_LAYER)) {
       map.setLayoutProperty(
-        mapId,
+        FINCAS_MASK_LAYER,
         "visibility",
-        sentinelHubVisible[layer.id] ? "visible" : "none",
+        anyOn ? "visible" : "none",
       );
     }
   }, [sentinelHubVisible, mapReady]);
