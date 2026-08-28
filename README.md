@@ -90,6 +90,12 @@ HTTPS es requisito para el GPS; Vercel lo cubre.
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - _(opcional, Fase 5)_ `NEXT_PUBLIC_SENTRY_DSN`
+   - _(opcional, capas Sentinel Hub / Copernicus Data Space — ADR-0022)_
+     `NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID` y opcionalmente
+     `NEXT_PUBLIC_SENTINELHUB_LAYERS` (lista por coma, def. `NDVI,NDMI`) y
+     `NEXT_PUBLIC_SENTINELHUB_MAXCC` (def. `20`). Alta gratuita en
+     <https://dataspace.copernicus.eu>; restringe el dominio de la configuración
+     OGC al del despliegue (consume tu cuota).
 3. **Build**: el `package.json` ya usa `next build --webpack` (Serwist). No se
    requiere config extra.
 4. En Supabase → **Authentication → URL Configuration**, agrega el dominio de

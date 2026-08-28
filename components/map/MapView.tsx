@@ -10,6 +10,7 @@ import maplibregl, {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { baseStyle } from "@/lib/geo/basemap";
+import { sentinelHubConfig, sentinelHubMapId } from "@/lib/geo/sentinelHub";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
@@ -141,6 +142,10 @@ function addContextLayer(map: MlMap, cfg: ContextLayer): void {
 }
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
+
+// Capas Sentinel Hub configuradas (vacío si no hay instance ID). Leídas del
+// entorno una vez; el efecto de visibilidad las recorre (ADR-0022).
+const SENTINEL_HUB_LAYERS = sentinelHubConfig()?.layers ?? [];
 
 export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -916,6 +921,25 @@ export function MapView() {
       sentinelVisible ? "visible" : "none",
     );
   }, [sentinelVisible, mapReady]);
+
+  // ── Capas Sentinel Hub (CDSE), conmutables desde 🗂️ Capas (ADR-0022) ──
+  const sentinelHubVisible = useMapStore((s) => s.sentinelHubVisible);
+  useEffect(() => {
+    const map = mapRef.current;
+    // Las capas solo existen si hay instance ID configurado (baseStyle las omite
+    // si no); el guard `getLayer` evita tocar una capa ausente. `mapReady` en
+    // deps por el mismo motivo que s2cloudless/baseMode.
+    if (!map || !mapReady) return;
+    for (const layer of SENTINEL_HUB_LAYERS) {
+      const mapId = sentinelHubMapId(layer.id);
+      if (!map.getLayer(mapId)) continue;
+      map.setLayoutProperty(
+        mapId,
+        "visibility",
+        sentinelHubVisible[layer.id] ? "visible" : "none",
+      );
+    }
+  }, [sentinelHubVisible, mapReady]);
 
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);

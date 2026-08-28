@@ -4,7 +4,13 @@ import type {
   RuntimeCaching,
   SerwistGlobalConfig,
 } from "serwist";
-import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist } from "serwist";
+import {
+  CacheFirst,
+  ExpirationPlugin,
+  NetworkOnly,
+  Serwist,
+  StaleWhileRevalidate,
+} from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -82,6 +88,23 @@ const campoCaching: RuntimeCaching[] = [
         new ExpirationPlugin({
           maxEntries: 1500,
           maxAgeSeconds: 30 * 24 * 60 * 60,
+          purgeOnQuotaError: true,
+        }),
+      ],
+    }),
+  },
+  {
+    // Tiles Sentinel Hub (CDSE): stale-while-revalidate — sirve la cacheada al
+    // instante (offline en zonas ya navegadas) y refresca en segundo plano,
+    // porque es la "última imagen", no un mosaico fijo (ADR-0022). Expiración
+    // corta para no anclar una imagen vieja.
+    matcher: ({ url }) => url.hostname.endsWith("dataspace.copernicus.eu"),
+    handler: new StaleWhileRevalidate({
+      cacheName: "agrocontrol-tiles-sentinelhub",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 1500,
+          maxAgeSeconds: 7 * 24 * 60 * 60,
           purgeOnQuotaError: true,
         }),
       ],

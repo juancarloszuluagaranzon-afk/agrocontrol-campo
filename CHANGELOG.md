@@ -5,6 +5,20 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — capas Sentinel Hub (Copernicus Data Space): NDVI + NDMI recientes
+
+- Nuevas capas **🛰️ Sentinel Hub** en 🗂️ Capas (una por índice, con su propio toggle): imágenes
+  **Sentinel-2 recientes** e índices agronómicos servidos por WMS desde el **Copernicus Data Space
+  Ecosystem**, el "siguiente paso" que anticipó ADR-0021 frente al mosaico anual sin nubes de EOX. Por
+  defecto **NDVI** (vigor de la vegetación) y **NDMI** (humedad de la vegetación, útil para riego). A
+  diferencia del compuesto anual, cada tesela es la **última imagen** bajo el umbral de nubes, así que
+  sirve para **monitoreo temporal del cultivo**.
+- Es **opcional y de alta gratuita**: se activa poniendo `NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID` (más los
+  opcionales `…_LAYERS`, por defecto `NDVI,NDMI`, y `…_MAXCC`, por defecto `20`) en `.env.local`. Sin
+  ese instance ID las capas y sus toggles **no aparecen** (degradación limpia). El acceso OGC de CDSE se
+  autentica con el instance ID en la URL, **sin proxy ni OAuth**; las teselas se cachean con
+  `StaleWhileRevalidate` (offline en zonas ya navegadas, refrescando en segundo plano). Ver **ADR-0022**.
+
 ### Maestro — refrescado al día (espejo del maestro del ingenio)
 
 - El maestro agronómico de Rio Map (`maestro_suertes.json` / `maestro_castilla.json`) estaba
