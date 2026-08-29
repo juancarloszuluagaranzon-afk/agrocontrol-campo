@@ -22,8 +22,17 @@ export function LayerToggles() {
   const toggleSentinel = useMapStore((s) => s.toggleSentinel);
   const sentinelHubVisible = useMapStore((s) => s.sentinelHubVisible);
   const toggleSentinelHub = useMapStore((s) => s.toggleSentinelHub);
+  const sentinelHubDates = useMapStore((s) => s.sentinelHubDates);
+  const sentinelHubSlot = useMapStore((s) => s.sentinelHubSlot);
+  const setSentinelHubDate = useMapStore((s) => s.setSentinelHubDate);
+  const setSentinelHubSlot = useMapStore((s) => s.setSentinelHubSlot);
   const planta = usePlantaStore((s) => s.planta);
   const capas = plantaConfig(planta).contextLayers;
+
+  // La fecha A/B solo tiene sentido con algún índice Sentinel Hub encendido.
+  const anySentinelOn = SENTINEL_HUB
+    ? SENTINEL_HUB.layers.some((l) => sentinelHubVisible[l.id])
+    : false;
 
   return (
     <div className="bg-background pointer-events-auto w-56 max-w-[calc(100vw-1rem)] rounded-xl p-2 shadow-lg ring-1 ring-black/10">
@@ -65,6 +74,46 @@ export function LayerToggles() {
           {layer.label}
         </label>
       ))}
+
+      {/* Fecha A/B para comparar antes/después de un riego (ADR-0024). */}
+      {anySentinelOn && (
+        <div className="mx-1 mt-1 rounded-md bg-black/[0.03] p-2">
+          <div className="mb-1 text-xs font-medium text-slate-600">
+            📅 Fecha — comparar riego
+          </div>
+          {(["A", "B"] as const).map((slot) => (
+            <label
+              key={slot}
+              className="flex items-center gap-2 py-1 text-sm"
+              title="Marca este punto para mostrarlo en el mapa"
+            >
+              <input
+                type="radio"
+                name="sentinelhub-slot"
+                checked={sentinelHubSlot === slot}
+                onChange={() => setSentinelHubSlot(slot)}
+                className="size-4"
+              />
+              <span className="w-16 shrink-0">
+                {slot === "A" ? "Antes" : "Después"}
+              </span>
+              <input
+                type="date"
+                value={sentinelHubDates[slot] ?? ""}
+                onChange={(e) =>
+                  setSentinelHubDate(slot, e.target.value || null)
+                }
+                className="min-w-0 flex-1 rounded border border-black/10 px-1 py-0.5 text-xs"
+              />
+            </label>
+          ))}
+          <p className="mt-0.5 text-[11px] leading-tight text-slate-500">
+            Vacío = imagen más reciente. Muestra la última escena hasta esa
+            fecha; alterna Antes/Después para comparar.
+          </p>
+        </div>
+      )}
+
       <div className="my-1 border-t border-black/5" />
 
       <fieldset className="mt-1">

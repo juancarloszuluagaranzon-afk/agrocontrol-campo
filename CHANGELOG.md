@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — comparar antes/después de un riego (fecha A/B en Sentinel Hub)
+
+- Con una capa **🛰️ Sentinel Hub** encendida aparece un selector **📅 Fecha — comparar riego** en 🗂️
+  Capas: dos fechas **Antes/Después** con un botón para **alternar** cuál se muestra sobre la misma vista.
+  Cada fecha resuelve a la **última escena Sentinel-2 hasta ese día** (ventana de 14 días, por la revisita
+  ~5 días y las nubes). Vacío = imagen más reciente. Ideal para ver el NDVI/NDMI antes y después de regar.
+  El cambio de fecha re-tesela en caliente (`setTiles`), sin recargar el mapa. Ver **ADR-0024**.
+
 ### Mapa — Sentinel Hub solo sobre nuestras fincas (máscara)
 
 - Con una capa **🛰️ Sentinel Hub** encendida, el índice (NDVI/NDMI) ahora se ve **solo sobre las suertes

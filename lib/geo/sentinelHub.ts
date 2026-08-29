@@ -107,18 +107,42 @@ export function sentinelHubConfig(): SentinelHubConfig | null {
   return parsed.success ? parsed.data : null;
 }
 
+/** Días hacia atrás de la ventana de imagen al elegir una fecha (revisita S-2 ~5 d). */
+export const SENTINEL_HUB_WINDOW_DAYS = 14;
+
+/**
+ * Convierte una fecha `YYYY-MM-DD` en el parámetro `TIME` del WMS: una ventana
+ * `inicio/fin` que **termina en esa fecha** y abarca `windowDays` hacia atrás,
+ * para que CDSE devuelva la última escena disponible **hasta** ese día (Sentinel-2
+ * revisita ~cada 5 días, rara vez hay imagen del día exacto). Solo fechas (sin
+ * hora) → sin `:` que escapar. `null`/fecha inválida → `undefined` (más reciente).
+ */
+export function sentinelHubTimeParam(
+  dateISO: string | null | undefined,
+  windowDays: number = SENTINEL_HUB_WINDOW_DAYS,
+): string | undefined {
+  if (!dateISO) return undefined;
+  const end = new Date(`${dateISO}T00:00:00Z`);
+  if (Number.isNaN(end.getTime())) return undefined;
+  const start = new Date(end.getTime() - windowDays * 86_400_000);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return `${fmt(start)}/${fmt(end)}`;
+}
+
 /**
  * Plantilla de teselas WMS para una fuente `raster` de MapLibre.
  *
  * MapLibre sustituye `{bbox-epsg-3857}` por `minX,minY,maxX,maxY`; con
  * `VERSION=1.1.1` + `SRS=EPSG:3857` el orden es x,y tradicional (el más robusto
- * para teselado, sin la inversión de ejes de 1.3.0). Sin `TIME`, CDSE devuelve
- * la imagen más reciente bajo `MAXCC`.
+ * para teselado, sin la inversión de ejes de 1.3.0). Con `time` (ventana
+ * `YYYY-MM-DD/YYYY-MM-DD`) se fija la fecha; sin él, CDSE devuelve la imagen más
+ * reciente bajo `MAXCC`.
  */
 export function sentinelHubTilesUrl(opts: {
   instanceId: string;
   layer: string;
   maxCloudCoverage: number;
+  time?: string;
 }): string {
   const params = new URLSearchParams({
     SERVICE: "WMS",
@@ -132,7 +156,8 @@ export function sentinelHubTilesUrl(opts: {
     HEIGHT: "256",
     MAXCC: String(opts.maxCloudCoverage),
   });
-  // `{bbox-epsg-3857}` es un marcador de MapLibre y NO debe ir URL-encoded
-  // (URLSearchParams escaparía las llaves), por eso se concatena aparte.
-  return `${WMS_HOST}/${opts.instanceId}?${params.toString()}&BBOX={bbox-epsg-3857}`;
+  // `{bbox-epsg-3857}` y `TIME` se concatenan aparte: el marcador de MapLibre no
+  // debe ir URL-encoded, y el rango de TIME va como en la doc de CDSE (con `/`).
+  const time = opts.time ? `&TIME=${opts.time}` : "";
+  return `${WMS_HOST}/${opts.instanceId}?${params.toString()}${time}&BBOX={bbox-epsg-3857}`;
 }

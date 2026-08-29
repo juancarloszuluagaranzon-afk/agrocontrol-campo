@@ -61,6 +61,15 @@ interface MapState {
   sentinelHubVisible: Record<string, boolean>;
   toggleSentinelHub: (layerId: string) => void;
 
+  /**
+   * Fechas A/B para comparar antes/después (ADR-0024). Cada una es `YYYY-MM-DD`
+   * o `null` (= imagen más reciente). `sentinelHubSlot` indica cuál se muestra.
+   */
+  sentinelHubDates: { A: string | null; B: string | null };
+  sentinelHubSlot: "A" | "B";
+  setSentinelHubDate: (slot: "A" | "B", dateISO: string | null) => void;
+  setSentinelHubSlot: (slot: "A" | "B") => void;
+
   /** Visibilidad de cada capa de contexto, por id. */
   activeContext: Record<string, boolean>;
   toggleContext: (id: string) => void;
@@ -144,6 +153,16 @@ export const useMapStore = create<MapState>((set) => ({
         [layerId]: !state.sentinelHubVisible[layerId],
       },
     })),
+
+  sentinelHubDates: { A: null, B: null },
+  sentinelHubSlot: "A",
+  setSentinelHubDate: (slot, dateISO) =>
+    set((state) => ({
+      sentinelHubDates: { ...state.sentinelHubDates, [slot]: dateISO || null },
+      // al fijar una fecha, mostrar ese slot
+      sentinelHubSlot: slot,
+    })),
+  setSentinelHubSlot: (slot) => set({ sentinelHubSlot: slot }),
 
   activeContext: initialContext,
   toggleContext: (id) =>
