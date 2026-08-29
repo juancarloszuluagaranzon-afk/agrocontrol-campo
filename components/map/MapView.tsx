@@ -6,11 +6,17 @@ import maplibregl, {
   type MapGeoJSONFeature,
   type GeoJSONSource,
   type ImageSource,
+  type RasterTileSource,
   type ExpressionSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { baseStyle } from "@/lib/geo/basemap";
-import { sentinelHubConfig, sentinelHubMapId } from "@/lib/geo/sentinelHub";
+import {
+  sentinelHubConfig,
+  sentinelHubMapId,
+  sentinelHubTilesUrl,
+  sentinelHubTimeParam,
+} from "@/lib/geo/sentinelHub";
 import {
   buildFincasMask,
   FINCAS_MASK_LAYER,
@@ -148,9 +154,11 @@ function addContextLayer(map: MlMap, cfg: ContextLayer): void {
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
 
-// Capas Sentinel Hub configuradas (vacío si no hay instance ID). Leídas del
-// entorno una vez; el efecto de visibilidad las recorre (ADR-0022).
-const SENTINEL_HUB_LAYERS = sentinelHubConfig()?.layers ?? [];
+// Config Sentinel Hub leída del entorno una vez (null si no hay instance ID);
+// el efecto de visibilidad recorre sus capas (ADR-0022) y el de fecha re-tesela
+// con la ventana TIME elegida (ADR-0024).
+const SENTINEL_HUB = sentinelHubConfig();
+const SENTINEL_HUB_LAYERS = SENTINEL_HUB?.layers ?? [];
 
 export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -985,6 +993,28 @@ export function MapView() {
       );
     }
   }, [sentinelHubVisible, mapReady]);
+
+  // ── Fecha A/B: re-tesela las capas Sentinel Hub con la ventana TIME (ADR-0024) ──
+  const sentinelHubDates = useMapStore((s) => s.sentinelHubDates);
+  const sentinelHubSlot = useMapStore((s) => s.sentinelHubSlot);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !SENTINEL_HUB) return;
+    const time = sentinelHubTimeParam(sentinelHubDates[sentinelHubSlot]);
+    for (const layer of SENTINEL_HUB.layers) {
+      const src = map.getSource(sentinelHubMapId(layer.id)) as
+        | RasterTileSource
+        | undefined;
+      src?.setTiles([
+        sentinelHubTilesUrl({
+          instanceId: SENTINEL_HUB.instanceId,
+          layer: layer.id,
+          maxCloudCoverage: SENTINEL_HUB.maxCloudCoverage,
+          time,
+        }),
+      ]);
+    }
+  }, [sentinelHubDates, sentinelHubSlot, mapReady]);
 
   // ── Dibujo de la medición en curso ──
   const vertices = useMapStore((s) => s.vertices);

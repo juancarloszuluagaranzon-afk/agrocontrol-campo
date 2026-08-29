@@ -3,6 +3,7 @@ import {
   sentinelHubConfig,
   sentinelHubMapId,
   sentinelHubTilesUrl,
+  sentinelHubTimeParam,
 } from "@/lib/geo/sentinelHub";
 
 const ENV_KEYS = [
@@ -95,5 +96,38 @@ describe("sentinelHubTilesUrl", () => {
     const url = sentinelHubTilesUrl(opts);
     expect(url).toContain("&BBOX={bbox-epsg-3857}");
     expect(url).not.toContain("%7Bbbox");
+  });
+
+  it("sin time no incluye TIME (imagen más reciente)", () => {
+    expect(sentinelHubTilesUrl(opts)).not.toContain("TIME=");
+  });
+
+  it("con time añade el rango TIME sin escapar el '/' del rango", () => {
+    const url = sentinelHubTilesUrl({ ...opts, time: "2026-08-06/2026-08-20" });
+    expect(url).toContain("&TIME=2026-08-06/2026-08-20");
+    // el '/' del rango de TIME queda crudo (no %2F) para CDSE
+    expect(url).not.toContain("2026-08-06%2F");
+    // TIME va antes del marcador de BBOX
+    expect(url.indexOf("TIME=")).toBeLessThan(url.indexOf("BBOX="));
+  });
+});
+
+describe("sentinelHubTimeParam", () => {
+  it("null/indefinido → undefined (más reciente)", () => {
+    expect(sentinelHubTimeParam(null)).toBeUndefined();
+    expect(sentinelHubTimeParam(undefined)).toBeUndefined();
+    expect(sentinelHubTimeParam("")).toBeUndefined();
+  });
+
+  it("fecha inválida → undefined", () => {
+    expect(sentinelHubTimeParam("no-es-fecha")).toBeUndefined();
+  });
+
+  it("arma una ventana que termina en la fecha y abarca 14 días atrás", () => {
+    expect(sentinelHubTimeParam("2026-08-20")).toBe("2026-08-06/2026-08-20");
+  });
+
+  it("respeta una ventana personalizada", () => {
+    expect(sentinelHubTimeParam("2026-08-20", 5)).toBe("2026-08-15/2026-08-20");
   });
 });
