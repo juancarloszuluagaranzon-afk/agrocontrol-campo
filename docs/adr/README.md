@@ -31,3 +31,4 @@ añade una nueva.
 | 0023 | Máscara "solo nuestras fincas" para las capas Sentinel Hub        | Aceptada |
 | 0024 | Selector de fecha A/B para comparar antes/después (Sentinel Hub)  | Aceptada |
 | 0025 | Calendario con días de paso del satélite (Catalog API + OAuth)    | Aceptada |
+| 0026 | Escala de color del índice activo (leyenda abajo-izquierda)       | Aceptada |
