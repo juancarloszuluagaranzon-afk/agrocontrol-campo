@@ -22,6 +22,8 @@ export interface PlantaAOI {
   zoom: number;
   minZoom: number;
   maxZoom: number;
+  /** Caja WGS84 [W,S,E,N] del área de la planta (catálogo de fechas, ADR-0025). */
+  bbox: [number, number, number, number];
 }
 
 export interface PlantaConfig {
@@ -59,6 +61,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
       zoom: AOI.zoom,
       minZoom: AOI.minZoom,
       maxZoom: AOI.maxZoom,
+      bbox: [...AOI.bbox],
     },
   },
   castilla: {
@@ -77,6 +80,7 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
       zoom: 10.8,
       minZoom: 9,
       maxZoom: 19,
+      bbox: [-76.496, 3.058, -76.225, 3.443],
     },
   },
 };

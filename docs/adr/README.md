@@ -30,3 +30,4 @@ añade una nueva.
 | 0022 | Capa Sentinel Hub (Copernicus Data Space) por WMS (NDVI reciente) | Aceptada |
 | 0023 | Máscara "solo nuestras fincas" para las capas Sentinel Hub        | Aceptada |
 | 0024 | Selector de fecha A/B para comparar antes/después (Sentinel Hub)  | Aceptada |
+| 0025 | Calendario con días de paso del satélite (Catalog API + OAuth)    | Aceptada |

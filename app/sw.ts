@@ -52,6 +52,22 @@ const campoCaching: RuntimeCaching[] = [
     }),
   },
   {
+    // Fechas del catálogo Sentinel (ruta propia): stale-while-revalidate para
+    // ver las últimas fechas conocidas sin señal y refrescarlas al reconectar.
+    matcher: ({ url, sameOrigin }) =>
+      sameOrigin && url.pathname.startsWith("/api/sentinel-dates"),
+    handler: new StaleWhileRevalidate({
+      cacheName: "agrocontrol-sentinel-fechas",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 8,
+          maxAgeSeconds: 7 * 24 * 60 * 60,
+          purgeOnQuotaError: true,
+        }),
+      ],
+    }),
+  },
+  {
     matcher: ({ url, sameOrigin }) =>
       sameOrigin && url.pathname.startsWith("/data/"),
     handler: new CacheFirst({
