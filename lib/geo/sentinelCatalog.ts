@@ -37,7 +37,8 @@ export function catalogSearchBody(
   return {
     collections: ["sentinel-2-l2a"],
     bbox,
-    datetime: `${fromISO}/${toISO}`,
+    // STAC exige intervalos RFC3339 completos (no fechas sueltas → 400).
+    datetime: `${fromISO}T00:00:00Z/${toISO}T23:59:59Z`,
     limit,
     fields: {
       include: ["properties.datetime", "properties.eo:cloud_cover"],

@@ -85,10 +85,12 @@ export async function GET(req: NextRequest) {
     if (!res.ok) {
       // token vencido u otro error: no fijar caché envenenada
       if (res.status === 401) cachedToken = null;
+      const detail = (await res.text().catch(() => "")).slice(0, 300);
       return NextResponse.json({
         configured: true,
         dates: [],
         error: `catalog ${res.status}`,
+        detail,
       });
     }
     const json = (await res.json()) as { features?: unknown[] };
