@@ -5,6 +5,7 @@ import { SearchBox } from "@/components/map/SearchBox";
 import { LayerToggles } from "@/components/map/LayerToggles";
 import { BaseToggle } from "@/components/map/BaseToggle";
 import { Legend } from "@/components/map/Legend";
+import { SentinelLegend } from "@/components/map/SentinelLegend";
 import { SuertePanel } from "@/components/map/SuertePanel";
 import { GpsControl } from "@/components/map/GpsControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
@@ -95,6 +96,9 @@ export function MapScreen() {
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 -translate-y-1/2">
         <GpsControl />
       </div>
+
+      {/* Escala de color del índice Sentinel Hub activo (abajo-izq., ADR-0026). */}
+      <SentinelLegend />
 
       {/* Menú de herramientas (✏️📏, abajo-izquierda). */}
       <ToolsMenu />
