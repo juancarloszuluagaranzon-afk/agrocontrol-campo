@@ -20,10 +20,10 @@ que lo explique, en el **margen inferior izquierdo** de la pantalla.
   `i/n`), no por eje lineal, para soportar bins no uniformes (NDMI tiene clases de distinto ancho).
 - **Visible mientras el índice esté encendido**, no solo con el panel 🗂️ Capas abierto: se monta en
   `MapScreen`, no dentro del bloque de herramientas.
-- **Posición** abajo-izquierda, **encima del FAB de herramientas**
-  (`bottom-[calc(4.5rem+safe-area)]`), `pointer-events-none` (informativa, deja pasar los toques al mapa).
-  Se **oculta cuando hay un panel inferior** (tablón seleccionado o medición), mismo criterio que
-  `ToolsMenu`, para no encimarse con los bottom-sheets (`inset-x-2`).
+- **Posición** al **margen inferior derecho** (`right-2 bottom-[calc(2rem+safe-area)]`, `items-end`),
+  `pointer-events-none` (informativa, deja pasar los toques al mapa). Va abajo-derecha (no al centro) para
+  despejar el FAB de "Mi ubicación". Se **oculta cuando hay un panel inferior** (tablón seleccionado o
+  medición), mismo criterio que `ToolsMenu`, para no encimarse con los bottom-sheets (`inset-x-2`).
 - Rampas por índice en una tabla (`INDEX_LEGENDS`); solo se muestran los índices con rampa definida (los
   compuestos como color real no llevan escala).
 

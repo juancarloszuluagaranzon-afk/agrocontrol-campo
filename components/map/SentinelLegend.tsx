@@ -4,10 +4,11 @@ import { sentinelHubConfig } from "@/lib/geo/sentinelHub";
 import { useMapStore } from "@/lib/store/mapStore";
 
 /**
- * Escala de color del índice Sentinel Hub activo (ADR-0026). Aparece abajo a la
- * izquierda mientras haya un índice encendido, para que en campo se entienda qué
- * significan los colores. Se oculta cuando hay un panel inferior (tablón o
- * medición), igual que el menú de herramientas, para no encimarse.
+ * Escala de color del índice Sentinel Hub activo (ADR-0026). Aparece al margen
+ * inferior derecho mientras haya un índice encendido, para que en campo se
+ * entienda qué significan los colores. Se oculta cuando hay un panel inferior
+ * (tablón o medición) para no encimarse; va abajo-derecha (no al centro) para
+ * despejar el FAB de "Mi ubicación".
  *
  * Las escalas son **exactas**: replican la paleta del evalscript real de cada
  * capa (ambas son discretas → barra escalonada, no degradado). Las paradas se
@@ -144,7 +145,7 @@ export function SentinelLegend() {
   if (activos.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-2 z-10 flex flex-col gap-1.5">
+    <div className="pointer-events-none absolute right-2 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-10 flex flex-col items-end gap-1.5">
       {activos.map((l) => {
         const leg = INDEX_LEGENDS[l.id];
         return leg ? <LegendCard key={l.id} leg={leg} /> : null;
