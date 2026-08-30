@@ -13,7 +13,7 @@ describe("catalogSearchBody", () => {
     );
     expect(body.collections).toEqual(["sentinel-2-l2a"]);
     expect(body.bbox).toEqual([-76.1, 4.2, -76.0, 4.3]);
-    expect(body.datetime).toBe("2026-06-01/2026-08-30");
+    expect(body.datetime).toBe("2026-06-01T00:00:00Z/2026-08-30T23:59:59Z");
     expect(body.fields.include).toContain("properties.eo:cloud_cover");
     expect(body.fields.exclude).toContain("geometry");
   });
