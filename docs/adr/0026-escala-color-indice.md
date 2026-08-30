@@ -10,9 +10,13 @@ que lo explique, en el **margen inferior izquierdo** de la pantalla.
 
 ## Decisión
 
-- Componente `SentinelLegend`: una tarjeta compacta con el **degradado del índice** (menor→mayor) y
-  etiquetas en los extremos (p. ej. NDVI "Suelo/poca → Vigorosa"; NDMI "Seco → Húmedo"). Una tarjeta por
-  índice activo (se apilan si hay varios).
+- Componente `SentinelLegend`: una tarjeta compacta con la **escala del índice** y el **eje de valores
+  reales** (p. ej. NDVI `−0,2 · 0 · 0,2 · 0,4 · 0,6 · 0,8`). Una tarjeta por índice activo (se apilan).
+- **Colores exactos, no representativos**: replican el evalscript real de la capa. NDVI/NDMI usan
+  `ColorMapVisualizer.createDefaultColorMap()` de Sentinel Hub, que es **discreta** (bins: color = parada
+  más cercana ≤ valor, paradas cada 0,1 de −0,2 a 0,9 + negro para < −0,2), por eso la barra va
+  **escalonada** y no en degradado. (NDMI se asume la misma paleta por defecto; pendiente de confirmar con
+  su evalscript.)
 - **Visible mientras el índice esté encendido**, no solo con el panel 🗂️ Capas abierto: se monta en
   `MapScreen`, no dentro del bloque de herramientas.
 - **Posición** abajo-izquierda, **encima del FAB de herramientas**
