@@ -4,21 +4,21 @@ import { sentinelHubConfig } from "@/lib/geo/sentinelHub";
 import { useMapStore } from "@/lib/store/mapStore";
 
 /**
- * Escala de color del índice Sentinel Hub activo (ADR-0026). Aparece abajo a la
- * izquierda mientras haya un índice encendido, para que en campo se entienda qué
- * significan los colores. Se oculta cuando hay un panel inferior (tablón o
- * medición), igual que el menú de herramientas, para no encimarse.
+ * Escala de color del índice Sentinel Hub activo (ADR-0026). Aparece al margen
+ * inferior derecho mientras haya un índice encendido, para que en campo se
+ * entienda qué significan los colores. Se oculta cuando hay un panel inferior
+ * (tablón o medición) para no encimarse; va abajo-derecha (no al centro) para
+ * despejar el FAB de "Mi ubicación".
  *
- * Las escalas son **exactas**: replican la paleta del evalscript de cada capa.
- * NDVI/NDMI usan `ColorMapVisualizer.createDefaultColorMap()` de Sentinel Hub,
- * que es **discreta** (bins: color = parada más cercana ≤ valor), por eso la
- * barra va escalonada y no en degradado.
+ * Las escalas son **exactas**: replican la paleta del evalscript real de cada
+ * capa (ambas son discretas → barra escalonada, no degradado). Las paradas se
+ * rotulan por límite de bin, no por eje lineal, para soportar bins no uniformes.
  */
 
 const SENTINEL_HUB = sentinelHubConfig();
 
 interface Bin {
-  /** Valor del índice desde el que aplica este color (parada del color map). */
+  /** Valor del índice desde el que aplica este color (límite inferior del bin). */
   from: number;
   color: string;
 }
@@ -26,17 +26,17 @@ interface Bin {
 interface IndexLegend {
   title: string;
   bins: Bin[];
-  /** Rango del eje de valores para posicionar las etiquetas. */
-  axis: [number, number];
-  /** Valores a rotular bajo la barra. */
+  /** Índices de bin cuyo `from` se rotula bajo la barra (posición = i/bins.length). */
   ticks: number[];
-  /** Nota de la parada por debajo del rango (p. ej. negro = agua/sin dato). */
+  /** Palabras en los extremos (semántica bajo→alto). */
+  ends: [string, string];
+  /** Parada por debajo del rango, aparte de la barra (p. ej. negro NDVI). */
   note?: { color: string; label: string };
 }
 
-// Paleta por defecto de Sentinel Hub (`createDefaultColorMap`), común a NDVI/NDMI:
-// paradas cada 0,1 de −0,2 a 0,9 (más negro para < −0,2). Discreta.
-const DEFAULT_COLORMAP: Bin[] = [
+// NDVI: `ColorMapVisualizer.createDefaultColorMap()` de Sentinel Hub (verificado
+// con el evalscript real). Paradas cada 0,1 de −0,2 a 0,9; negro para < −0,2.
+const NDVI_BINS: Bin[] = [
   { from: -0.2, color: "#ff0000" },
   { from: -0.1, color: "#9a0000" },
   { from: 0.0, color: "#660000" },
@@ -50,60 +50,71 @@ const DEFAULT_COLORMAP: Bin[] = [
   { from: 0.8, color: "#33cc33" },
   { from: 0.9, color: "#006600" },
 ];
-const DEFAULT_NOTE = { color: "#000000", label: "< −0,2: agua / sin dato" };
+
+// NDMI: evalscript propio (verificado). 5 clases: seco → húmedo. La primera
+// (< −0,2) es un color mostrado, no "sin dato" (from sentinela para la key).
+const NDMI_BINS: Bin[] = [
+  { from: -1, color: "#cc8033" }, // < −0,2 (seco)
+  { from: -0.2, color: "#f0cc73" },
+  { from: 0.0, color: "#d9e68c" },
+  { from: 0.2, color: "#80cc8c" },
+  { from: 0.4, color: "#1a73b3" }, // ≥ 0,4 (húmedo)
+];
 
 const INDEX_LEGENDS: Record<string, IndexLegend> = {
-  // NDVI: evalscript predefinido `createDefaultColorMap()` (verificado con el
-  // evalscript real de la capa). B08/B04.
   NDVI: {
     title: "NDVI · vigor de la vegetación",
-    bins: DEFAULT_COLORMAP,
-    axis: [-0.2, 1.0],
-    ticks: [-0.2, 0, 0.2, 0.4, 0.6, 0.8],
-    note: DEFAULT_NOTE,
+    bins: NDVI_BINS,
+    ticks: [2, 4, 6, 8, 10], // 0 · 0,2 · 0,4 · 0,6 · 0,8
+    ends: ["poca veg.", "vigorosa"],
+    note: { color: "#000000", label: "< −0,2: agua / sin dato" },
   },
-  // NDMI: se asume la misma paleta por defecto (B08/B11) — pendiente de confirmar
-  // con el evalscript real de la capa NDMI.
   NDMI: {
     title: "NDMI · humedad de la vegetación",
-    bins: DEFAULT_COLORMAP,
-    axis: [-0.2, 1.0],
-    ticks: [-0.2, 0, 0.2, 0.4, 0.6, 0.8],
-    note: DEFAULT_NOTE,
+    bins: NDMI_BINS,
+    ticks: [1, 2, 3, 4], // −0,2 · 0 · 0,2 · 0,4
+    ends: ["seco", "húmedo"],
   },
 };
 
 const fmt = (v: number) => v.toLocaleString("es-CO");
 
 function LegendCard({ leg }: { leg: IndexLegend }) {
-  const [lo, hi] = leg.axis;
-  const pos = (v: number) => ((v - lo) / (hi - lo)) * 100;
+  const n = leg.bins.length;
   return (
     <div className="bg-background/95 w-52 rounded-lg p-2 shadow-lg ring-1 ring-black/10 backdrop-blur">
       <div className="mb-1 text-[11px] leading-tight font-semibold text-slate-700">
         {leg.title}
       </div>
-      {/* Barra escalonada (bins de igual ancho: paradas uniformes de 0,1). */}
+      {/* Barra escalonada (un segmento por bin). */}
       <div className="flex h-2.5 w-full overflow-hidden rounded-full ring-1 ring-black/10">
-        {leg.bins.map((b) => (
+        {leg.bins.map((b, i) => (
           <div
-            key={b.from}
+            key={i}
             className="flex-1"
             style={{ backgroundColor: b.color }}
           />
         ))}
       </div>
-      {/* Eje de valores del índice. */}
+      {/* Rótulos de valor en los límites de bin (posición = i/n). */}
       <div className="relative mt-0.5 h-3">
-        {leg.ticks.map((t) => (
-          <span
-            key={t}
-            className="absolute -translate-x-1/2 text-[9px] text-slate-500"
-            style={{ left: `${pos(t)}%` }}
-          >
-            {fmt(t)}
-          </span>
-        ))}
+        {leg.ticks.map((i) => {
+          const b = leg.bins[i];
+          return b ? (
+            <span
+              key={i}
+              className="absolute -translate-x-1/2 text-[9px] text-slate-500"
+              style={{ left: `${(i / n) * 100}%` }}
+            >
+              {fmt(b.from)}
+            </span>
+          ) : null;
+        })}
+      </div>
+      {/* Palabras extremas (bajo → alto). */}
+      <div className="flex justify-between text-[9px] font-medium text-slate-500">
+        <span>{leg.ends[0]}</span>
+        <span>{leg.ends[1]}</span>
       </div>
       {leg.note && (
         <div className="mt-0.5 flex items-center gap-1 text-[9px] text-slate-500">
@@ -134,7 +145,7 @@ export function SentinelLegend() {
   if (activos.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-2 z-10 flex flex-col gap-1.5">
+    <div className="pointer-events-none absolute right-2 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-10 flex flex-col items-end gap-1.5">
       {activos.map((l) => {
         const leg = INDEX_LEGENDS[l.id];
         return leg ? <LegendCard key={l.id} leg={leg} /> : null;

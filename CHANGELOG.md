@@ -7,8 +7,9 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ### Mapa — escala de color del índice (leyenda)
 
-- Al encender un índice **🛰️ Sentinel Hub** (NDVI/NDMI) aparece una **escala de color** abajo a la
-  izquierda que explica los colores (p. ej. NDVI "Suelo/poca → Vigorosa", NDMI "Seco → Húmedo"), para que
+- Al encender un índice **🛰️ Sentinel Hub** (NDVI/NDMI) aparece una **escala de color** al margen
+  inferior derecho que explica los colores con la **paleta exacta** de cada capa (NDVI por defecto de
+  Sentinel Hub; NDMI 5 clases seco→húmedo) y los valores reales del índice, para que
   en campo se entienda el mapa. Persiste mientras el índice esté encendido y se oculta al abrir un panel
   inferior (tablón o medición) para no encimarse. Ver **ADR-0026**.
 
