@@ -5,6 +5,16 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — calendario con los días de paso del satélite (comparar riego)
+
+- El selector de fecha de Sentinel Hub ahora es un **calendario** que **marca con un círculo los días con
+  imagen real** de Sentinel-2 sobre tus fincas, **coloreado por nubosidad** (verde despejado → gris muy
+  nublado), para elegir días despejados al comparar Antes/Después de un riego. Los días salen de la
+  **Catalog API de CDSE** vía una ruta serverless (`/api/sentinel-dates`) que guarda el secreto OAuth.
+- **Opcional y con degradación limpia:** sin las credenciales `SENTINELHUB_CLIENT_ID`/`SECRET` (de
+  servidor, secretas), el calendario sigue siendo usable — solo no marca los círculos. Las fechas se
+  cachean en el service worker para verlas sin señal. Ver **ADR-0025**.
+
 ### Mapa — comparar antes/después de un riego (fecha A/B en Sentinel Hub)
 
 - Con una capa **🛰️ Sentinel Hub** encendida aparece un selector **📅 Fecha — comparar riego** en 🗂️

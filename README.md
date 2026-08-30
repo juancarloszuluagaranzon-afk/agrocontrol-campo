@@ -94,8 +94,11 @@ HTTPS es requisito para el GPS; Vercel lo cubre.
      `NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID` y opcionalmente
      `NEXT_PUBLIC_SENTINELHUB_LAYERS` (lista por coma, def. `NDVI,NDMI`) y
      `NEXT_PUBLIC_SENTINELHUB_MAXCC` (def. `20`). Alta gratuita en
-     <https://dataspace.copernicus.eu>; restringe el dominio de la configuración
-     OGC al del despliegue (consume tu cuota).
+     <https://dataspace.copernicus.eu>.
+   - _(opcional, calendario de días de paso — ADR-0025; **secretas, de servidor**)_
+     `SENTINELHUB_CLIENT_ID` y `SENTINELHUB_CLIENT_SECRET`, de un cliente OAuth
+     creado en CDSE (User settings → OAuth clients). Sin ellas el calendario
+     funciona pero no marca los días con imagen.
 3. **Build**: el `package.json` ya usa `next build --webpack` (Serwist). No se
    requiere config extra.
 4. En Supabase → **Authentication → URL Configuration**, agrega el dominio de

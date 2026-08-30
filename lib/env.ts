@@ -34,3 +34,25 @@ export function requireSupabaseEnv(): SupabaseEnv {
   cached = parsed.data;
   return cached;
 }
+
+/**
+ * Credenciales OAuth de Sentinel Hub (CDSE) para la Catalog API — **secretas, de
+ * servidor** (NO `NEXT_PUBLIC`). Solo las usa la ruta `/api/sentinel-dates`
+ * (ADR-0025). Devuelve `null` si no están configuradas: el calendario funciona
+ * igual, solo sin marcar los días con imagen (degradación limpia).
+ */
+const sentinelOAuthSchema = z.object({
+  clientId: z.string().min(1),
+  clientSecret: z.string().min(1),
+});
+
+export function sentinelHubOAuth(): {
+  clientId: string;
+  clientSecret: string;
+} | null {
+  const parsed = sentinelOAuthSchema.safeParse({
+    clientId: process.env.SENTINELHUB_CLIENT_ID,
+    clientSecret: process.env.SENTINELHUB_CLIENT_SECRET,
+  });
+  return parsed.success ? parsed.data : null;
+}
