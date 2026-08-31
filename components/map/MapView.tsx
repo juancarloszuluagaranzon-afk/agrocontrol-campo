@@ -250,6 +250,12 @@ export function MapView() {
         map.addSource(FINCAS_MASK_SOURCE, {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
+          // `tolerance: 0` desactiva la simplificación de geojson-vt: sin esto, a
+          // zoom bajo MapLibre descartaba los huecos de los tablones más pequeños
+          // (p. ej. Peralonso, los de menor ha), y el velo tapaba esas suertes
+          // dejándolas sin índice. También `buffer` amplio por si acaso en bordes.
+          tolerance: 0,
+          buffer: 128,
         });
         map.addLayer({
           id: FINCAS_MASK_LAYER,

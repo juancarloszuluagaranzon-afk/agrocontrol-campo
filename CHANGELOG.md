@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fix — el índice no se veía en haciendas de tablones pequeños (Peralonso)
+
+- La máscara "solo nuestras fincas" tapaba con el velo las suertes de **tablones más pequeños** (p. ej.
+  **Peralonso**, la de menor hectareaje), dejándolas **sin índice** a zoom bajo. Causa: MapLibre
+  simplificaba (`geojson-vt`) el geojson de la máscara y **descartaba los huecos pequeños**. Fix:
+  `tolerance: 0` en la fuente de la máscara para preservar todos los huecos a cualquier zoom.
+
 ### Mapa — escala de color del índice (leyenda)
 
 - Al encender un índice **🛰️ Sentinel Hub** (NDVI/NDMI) aparece una **escala de color** al margen
