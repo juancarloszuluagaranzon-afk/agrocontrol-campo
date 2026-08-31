@@ -8,12 +8,9 @@ versionado [SemVer](https://semver.org/lang/es/).
 ### Fix — el índice no se veía en haciendas de tablones pequeños (Peralonso)
 
 - La máscara "solo nuestras fincas" tapaba con el velo las suertes de **tablones más pequeños** (p. ej.
-  **Peralonso**, la de menor hectareaje), dejándolas **sin índice a cualquier zoom**. Causa real: MapLibre
-  limita a **500 anillos por polígono** (`EARCUT_MAX_RINGS`) y, al exceder, conserva solo los de **mayor
-  área**; con ~1378 huecos en un solo polígono, los tablones más pequeños perdían su hueco. Fix: la máscara
-  pasa a **MultiPolygon repartido en una rejilla** (cada celda < 500 huecos) + `tolerance: 0` como refuerzo
-  contra la simplificación. Verificado con los datos: celda más cargada ~306 huecos (Castilla), Peralonso
-  con sus 193 tablones cubiertos.
+  **Peralonso**, la de menor hectareaje), dejándolas **sin índice** a zoom bajo. Causa: MapLibre
+  simplificaba (`geojson-vt`) el geojson de la máscara y **descartaba los huecos pequeños**. Fix:
+  `tolerance: 0` en la fuente de la máscara para preservar todos los huecos a cualquier zoom.
 
 ### Mapa — escala de color del índice (leyenda)
 
