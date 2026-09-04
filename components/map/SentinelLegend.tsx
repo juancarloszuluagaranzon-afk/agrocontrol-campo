@@ -61,6 +61,17 @@ const NDMI_BINS: Bin[] = [
   { from: 0.4, color: "#1a73b3" }, // ≥ 0,4 (húmedo)
 ];
 
+// EVI: evalscript propio con rampa FRÍA (verde-agua → verde intenso), a
+// propósito distinta a la del NDVI para diferenciarlos de un vistazo. 6 clases.
+const EVI_BINS: Bin[] = [
+  { from: -1, color: "#b8a878" }, // < 0 (suelo / sin veg)
+  { from: 0.0, color: "#ccece6" },
+  { from: 0.2, color: "#99d8c9" },
+  { from: 0.35, color: "#66c2a4" },
+  { from: 0.5, color: "#2ca25f" },
+  { from: 0.65, color: "#006d2c" }, // ≥ 0,65 (vigor alto)
+];
+
 const INDEX_LEGENDS: Record<string, IndexLegend> = {
   NDVI: {
     title: "NDVI · vigor de la vegetación",
@@ -74,6 +85,12 @@ const INDEX_LEGENDS: Record<string, IndexLegend> = {
     bins: NDMI_BINS,
     ticks: [1, 2, 3, 4], // −0,2 · 0 · 0,2 · 0,4
     ends: ["seco", "húmedo"],
+  },
+  EVI: {
+    title: "EVI · vigor (canopia densa)",
+    bins: EVI_BINS,
+    ticks: [1, 2, 3, 4, 5], // 0 · 0,2 · 0,35 · 0,5 · 0,65
+    ends: ["bajo / suelo", "vigor alto"],
   },
 };
 

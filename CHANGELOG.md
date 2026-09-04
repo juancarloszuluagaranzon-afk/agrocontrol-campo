@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — índice EVI (vigor en canopia densa)
+
+- Nuevo índice **🛰️ EVI** (Enhanced Vegetation Index), útil en caña ya cerrada donde el NDVI se satura:
+  EVI reduce la saturación y descuenta suelo/atmósfera. Se calcula con evalscript propio
+  (`2.5·(B08−B04)/(B08+6·B04−7.5·B02+1)`) y trae **rampa de color propia** (verde-agua frío → verde
+  intenso), a propósito **distinta a la del NDVI** para diferenciarlos de un vistazo; su leyenda exacta
+  aparece abajo-derecha. Se activa poniendo `EVI` en `NEXT_PUBLIC_SENTINELHUB_LAYERS` (requiere crear la
+  capa `EVI` en la config de CDSE con ese evalscript).
+
 ### Fix — el índice no se veía en haciendas de tablones pequeños (Peralonso)
 
 - La máscara "solo nuestras fincas" tapaba con el velo las suertes de **tablones más pequeños** (p. ej.
