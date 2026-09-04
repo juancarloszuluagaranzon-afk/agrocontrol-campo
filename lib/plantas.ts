@@ -44,6 +44,12 @@ export interface PlantaConfig {
   contextLayers: ContextLayer[];
   /** Encuadre inicial del mapa. */
   aoi: PlantaAOI;
+  /**
+   * Máscara "solo nuestras fincas" (ADR-0023): imagen PNG (velo con las fincas
+   * recortadas) y su bbox `[W,S,E,N]` para colocarla como `image` source.
+   * Generada con `scripts/gen_mask.mjs`.
+   */
+  mask: { url: string; bbox: [number, number, number, number] };
 }
 
 export const PLANTAS: Record<PlantaId, PlantaConfig> = {
@@ -63,6 +69,10 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
       maxZoom: AOI.maxZoom,
       bbox: [...AOI.bbox],
     },
+    mask: {
+      url: "/data/mask_riopaila.png",
+      bbox: [-76.19189, 4.22619, -76.03967, 4.39324],
+    },
   },
   castilla: {
     id: "castilla",
@@ -81,6 +91,10 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
       minZoom: 9,
       maxZoom: 19,
       bbox: [-76.496, 3.058, -76.225, 3.443],
+    },
+    mask: {
+      url: "/data/mask_castilla.png",
+      bbox: [-76.53629, 3.00069, -76.18485, 3.50032],
     },
   },
 };
