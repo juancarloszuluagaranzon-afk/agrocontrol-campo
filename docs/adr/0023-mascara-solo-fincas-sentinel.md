@@ -15,16 +15,20 @@ por tamaño de URL) o un proxy OAuth (pesado y sin offline).
 
 ## Decisión
 
-- **Máscara inversa cliente** (`lib/geo/fincasMask.ts`): un polígono que cubre todo el exterior con las
-  suertes recortadas como **huecos**. Se pinta semi-transparente oscuro (`#0a0f1a`, `fill-opacity` 0.6)
-  **encima del índice** y **debajo de contexto/suertes**, así NDVI/NDMI queda a plena intensidad dentro de
-  los lotes y el satélite **atenuado** fuera.
-- **Construcción pura y O(n) sin dependencias**: se concatena el anillo exterior de cada tablón como hueco
-  del polígono exterior. MapLibre/earcut trata todo anillo tras el primero como hueco (sin importar el
-  sentido de giro), así que **no hace falta turf** ni operaciones geométricas. Se arma en runtime desde los
-  tablones que la app ya carga (`cfg.tablones`), por planta, siempre en sincronía y offline.
-- **Anillo exterior amplio** (SW de Colombia, lon −80..−72, lat 0..8) que cubre el viewport a cualquier
-  zoom/paneo razonable del AOI del ingenio.
+- **Máscara raster precomputada por planta** (`public/data/mask_<planta>.png`, generada con
+  `scripts/gen_mask.mjs`): un velo oscuro (`#0a0f1a`, alpha 0,6 horneado en el PNG) con las fincas
+  recortadas (transparentes). Se coloca como **`image` source** de MapLibre sobre el bbox de la planta
+  (`PlantaConfig.mask`), **encima del índice** y **debajo de contexto/suertes**; así NDVI/NDMI queda a
+  plena intensidad dentro de los lotes y el satélite **atenuado** fuera. Oculta salvo que haya un índice
+  encendido. El PNG se cachea con el resto de `/data/` en el service worker (offline).
+- **Por qué raster y no vectorial (ver Historial):** los ~1345 tablones son **parcelas separadas** (vías/
+  canales entre ellas), y MapLibre limita a **500 anillos por polígono** — una máscara vectorial que las
+  perfore a todas siempre excede ese tope y **descarta las de menor área** (por eso Peralonso, de tablones
+  más chicos, se perdía). Una imagen no tiene ese límite.
+- **Generación** (`scripts/gen_mask.mjs`, offline con `sharp`): proyecta los tablones a **Web Mercator**
+  (para que calce con la colocación del `image` source), dibuja un SVG (rect del lienzo + tablones con
+  `fill-rule=evenodd` → huecos) y lo rasteriza a PNG ~4096 px. `pnpm gen:mask` para regenerar cuando cambie
+  la cartografía.
 - **Visibilidad ligada a Sentinel Hub**: la máscara solo aparece cuando **alguna** capa Sentinel Hub está
   encendida (no afecta la navegación normal en satélite ni el mosaico de EOX). Se añade solo si hay
   instance ID configurado.
@@ -36,10 +40,22 @@ por tamaño de URL) o un proxy OAuth (pesado y sin offline).
 - Es **atenuación, no recorte exacto**: el índice puede insinuarse **muy tenue** fuera de los lotes (a
   través del velo). Aceptado en la decisión del usuario ("satélite atenuado alrededor") frente a la opción
   de recorte servidor. Subir la opacidad del velo lo oculta más.
-- Un polígono con miles de huecos (1378 Riopaila / 2446 Castilla) se triangula una vez al montar la capa:
-  costo puntual asumible; si molestara, se precomputaría a un `geojson` estático por planta.
-- El velo también atenúa el satélite/mosaico base fuera de las suertes (deseado); el contexto vectorial y
-  las suertes van por encima y quedan nítidos.
+- El PNG pesa ~1,3 MB (Riopaila) / ~0,7 MB (Castilla); se descarga una vez y queda en la caché del SW.
+- **Resolución** ~4096 px: los bordes del velo pueden verse un pelín suaves a zoom muy alto (es un velo,
+  no dato; las suertes van nítidas por encima). Regenerable a más px si hiciera falta.
+- El velo también atenúa el satélite/mosaico base fuera de las suertes (deseado).
+
+## Historial (por qué se llegó al raster)
+
+1. **Vectorial, 1 polígono con ~1378 huecos** (v1): se veía bien salvo que **MapLibre descarta huecos
+   pasando de 500 anillos/polígono** (`EARCUT_MAX_RINGS`, conserva los de mayor área) → los tablones más
+   chicos (Peralonso) quedaban sin recorte.
+2. **`tolerance: 0`** (PR #63): se creyó que era simplificación; no lo era → no arregló nada.
+3. **MultiPolygon en rejilla** (PR #64): repartir huecos en celdas <500; **quedó peor** (revertido).
+4. **Disolver con `polygon-clipping`**: las parcelas **no comparten bordes** (vías/canales) → no se fusionan
+   (quedaban ~1345 bloques) y crasheaba en Castilla.
+5. **Raster (esta decisión)**: sin límite de anillos, sin costuras, verificado a nivel de píxel (Peralonso
+   192/193 tablones en hueco; exterior con velo).
 
 ## Alternativas descartadas
 

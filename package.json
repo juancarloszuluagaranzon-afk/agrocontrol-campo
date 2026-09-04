@@ -8,6 +8,7 @@
   },
   "scripts": {
     "copy-pdf-worker": "node scripts/copy-pdf-worker.mjs",
+    "gen:mask": "node scripts/gen_mask.mjs",
     "predev": "node scripts/copy-pdf-worker.mjs",
     "prebuild": "node scripts/copy-pdf-worker.mjs",
     "dev": "next dev --port 3200",

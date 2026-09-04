@@ -17,11 +17,7 @@ import {
   sentinelHubTilesUrl,
   sentinelHubTimeParam,
 } from "@/lib/geo/sentinelHub";
-import {
-  buildFincasMask,
-  FINCAS_MASK_LAYER,
-  FINCAS_MASK_SOURCE,
-} from "@/lib/geo/fincasMask";
+import { FINCAS_MASK_LAYER, FINCAS_MASK_SOURCE } from "@/lib/geo/fincasMask";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
@@ -239,42 +235,33 @@ export function MapView() {
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
 
-      // Máscara "solo nuestras fincas" (ADR-0023): velo oscuro semi-transparente
-      // con las suertes recortadas como huecos, encima del índice Sentinel Hub y
-      // debajo del contexto/suertes. Oculta salvo que una capa Sentinel Hub esté
-      // encendida. Al ir primero en el load, queda sobre los raster de baseStyle.
-      // Solo se construye si hay índice que recortar (Sentinel Hub configurado).
-      // `cfg.tablones` es la URL del geojson (MapLibre la descarga): se trae el
-      // FeatureCollection y se arma la máscara con setData (cacheado por el SW).
+      // Máscara "solo nuestras fincas" (ADR-0023): velo oscuro con las fincas
+      // recortadas (transparentes), como **imagen** raster precomputada por
+      // planta (public/data/mask_<planta>.png, ver scripts/gen_mask.mjs). Se usa
+      // imagen —no geojson— porque las ~1345 parcelas separadas excederían el
+      // límite de 500 anillos/polígono de MapLibre (por eso Peralonso, de
+      // tablones chicos, se perdía). El velo (alpha 0,6) ya viene horneado en el
+      // PNG. Encima del índice y debajo de contexto/suertes; oculta salvo que
+      // una capa Sentinel Hub esté encendida. Solo si hay índice configurado.
       if (SENTINEL_HUB_LAYERS.length > 0) {
+        const [mW, mS, mE, mN] = cfg.mask.bbox;
         map.addSource(FINCAS_MASK_SOURCE, {
-          type: "geojson",
-          data: { type: "FeatureCollection", features: [] },
-          // `tolerance: 0` desactiva la simplificación de geojson-vt: sin esto, a
-          // zoom bajo MapLibre descartaba los huecos de los tablones más pequeños
-          // (p. ej. Peralonso, los de menor ha), y el velo tapaba esas suertes
-          // dejándolas sin índice. También `buffer` amplio por si acaso en bordes.
-          tolerance: 0,
-          buffer: 128,
+          type: "image",
+          url: cfg.mask.url,
+          coordinates: [
+            [mW, mN],
+            [mE, mN],
+            [mE, mS],
+            [mW, mS],
+          ],
         });
         map.addLayer({
           id: FINCAS_MASK_LAYER,
-          type: "fill",
+          type: "raster",
           source: FINCAS_MASK_SOURCE,
           layout: { visibility: "none" },
-          paint: { "fill-color": "#0a0f1a", "fill-opacity": 0.6 },
+          paint: { "raster-opacity": 1, "raster-fade-duration": 0 },
         });
-        fetch(cfg.tablones)
-          .then((r) => r.json() as Promise<FeatureCollection>)
-          .then((fc) => {
-            const src = map.getSource(FINCAS_MASK_SOURCE) as
-              | GeoJSONSource
-              | undefined;
-            src?.setData(buildFincasMask(fc));
-          })
-          .catch(() => {
-            // Sin máscara si falla la carga: la capa queda vacía (degradación limpia).
-          });
       }
 
       // Capas de contexto de la planta activa (ocultas por defecto) antes de
@@ -659,7 +646,7 @@ export function MapView() {
       map.remove();
       mapRef.current = null;
     };
-  }, [setSelected, cfg.tablones, cfg.aoi, cfg.contextLayers]);
+  }, [setSelected, cfg.tablones, cfg.aoi, cfg.contextLayers, cfg.mask]);
 
   // ── Resaltado de la suerte seleccionada ──
   const selectedTabId = useMapStore((s) => s.selected?.tab_id ?? "");

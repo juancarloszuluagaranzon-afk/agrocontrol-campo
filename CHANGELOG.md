@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fix — Peralonso (y todo tablón pequeño) ya muestra el índice · máscara raster
+
+- La máscara "solo nuestras fincas" pasa a ser una **imagen PNG precomputada** por planta
+  (`public/data/mask_<planta>.png`, `scripts/gen_mask.mjs`, `pnpm gen:mask`) colocada como `image` source,
+  en vez de un polígono vectorial. **Causa del bug:** los ~1345 tablones son parcelas separadas y MapLibre
+  descarta huecos pasando de **500 anillos/polígono**, así que los tablones más pequeños (**Peralonso**)
+  quedaban sin recorte. Una máscara raster no tiene ese límite. **Verificado a nivel de píxel**: Peralonso
+  192/193 tablones en hueco, exterior con velo. Ver **ADR-0023** (incluye el historial de los intentos).
+
 ### Mapa — índice EVI (vigor en canopia densa)
 
 - Nuevo índice **🛰️ EVI** (Enhanced Vegetation Index), útil en caña ya cerrada donde el NDVI se satura:
