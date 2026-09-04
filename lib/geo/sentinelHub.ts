@@ -29,6 +29,7 @@ export function sentinelHubMapId(layer: string): string {
 const DEFAULT_LABELS: Record<string, string> = {
   NDVI: "NDVI (vegetación)",
   NDMI: "NDMI (humedad)",
+  EVI: "EVI (vigor)",
   NDWI: "NDWI (agua)",
   "TRUE-COLOR": "Color real",
   "FALSE-COLOR": "Color falso",
