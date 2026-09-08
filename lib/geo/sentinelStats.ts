@@ -82,8 +82,9 @@ export function statsBody(
     input: {
       bounds: {
         geometry,
-        // GeoJSON lon/lat; Sentinel Hub lo interpreta con este CRS (EPSG:4326).
-        properties: { crs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84" },
+        // GeoJSON lon/lat con el CRS que documenta Sentinel Hub (EPSG:4326;
+        // interpreta las coords como lon,lat de GeoJSON).
+        properties: { crs: "http://www.opengis.net/gml/srs/epsg.xml#4326" },
       },
       data: [
         { type: "sentinel-2-l2a", dataFilter: { maxCloudCoverage: maxcc } },
