@@ -37,11 +37,23 @@ export default function RestablecerPage() {
   });
 
   useEffect(() => {
-    const supabase = createClient();
+    // Sin configuración de Supabase (p. ej. CI sin env) no hay forma de
+    // validar el enlace: se reporta inválido en vez de quedarse "verificando".
+    const supabase = (() => {
+      try {
+        return createClient();
+      } catch {
+        return null;
+      }
+    })();
+    if (!supabase) {
+      queueMicrotask(() => setEstado("invalido"));
+      return;
+    }
     let activo = true;
 
     // Si el enlace trae `?code=` (PKCE) y aún no hay sesión, se canjea.
-    async function verificar() {
+    const verificar = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         if (activo) setEstado("listo");
@@ -58,7 +70,7 @@ export default function RestablecerPage() {
       setTimeout(() => {
         if (activo) setEstado((e) => (e === "verificando" ? "invalido" : e));
       }, 2500);
-    }
+    };
     void verificar();
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
