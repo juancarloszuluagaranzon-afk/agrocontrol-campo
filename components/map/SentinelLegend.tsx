@@ -72,6 +72,18 @@ const EVI_BINS: Bin[] = [
   { from: 0.65, color: "#006d2c" }, // ≥ 0,65 (vigor alto)
 ];
 
+// NIR (B08): NO es un índice, es **reflectancia** cruda. Escala de GRISES (como
+// una foto infrarroja), oscuro=baja → claro=alta. Umbrales en reflectancia real
+// (0..~0,6). Los colores coinciden con el evalscript de la capa NIR en CDSE.
+const NIR_BINS: Bin[] = [
+  { from: -1, color: "#1a1a1f" }, // < 0,1 (baja: agua/sombra)
+  { from: 0.1, color: "#4d4d54" },
+  { from: 0.2, color: "#85858c" },
+  { from: 0.3, color: "#b8b8bd" },
+  { from: 0.4, color: "#e0e0e6" },
+  { from: 0.5, color: "#ffffff" }, // ≥ 0,5 (alta)
+];
+
 const INDEX_LEGENDS: Record<string, IndexLegend> = {
   NDVI: {
     title: "NDVI · vigor de la vegetación",
@@ -91,6 +103,12 @@ const INDEX_LEGENDS: Record<string, IndexLegend> = {
     bins: EVI_BINS,
     ticks: [1, 2, 3, 4, 5], // 0 · 0,2 · 0,35 · 0,5 · 0,65
     ends: ["bajo / suelo", "vigor alto"],
+  },
+  NIR: {
+    title: "NIR · reflectancia",
+    bins: NIR_BINS,
+    ticks: [1, 2, 3, 4, 5], // 0,1 · 0,2 · 0,3 · 0,4 · 0,5
+    ends: ["baja", "alta"],
   },
 };
 
