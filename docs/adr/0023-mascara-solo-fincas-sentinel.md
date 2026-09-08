@@ -25,6 +25,10 @@ por tamaño de URL) o un proxy OAuth (pesado y sin offline).
   canales entre ellas), y MapLibre limita a **500 anillos por polígono** — una máscara vectorial que las
   perfore a todas siempre excede ese tope y **descarta las de menor área** (por eso Peralonso, de tablones
   más chicos, se perdía). Una imagen no tiene ese límite.
+- **Marco de velo exterior** (`buildMaskFrame`): el PNG solo cubre el bbox (fincas + 15 %); al alejar el
+  zoom, el índice se veía **suelto como un bloque** más allá del bbox. Se añade un `fill` geojson de 2
+  anillos (exterior enorme −80..−72 menos el bbox de la máscara) que velo todo lo lejano; abuta con el PNG
+  en el borde del bbox. 2 anillos → sin problema de límite.
 - **Generación** (`scripts/gen_mask.mjs`, offline con `sharp`): proyecta los tablones a **Web Mercator**
   (para que calce con la colocación del `image` source), dibuja un SVG (rect del lienzo + tablones con
   `fill-rule=evenodd` → huecos) y lo rasteriza a PNG ~4096 px. `pnpm gen:mask` para regenerar cuando cambie
