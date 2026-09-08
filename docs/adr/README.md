@@ -32,3 +32,4 @@ añade una nueva.
 | 0024 | Selector de fecha A/B para comparar antes/después (Sentinel Hub)  | Aceptada |
 | 0025 | Calendario con días de paso del satélite (Catalog API + OAuth)    | Aceptada |
 | 0026 | Escala de color del índice activo (leyenda abajo-izquierda)       | Aceptada |
+| 0027 | Estadísticas por suerte (Statistical API de Sentinel Hub)         | Aceptada |

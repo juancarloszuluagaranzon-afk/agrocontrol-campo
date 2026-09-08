@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { sentinelHubOAuth } from "@/lib/env";
+import {
+  getSentinelToken,
+  invalidateSentinelToken,
+} from "@/lib/sentinel/token";
 import {
   catalogSearchBody,
   parseCatalogDates,
@@ -17,46 +20,14 @@ import {
  */
 export const dynamic = "force-dynamic";
 
-const TOKEN_URL =
-  "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token";
 const CATALOG_URL =
   "https://sh.dataspace.copernicus.eu/api/v1/catalog/1.0.0/search";
-
-// Token cacheado a nivel de módulo (se reusa entre invocaciones calientes).
-let cachedToken: { value: string; exp: number } | null = null;
-
-async function getToken(
-  clientId: string,
-  clientSecret: string,
-): Promise<string> {
-  const now = Date.now();
-  if (cachedToken && cachedToken.exp > now + 30_000) return cachedToken.value;
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "client_credentials",
-      client_id: clientId,
-      client_secret: clientSecret,
-    }),
-  });
-  if (!res.ok) throw new Error(`token ${res.status}`);
-  const json = (await res.json()) as {
-    access_token: string;
-    expires_in?: number;
-  };
-  cachedToken = {
-    value: json.access_token,
-    exp: now + (json.expires_in ?? 600) * 1000,
-  };
-  return cachedToken.value;
-}
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function GET(req: NextRequest) {
-  const oauth = sentinelHubOAuth();
-  if (!oauth) return NextResponse.json({ configured: false, dates: [] });
+  const token = await getSentinelToken();
+  if (!token) return NextResponse.json({ configured: false, dates: [] });
 
   const sp = req.nextUrl.searchParams;
   const bboxRaw = sp.get("bbox");
@@ -73,7 +44,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const token = await getToken(oauth.clientId, oauth.clientSecret);
     const res = await fetch(CATALOG_URL, {
       method: "POST",
       headers: {
@@ -84,7 +54,7 @@ export async function GET(req: NextRequest) {
     });
     if (!res.ok) {
       // token vencido u otro error: no fijar caché envenenada
-      if (res.status === 401) cachedToken = null;
+      if (res.status === 401) invalidateSentinelToken();
       const detail = (await res.text().catch(() => "")).slice(0, 300);
       return NextResponse.json({
         configured: true,
