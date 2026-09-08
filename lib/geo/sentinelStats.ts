@@ -96,9 +96,9 @@ export function statsBody(
       resy: 10,
       evalscript: statEvalscript(index),
     },
-    // `{}` = estadísticas por defecto (min/max/mean/stDev/sampleCount) de las
-    // salidas (dataMask se excluye del cálculo).
-    calculations: {},
+    // Sin `calculations` → la Statistical API calcula las estadísticas por
+    // defecto (min/max/mean/stDev/sampleCount) de las salidas (dataMask se
+    // excluye). (`calculations: {}` puede interpretarse como "no calcular nada".)
   };
 }
 
