@@ -144,11 +144,20 @@ export function statsBody(
 }
 
 interface StatsApiBandStats {
-  min?: number;
-  max?: number;
-  mean?: number;
-  stDev?: number;
+  // La Statistical API puede devolver los estadísticos como número o como el
+  // **string `"NaN"`** cuando, tras enmascarar nubes con SCL (ADR-0028), no
+  // queda ningún píxel válido en el intervalo (aunque `sampleCount` > 0).
+  min?: number | string;
+  max?: number | string;
+  mean?: number | string;
+  stDev?: number | string;
   sampleCount?: number;
+}
+
+/** Número finito o el fallback (descarta `"NaN"`/strings/no-finitos). */
+function finiteOr(v: unknown, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
 }
 
 /** Normaliza un objeto `{k:v}` o array a una lista de valores. */
@@ -170,12 +179,15 @@ export function parseStats(json: {
     for (const out of values(interval.outputs)) {
       for (const band of values((out as { bands?: unknown }).bands)) {
         const st = (band as { stats?: StatsApiBandStats }).stats;
-        if (st?.sampleCount && st.mean != null) {
+        const mean = Number(st?.mean);
+        // Requiere media **finita**: `"NaN"` (todo nube tras SCL) o sin muestras
+        // → se ignora este intervalo/banda y se sigue buscando; sin dato → null.
+        if (st?.sampleCount && Number.isFinite(mean)) {
           return {
-            mean: st.mean,
-            min: st.min ?? st.mean,
-            max: st.max ?? st.mean,
-            stDev: st.stDev ?? 0,
+            mean,
+            min: finiteOr(st.min, mean),
+            max: finiteOr(st.max, mean),
+            stDev: finiteOr(st.stDev, 0),
             samples: st.sampleCount,
           };
         }
