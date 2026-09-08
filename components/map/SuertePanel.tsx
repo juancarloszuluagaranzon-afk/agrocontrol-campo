@@ -4,6 +4,7 @@ import { useMapStore } from "@/lib/store/mapStore";
 import { formatHectareas } from "@/lib/geo/format";
 import { useMaestro } from "@/lib/data/useMaestro";
 import { edadSuerteMeses } from "@/domain/maestro/schema";
+import { SuerteIndexStats } from "@/components/map/SuerteIndexStats";
 
 /** Fecha ISO (aaaa-mm-dd) → dd/mm/aaaa, o "—" si falta. */
 function fechaCorta(iso: string | null | undefined): string {
@@ -112,6 +113,8 @@ export function SuertePanel() {
           <p className="text-accent/50 mt-1 text-sm">Sin datos del maestro</p>
         )}
       </div>
+
+      <SuerteIndexStats tabId={selected.tab_id} />
     </div>
   );
 }

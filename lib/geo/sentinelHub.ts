@@ -132,6 +132,22 @@ export function sentinelHubTimeParam(
 }
 
 /**
+ * Ventana de fechas `{from,to}` (YYYY-MM-DD) de una fecha elegida: `windowDays`
+ * atrás hasta esa fecha; con `null`, ventana reciente que termina hoy. La usan
+ * las estadísticas por suerte (ADR-0027) para pedir el mismo período que el mapa.
+ */
+export function sentinelHubTimeRange(
+  dateISO: string | null | undefined,
+  windowDays: number = SENTINEL_HUB_WINDOW_DAYS,
+): { from: string; to: string } {
+  const parsed = dateISO ? new Date(`${dateISO}T00:00:00Z`) : new Date();
+  const end = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const start = new Date(end.getTime() - windowDays * 86_400_000);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return { from: fmt(start), to: fmt(end) };
+}
+
+/**
  * Plantilla de teselas WMS para una fuente `raster` de MapLibre.
  *
  * MapLibre sustituye `{bbox-epsg-3857}` por `minX,minY,maxX,maxY`; con

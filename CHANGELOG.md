@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Suertes — estadísticas de índice por tablón (media/mín/máx)
+
+- Al abrir un tablón con un índice **🛰️ Sentinel Hub** encendido (NDVI/NDMI/EVI/NIR), el panel muestra
+  **media · mín · máx** de ese índice sobre el tablón, del **mismo período** que el mapa (fecha
+  Antes/Después). Se calcula con la **Statistical API de Sentinel Hub** vía la ruta serverless
+  `/api/sentinel-stats` (reutiliza el OAuth del calendario y la geometría de las suertes). Bajo demanda, no
+  se almacena; degrada limpio ("no configurado" / "sin dato" ante nubes o sin credenciales). Ver
+  **ADR-0027**. Prepara el terreno para comparar índices por suerte.
+
 ### Fix — el índice ya no se ve como bloque suelto al alejar el zoom
 
 - La máscara "solo fincas" (imagen PNG) solo cubría el bbox de las fincas; al alejar el zoom, el índice
