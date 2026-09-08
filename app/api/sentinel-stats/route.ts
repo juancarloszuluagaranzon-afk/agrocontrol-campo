@@ -7,6 +7,7 @@ import {
 import {
   isStatIndex,
   parseStats,
+  parseStatsSeries,
   statsBody,
   type StatIndex,
 } from "@/lib/geo/sentinelStats";
@@ -62,6 +63,11 @@ export async function GET(req: NextRequest) {
     maxccRaw && /^\d{1,3}$/.test(maxccRaw)
       ? Math.min(100, Number(maxccRaw))
       : 60;
+  // Modo **serie temporal**: intervalo de agregación (`P<n>D`) → devuelve la
+  // curva `[{from,to,stats}]` en vez de un único `{stats}` (ADR-0029).
+  const intervalRaw = sp.get("interval");
+  const interval =
+    intervalRaw && /^P\d{1,3}D$/.test(intervalRaw) ? intervalRaw : undefined;
 
   if (
     !tabId ||
@@ -97,7 +103,7 @@ export async function GET(req: NextRequest) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(
-        statsBody(geometry, from, to, index as StatIndex, maxcc),
+        statsBody(geometry, from, to, index as StatIndex, maxcc, interval),
       ),
     });
     if (!res.ok) {
@@ -111,10 +117,12 @@ export async function GET(req: NextRequest) {
       });
     }
     const json = await res.json();
-    return NextResponse.json(
-      { configured: true, stats: parseStats(json) },
-      { headers: { "Cache-Control": "private, max-age=3600" } },
-    );
+    const payload = interval
+      ? { configured: true, series: parseStatsSeries(json) }
+      : { configured: true, stats: parseStats(json) };
+    return NextResponse.json(payload, {
+      headers: { "Cache-Control": "private, max-age=3600" },
+    });
   } catch {
     return NextResponse.json({ configured: true, stats: null, error: "fetch" });
   }

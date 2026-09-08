@@ -3,6 +3,7 @@ import type { Geometry } from "geojson";
 import {
   isStatIndex,
   parseStats,
+  parseStatsSeries,
   statEvalscript,
   statsBody,
 } from "@/lib/geo/sentinelStats";
@@ -64,6 +65,48 @@ describe("statsBody", () => {
     expect(def.input.data[0]?.dataFilter.maxCloudCoverage).toBe(60);
     const hi = statsBody(geom, "2026-08-06", "2026-08-20", "NDVI", 90);
     expect(hi.input.data[0]?.dataFilter.maxCloudCoverage).toBe(90);
+  });
+
+  it("con `interval` usa ese paso (serie), no un único intervalo del período", () => {
+    const b = statsBody(geom, "2026-01-01", "2026-12-31", "NDVI", 60, "P30D");
+    expect(b.aggregation.aggregationInterval.of).toBe("P30D");
+  });
+});
+
+describe("parseStatsSeries", () => {
+  it("devuelve un punto por intervalo, con huecos como stats null", () => {
+    const json = {
+      data: [
+        {
+          interval: {
+            from: "2026-01-01T00:00:00Z",
+            to: "2026-02-01T00:00:00Z",
+          },
+          outputs: {
+            index: {
+              bands: { B0: { stats: { mean: 0.3, sampleCount: 100 } } },
+            },
+          },
+        },
+        {
+          interval: {
+            from: "2026-02-01T00:00:00Z",
+            to: "2026-03-01T00:00:00Z",
+          },
+          outputs: {
+            index: {
+              bands: { B0: { stats: { mean: "NaN", sampleCount: 100 } } },
+            },
+          },
+        },
+      ],
+    };
+    const s = parseStatsSeries(json);
+    expect(s).toHaveLength(2);
+    expect(s[0]?.from).toBe("2026-01-01T00:00:00Z");
+    expect(s[0]?.stats?.mean).toBe(0.3);
+    expect(s[1]?.stats).toBeNull(); // intervalo todo-nube → hueco
+    expect(parseStatsSeries({})).toEqual([]);
   });
 });
 
