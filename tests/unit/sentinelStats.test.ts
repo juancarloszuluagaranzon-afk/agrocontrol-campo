@@ -42,13 +42,16 @@ describe("statEvalscript", () => {
 });
 
 describe("statsBody", () => {
-  it("arma Sentinel-2 L2A con la geometría, ventana y un intervalo del período", () => {
+  it("arma Sentinel-2 L2A, reproyecta a 3857 y usa un intervalo del período", () => {
     const b = statsBody(geom, "2026-08-06", "2026-08-20", "NDVI");
     expect(b.input.data[0]?.type).toBe("sentinel-2-l2a");
-    expect(b.input.bounds.geometry).toBe(geom);
+    expect(b.input.bounds.properties.crs).toContain("3857");
+    // geometría reproyectada: lon −76,1 → ~−8,47M m en Web Mercator
+    const g = b.input.bounds.geometry;
+    const x = g.type === "Polygon" ? (g.coordinates[0]?.[0]?.[0] ?? 0) : 0;
+    expect(x).toBeLessThan(-8_000_000);
     expect(b.aggregation.timeRange.from).toBe("2026-08-06T00:00:00Z");
     expect(b.aggregation.timeRange.to).toBe("2026-08-20T23:59:59Z");
-    // 14 días → un intervalo que cubre todo el período
     expect(b.aggregation.aggregationInterval.of).toBe("P15D");
   });
 });

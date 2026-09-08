@@ -66,6 +66,32 @@ const dayDur = (fromISO: string, toISO: string): string => {
   return `P${days}D`;
 };
 
+// Reproyección lon/lat (EPSG:4326) → Web Mercator (EPSG:3857, metros). Se usa
+// una CRS métrica para que `resx/resy = 10` sean 10 m reales (Sentinel-2);
+// en grados el tablón caía por debajo de 1 píxel (data vacía).
+const MERC_R = 20037508.342789244;
+const toMerc = (p: number[]): [number, number] => [
+  ((p[0] ?? 0) * MERC_R) / 180,
+  (Math.log(Math.tan(((90 + (p[1] ?? 0)) * Math.PI) / 360)) * MERC_R) / Math.PI,
+];
+
+/** Reproyecta un Polygon/MultiPolygon de lon/lat a EPSG:3857. */
+export function reprojectTo3857(g: Geometry): Geometry {
+  if (g.type === "Polygon") {
+    return {
+      type: "Polygon",
+      coordinates: g.coordinates.map((r) => r.map(toMerc)),
+    };
+  }
+  if (g.type === "MultiPolygon") {
+    return {
+      type: "MultiPolygon",
+      coordinates: g.coordinates.map((poly) => poly.map((r) => r.map(toMerc))),
+    };
+  }
+  return g;
+}
+
 /**
  * Cuerpo de la Statistical API: estadísticas del índice sobre la geometría del
  * tablón (CRS84 lon/lat) en la ventana `from..to`, como **un solo intervalo**
@@ -81,10 +107,10 @@ export function statsBody(
   return {
     input: {
       bounds: {
-        geometry,
-        // GeoJSON lon/lat con el CRS que documenta Sentinel Hub (EPSG:4326;
-        // interpreta las coords como lon,lat de GeoJSON).
-        properties: { crs: "http://www.opengis.net/gml/srs/epsg.xml#4326" },
+        // Geometría reproyectada a EPSG:3857 (metros) para que resx/resy=10 sean
+        // 10 m reales. CRS soportado por Sentinel Hub.
+        geometry: reprojectTo3857(geometry),
+        properties: { crs: "http://www.opengis.net/def/crs/EPSG/0/3857" },
       },
       data: [
         { type: "sentinel-2-l2a", dataFilter: { maxCloudCoverage: maxcc } },
@@ -93,10 +119,8 @@ export function statsBody(
     aggregation: {
       timeRange: { from: `${fromISO}T00:00:00Z`, to: `${toISO}T23:59:59Z` },
       aggregationInterval: { of: dayDur(fromISO, toISO) },
-      // La geometría va en grados (CRS84) → resx/resy también en grados.
-      // ~10 m ≈ 0,00009° (Sentinel-2 a 10 m). Con "10" tomaba 10°/píxel → 0 píx.
-      resx: 0.00009,
-      resy: 0.00009,
+      resx: 10,
+      resy: 10,
       evalscript: statEvalscript(index),
     },
     // Sin `calculations` → la Statistical API calcula las estadísticas por
