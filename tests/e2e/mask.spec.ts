@@ -43,6 +43,12 @@ test("máscara: EVI se recorta a las fincas (incluida Peralonso)", async ({
         const m = w.__e2eMap;
         if (!m || !m.getLayer("fincas-mask")) return "sin-capa";
         if (m.getSource("fincas-mask")?.type !== "image") return "no-raster";
+        // El marco (velo del exterior lejano, fuera del bbox del PNG) también.
+        if (!m.getLayer("fincas-mask-frame")) return "sin-marco";
+        if (
+          m.getLayoutProperty("fincas-mask-frame", "visibility") !== "visible"
+        )
+          return "marco-oculto";
         return m.getLayoutProperty("fincas-mask", "visibility");
       }),
     )

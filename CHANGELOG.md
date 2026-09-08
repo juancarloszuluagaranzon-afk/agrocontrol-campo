@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Fix — el índice ya no se ve como bloque suelto al alejar el zoom
+
+- La máscara "solo fincas" (imagen PNG) solo cubría el bbox de las fincas; al alejar el zoom, el índice
+  (muy visible con NIR en gris) se veía **suelto más allá de ese recuadro**. Se añade un **marco** de velo
+  (`buildMaskFrame`, un `fill` de 2 anillos que cubre todo lo exterior lejano al bbox), así **todo lo que
+  está fuera de las fincas queda atenuado** a cualquier zoom. Ver **ADR-0023**.
+
 ### Mapa — capa NIR (reflectancia del infrarrojo cercano)
 
 - Nueva capa **🛰️ NIR (reflectancia)**: muestra la **banda B08** de Sentinel-2 (NIR ~842 nm, 10 m) como

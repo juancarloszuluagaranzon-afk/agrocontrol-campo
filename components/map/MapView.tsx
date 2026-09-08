@@ -17,7 +17,13 @@ import {
   sentinelHubTilesUrl,
   sentinelHubTimeParam,
 } from "@/lib/geo/sentinelHub";
-import { FINCAS_MASK_LAYER, FINCAS_MASK_SOURCE } from "@/lib/geo/fincasMask";
+import {
+  buildMaskFrame,
+  FINCAS_MASK_FRAME_LAYER,
+  FINCAS_MASK_FRAME_SOURCE,
+  FINCAS_MASK_LAYER,
+  FINCAS_MASK_SOURCE,
+} from "@/lib/geo/fincasMask";
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
@@ -245,6 +251,21 @@ export function MapView() {
       // una capa Sentinel Hub esté encendida. Solo si hay índice configurado.
       if (SENTINEL_HUB_LAYERS.length > 0) {
         const [mW, mS, mE, mN] = cfg.mask.bbox;
+        // Marco: velo para todo lo que quede FUERA del bbox del PNG (si no, el
+        // índice se ve suelto como un bloque al alejar el zoom). Va primero para
+        // quedar debajo del PNG; abutan sin costura en el borde del bbox.
+        map.addSource(FINCAS_MASK_FRAME_SOURCE, {
+          type: "geojson",
+          data: buildMaskFrame(cfg.mask.bbox),
+        });
+        map.addLayer({
+          id: FINCAS_MASK_FRAME_LAYER,
+          type: "fill",
+          source: FINCAS_MASK_FRAME_SOURCE,
+          layout: { visibility: "none" },
+          paint: { "fill-color": "#0a0f1a", "fill-opacity": 0.6 },
+        });
+        // Máscara raster (fincas recortadas) sobre el bbox.
         map.addSource(FINCAS_MASK_SOURCE, {
           type: "image",
           url: cfg.mask.url,
@@ -976,14 +997,12 @@ export function MapView() {
       if (!map.getLayer(mapId)) continue;
       map.setLayoutProperty(mapId, "visibility", on ? "visible" : "none");
     }
-    // Máscara "solo nuestras fincas": visible solo con algún índice encendido
-    // (atenúa el satélite fuera de las suertes; ADR-0023).
-    if (map.getLayer(FINCAS_MASK_LAYER)) {
-      map.setLayoutProperty(
-        FINCAS_MASK_LAYER,
-        "visibility",
-        anyOn ? "visible" : "none",
-      );
+    // Máscara "solo nuestras fincas" (imagen + marco): visible solo con algún
+    // índice encendido (atenúa el satélite fuera de las suertes; ADR-0023).
+    for (const id of [FINCAS_MASK_FRAME_LAYER, FINCAS_MASK_LAYER]) {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, "visibility", anyOn ? "visible" : "none");
+      }
     }
   }, [sentinelHubVisible, mapReady]);
 
