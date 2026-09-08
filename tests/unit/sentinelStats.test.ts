@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Geometry } from "geojson";
 import {
+  isSarIndex,
   isStatIndex,
   parseStats,
   parseStatsSeries,
@@ -22,10 +23,31 @@ const geom: Geometry = {
 };
 
 describe("isStatIndex", () => {
-  it("acepta los 4 índices y rechaza otros", () => {
+  it("acepta ópticos y radar, rechaza otros", () => {
     expect(isStatIndex("NDVI")).toBe(true);
     expect(isStatIndex("NIR")).toBe(true);
+    expect(isStatIndex("VV")).toBe(true);
+    expect(isStatIndex("RVI")).toBe(true);
     expect(isStatIndex("TRUE-COLOR")).toBe(false);
+  });
+  it("isSarIndex distingue radar de óptico", () => {
+    expect(isSarIndex("VH")).toBe(true);
+    expect(isSarIndex("NDVI")).toBe(false);
+  });
+});
+
+describe("SAR (Sentinel-1)", () => {
+  it("VH emite dB (log) y RVI la razón 4·VH/(VV+VH)", () => {
+    expect(statEvalscript("VH")).toContain("s.VH");
+    expect(statEvalscript("VH")).toContain("Math.log");
+    expect(statEvalscript("RVI")).toContain("(4 * s.VH)");
+    expect(statEvalscript("VV")).toContain('input: ["VV", "VH", "dataMask"]');
+  });
+  it("statsBody de radar usa sentinel-1-grd con orto + GAMMA0", () => {
+    const b = statsBody(geom, "2024-01-01", "2024-12-31", "VV", 60, "P30D");
+    expect(b.input.data[0]?.type).toBe("sentinel-1-grd");
+    expect(b.input.data[0]?.processing?.backCoeff).toBe("GAMMA0_TERRAIN");
+    expect(b.aggregation.aggregationInterval.of).toBe("P30D");
   });
 });
 

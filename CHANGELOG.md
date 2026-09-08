@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Suertes — radar Sentinel-1 (curva sin huecos por nube)
+
+- `/api/sentinel-stats` acepta ahora índices de **radar** `VV`, `VH` (dB) y `RVI` además de los ópticos.
+  El radar atraviesa la nube (adquiere cada ~6–12 días), así que la **serie es densa incluso en época
+  lluviosa** — complementa al óptico, que en el Valle pierde meses. Usa `sentinel-1-grd` orto-rectificado
+  con GAMMA0; misma interfaz (`?index=VV&interval=P30D`). Insumo del modelo de TCH. Ver **ADR-0030**.
+
 ### Cuenta — recuperar la contraseña por correo
 
 - Nuevo **"¿Olvidaste tu contraseña?"** en el login: escribes tu correo y Supabase te envía un enlace

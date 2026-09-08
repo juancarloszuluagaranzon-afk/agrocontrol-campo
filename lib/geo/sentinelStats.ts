@@ -7,12 +7,29 @@ import type { Geometry } from "geojson";
  * cuerpo de la petición y parseo); la llamada con red va en `/api/sentinel-stats`.
  */
 
-/** Índices que soportan estadísticas por suerte. */
+/** Índices **ópticos** (Sentinel-2). */
 export const STAT_INDEXES = ["NDVI", "NDMI", "EVI", "NIR"] as const;
-export type StatIndex = (typeof STAT_INDEXES)[number];
+export type OpticalIndex = (typeof STAT_INDEXES)[number];
+
+/**
+ * Índices de **radar** (Sentinel-1 GRD). El radar atraviesa la nube, así que la
+ * serie es densa incluso en época lluviosa (ADR-0030) — complementa al óptico,
+ * que en el Valle pierde meses por nube. VV/VH en dB; RVI = índice de vegetación
+ * de radar (4·VH/(VV+VH)), proxy de biomasa/estructura del dosel.
+ */
+export const SAR_INDEXES = ["VV", "VH", "RVI"] as const;
+export type SarIndex = (typeof SAR_INDEXES)[number];
+
+export type StatIndex = OpticalIndex | SarIndex;
 
 export function isStatIndex(x: string): x is StatIndex {
-  return (STAT_INDEXES as readonly string[]).includes(x);
+  return (
+    (STAT_INDEXES as readonly string[]).includes(x) ||
+    (SAR_INDEXES as readonly string[]).includes(x)
+  );
+}
+export function isSarIndex(x: string): x is SarIndex {
+  return (SAR_INDEXES as readonly string[]).includes(x);
 }
 
 /** Estadísticas de un índice sobre una geometría. */
@@ -26,7 +43,7 @@ export interface SuerteStats {
 
 // Bandas y fórmula por índice (mismas que los evalscripts de color en CDSE, pero
 // devolviendo el VALOR, no color — para la Statistical API).
-const FORMULA: Record<StatIndex, { bands: string[]; expr: string }> = {
+const FORMULA: Record<OpticalIndex, { bands: string[]; expr: string }> = {
   NDVI: { bands: ["B04", "B08"], expr: "(s.B08 - s.B04) / (s.B08 + s.B04)" },
   NDMI: { bands: ["B08", "B11"], expr: "(s.B08 - s.B11) / (s.B08 + s.B11)" },
   EVI: {
@@ -45,7 +62,34 @@ const FORMULA: Record<StatIndex, { bands: string[]; expr: string }> = {
  * SCL se descarta nube/sombra/cirro/nieve **píxel a píxel**, así se pueden
  * admitir escenas más nubladas (maxcc alto) sin sesgar el resultado (ADR-0028).
  */
+/**
+ * Evalscript de radar (Sentinel-1 GRD): VV/VH en **dB** (10·log10) o **RVI**
+ * (4·VH/(VV+VH)), + `dataMask` (disponibilidad; el radar no tiene nubes). Se
+ * acota el argumento del log para evitar −∞ en píxeles de valor 0.
+ */
+function sarEvalscript(index: SarIndex): string {
+  const expr = {
+    VV: "10 * Math.log(Math.max(s.VV, 1e-7)) / Math.LN10",
+    VH: "10 * Math.log(Math.max(s.VH, 1e-7)) / Math.LN10",
+    RVI: "(4 * s.VH) / Math.max(s.VV + s.VH, 1e-7)",
+  }[index];
+  return `//VERSION=3
+function setup() {
+  return {
+    input: ["VV", "VH", "dataMask"],
+    output: [
+      { id: "index", bands: 1, sampleType: "FLOAT32" },
+      { id: "dataMask", bands: 1 }
+    ]
+  };
+}
+function evaluatePixel(s) {
+  return { index: [${expr}], dataMask: [s.dataMask] };
+}`;
+}
+
 export function statEvalscript(index: StatIndex): string {
+  if (isSarIndex(index)) return sarEvalscript(index);
   const { bands, expr } = FORMULA[index];
   const input = [...bands, "SCL", "dataMask"].map((b) => `"${b}"`).join(", ");
   return `//VERSION=3
@@ -123,6 +167,23 @@ export function statsBody(
   // la **curva temporal** por suerte (ADR-0029).
   interval?: string,
 ) {
+  // Radar (Sentinel-1 GRD): no hay nube que filtrar; se orto-rectifica y se usa
+  // GAMMA0 terreno (backscatter comparable en relieve). Óptico (S-2): filtro de
+  // nubosidad de escena (el SCL enmascara el resto por píxel, ADR-0028).
+  const sar = isSarIndex(index);
+  const data: Array<{
+    type: string;
+    dataFilter: Record<string, unknown>;
+    processing?: Record<string, unknown>;
+  }> = sar
+    ? [
+        {
+          type: "sentinel-1-grd",
+          dataFilter: { acquisitionMode: "IW", polarization: "DV" },
+          processing: { orthorectify: true, backCoeff: "GAMMA0_TERRAIN" },
+        },
+      ]
+    : [{ type: "sentinel-2-l2a", dataFilter: { maxCloudCoverage: maxcc } }];
   return {
     input: {
       bounds: {
@@ -131,9 +192,7 @@ export function statsBody(
         geometry: reprojectTo3857(geometry),
         properties: { crs: "http://www.opengis.net/def/crs/EPSG/0/3857" },
       },
-      data: [
-        { type: "sentinel-2-l2a", dataFilter: { maxCloudCoverage: maxcc } },
-      ],
+      data,
     },
     aggregation: {
       timeRange: { from: `${fromISO}T00:00:00Z`, to: `${toISO}T23:59:59Z` },
