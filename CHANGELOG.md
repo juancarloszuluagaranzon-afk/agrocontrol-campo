@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Suertes — estadísticas con nubes enmascaradas por píxel (SCL)
+
+- Las estadísticas de índice por tablón ahora **descartan la nube píxel a píxel** con la Scene Classification
+  Layer (SCL): sombra, nube, cirro y nieve quedan **fuera de la media**, no solo los píxeles "sin dato". Y se
+  admiten escenas más nubladas por defecto (`maxCloudCoverage` 20 → **60 %**; afinable con `?maxcc=`). En el
+  Valle (muy nublado, peor en La Niña) esto **reduce los "sin dato (nubes)"** y **quita el sesgo** de la media.
+  Cambio retrocompatible en `/api/sentinel-stats`. Ver **ADR-0028**.
+
 ### Suertes — estadísticas de índice por tablón (media/mín/máx)
 
 - Al abrir un tablón con un índice **🛰️ Sentinel Hub** encendido (NDVI/NDMI/EVI/NIR), el panel muestra

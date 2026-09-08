@@ -29,15 +29,19 @@ describe("isStatIndex", () => {
 });
 
 describe("statEvalscript", () => {
-  it("NIR emite B08 crudo y dataMask", () => {
+  it("NIR emite B08 crudo y enmascara nubes por píxel con SCL", () => {
     const s = statEvalscript("NIR");
     expect(s).toContain('"B08"');
     expect(s).toContain("index: [s.B08]");
-    expect(s).toContain("dataMask: [s.dataMask]");
+    // SCL como entrada y su uso en la máscara de nube (ADR-0028).
+    expect(s).toContain('"SCL"');
+    expect(s).toContain("var clear");
+    expect(s).toContain("dataMask: [s.dataMask * clear]");
   });
   it("NDVI usa B04 y B08 con la fórmula del índice", () => {
     const s = statEvalscript("NDVI");
     expect(s).toContain("(s.B08 - s.B04) / (s.B08 + s.B04)");
+    expect(s).toContain('"SCL"');
   });
 });
 
@@ -53,6 +57,13 @@ describe("statsBody", () => {
     expect(b.aggregation.timeRange.from).toBe("2026-08-06T00:00:00Z");
     expect(b.aggregation.timeRange.to).toBe("2026-08-20T23:59:59Z");
     expect(b.aggregation.aggregationInterval.of).toBe("P14D");
+  });
+
+  it("admite nubes altas por defecto (SCL enmascara) y permite override", () => {
+    const def = statsBody(geom, "2026-08-06", "2026-08-20", "NDVI");
+    expect(def.input.data[0]?.dataFilter.maxCloudCoverage).toBe(60);
+    const hi = statsBody(geom, "2026-08-06", "2026-08-20", "NDVI", 90);
+    expect(hi.input.data[0]?.dataFilter.maxCloudCoverage).toBe(90);
   });
 });
 
