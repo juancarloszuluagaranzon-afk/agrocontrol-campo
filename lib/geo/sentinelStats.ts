@@ -38,12 +38,16 @@ const FORMULA: Record<StatIndex, { bands: string[]; expr: string }> = {
 
 /**
  * Evalscript de estadísticas: emite el **valor** del índice (FLOAT32, para no
- * truncar NDVI/reflectancia) + `dataMask` (obligatorio: excluye píxeles sin
- * dato/nubes del cálculo).
+ * truncar NDVI/reflectancia) + `dataMask` con **enmascaramiento de nubes por
+ * píxel** vía la Scene Classification Layer (SCL). El Valle es muy nublado
+ * (peor en años La Niña): filtrar solo escenas por `maxCloudCoverage` dejaba las
+ * ventanas de fase vacías (`null`) y sesgaba la media con píxeles de nube. Con
+ * SCL se descarta nube/sombra/cirro/nieve **píxel a píxel**, así se pueden
+ * admitir escenas más nubladas (maxcc alto) sin sesgar el resultado (ADR-0028).
  */
 export function statEvalscript(index: StatIndex): string {
   const { bands, expr } = FORMULA[index];
-  const input = [...bands, "dataMask"].map((b) => `"${b}"`).join(", ");
+  const input = [...bands, "SCL", "dataMask"].map((b) => `"${b}"`).join(", ");
   return `//VERSION=3
 function setup() {
   return {
@@ -55,7 +59,11 @@ function setup() {
   };
 }
 function evaluatePixel(s) {
-  return { index: [${expr}], dataMask: [s.dataMask] };
+  // SCL: 0,1 sin dato/defecto · 3 sombra · 8,9 nube · 10 cirro · 11 nieve.
+  // clear=0 en esos → dataMask 0 → el píxel NO entra en la estadística.
+  var scl = s.SCL;
+  var clear = (scl === 0 || scl === 1 || scl === 3 || scl === 8 || scl === 9 || scl === 10 || scl === 11) ? 0 : 1;
+  return { index: [${expr}], dataMask: [s.dataMask * clear] };
 }`;
 }
 
@@ -105,7 +113,10 @@ export function statsBody(
   fromISO: string,
   toISO: string,
   index: StatIndex,
-  maxcc = 20,
+  // Con el enmascaramiento SCL (ADR-0028) las nubes se descartan por píxel, así
+  // que admitir escenas más nubladas (60 %) rinde más ventanas con dato sin
+  // sesgar la media —clave en época lluviosa—.
+  maxcc = 60,
 ) {
   return {
     input: {

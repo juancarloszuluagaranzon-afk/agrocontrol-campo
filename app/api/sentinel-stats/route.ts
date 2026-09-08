@@ -55,6 +55,13 @@ export async function GET(req: NextRequest) {
   const index = sp.get("index");
   const from = sp.get("from");
   const to = sp.get("to");
+  // Nubosidad máxima de escena admitida (0–100). Con SCL enmascarando nubes por
+  // píxel (ADR-0028), el valor por defecto es alto; se puede afinar por query.
+  const maxccRaw = sp.get("maxcc");
+  const maxcc =
+    maxccRaw && /^\d{1,3}$/.test(maxccRaw)
+      ? Math.min(100, Number(maxccRaw))
+      : 60;
 
   if (
     !tabId ||
@@ -89,7 +96,9 @@ export async function GET(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(statsBody(geometry, from, to, index as StatIndex)),
+      body: JSON.stringify(
+        statsBody(geometry, from, to, index as StatIndex, maxcc),
+      ),
     });
     if (!res.ok) {
       if (res.status === 401) invalidateSentinelToken();
