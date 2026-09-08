@@ -52,7 +52,7 @@ describe("statsBody", () => {
     expect(x).toBeLessThan(-8_000_000);
     expect(b.aggregation.timeRange.from).toBe("2026-08-06T00:00:00Z");
     expect(b.aggregation.timeRange.to).toBe("2026-08-20T23:59:59Z");
-    expect(b.aggregation.aggregationInterval.of).toBe("P15D");
+    expect(b.aggregation.aggregationInterval.of).toBe("P14D");
   });
 });
 

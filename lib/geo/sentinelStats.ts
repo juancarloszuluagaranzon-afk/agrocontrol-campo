@@ -59,10 +59,13 @@ function evaluatePixel(s) {
 }`;
 }
 
+// Duración del intervalo = span de fechas, para que UN intervalo cubra el
+// período y quede DENTRO del rango [from 00:00, to 23:59]. (Con +1 día el
+// intervalo excedía el rango → la API no creaba ninguno → data vacía.)
 const dayDur = (fromISO: string, toISO: string): string => {
   const ms =
     Date.parse(`${toISO}T00:00:00Z`) - Date.parse(`${fromISO}T00:00:00Z`);
-  const days = Math.max(1, Math.round(ms / 86_400_000) + 1);
+  const days = Math.max(1, Math.round(ms / 86_400_000));
   return `P${days}D`;
 };
 
