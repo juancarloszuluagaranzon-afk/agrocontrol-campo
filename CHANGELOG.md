@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Suertes — serie temporal de índice (curva del ciclo)
+
+- La ruta `/api/sentinel-stats` acepta **`?interval=P<n>D`** (p. ej. `P30D`): en vez de un único
+  `{stats}` del período, devuelve la **serie** `{series:[{from,to,stats}]}` —un punto por intervalo— con los
+  huecos por nube explícitos (`stats:null`). Es la **curva temporal** por suerte, en **una sola llamada**
+  (insumo del futuro modelo de TCH; habilita una mini-gráfica por suerte en el panel). Retrocompatible.
+  Ver **ADR-0029**.
+
 ### Suertes — estadísticas con nubes enmascaradas por píxel (SCL)
 
 - Las estadísticas de índice por tablón ahora **descartan la nube píxel a píxel** con la Scene Classification

@@ -117,6 +117,11 @@ export function statsBody(
   // que admitir escenas más nubladas (60 %) rinde más ventanas con dato sin
   // sesgar la media —clave en época lluviosa—.
   maxcc = 60,
+  // Duración del intervalo de agregación (ISO-8601, p. ej. `"P30D"`). Sin él,
+  // **un solo intervalo** cubre todo el período (media/mín/máx del rango). Con
+  // él, la Statistical API devuelve **una serie** —un punto por intervalo—: es
+  // la **curva temporal** por suerte (ADR-0029).
+  interval?: string,
 ) {
   return {
     input: {
@@ -132,7 +137,7 @@ export function statsBody(
     },
     aggregation: {
       timeRange: { from: `${fromISO}T00:00:00Z`, to: `${toISO}T23:59:59Z` },
-      aggregationInterval: { of: dayDur(fromISO, toISO) },
+      aggregationInterval: { of: interval ?? dayDur(fromISO, toISO) },
       resx: 10,
       resy: 10,
       evalscript: statEvalscript(index),
@@ -172,27 +177,56 @@ function values(x: unknown): unknown[] {
  * hay píxeles válidos (nubes/sin escena en el período). Robusto a que `outputs`
  * y `bands` vengan como objeto o como array (la doc los muestra de ambas formas).
  */
-export function parseStats(json: {
-  data?: { outputs?: unknown }[];
-}): SuerteStats | null {
-  for (const interval of json.data ?? []) {
-    for (const out of values(interval.outputs)) {
-      for (const band of values((out as { bands?: unknown }).bands)) {
-        const st = (band as { stats?: StatsApiBandStats }).stats;
-        const mean = Number(st?.mean);
-        // Requiere media **finita**: `"NaN"` (todo nube tras SCL) o sin muestras
-        // → se ignora este intervalo/banda y se sigue buscando; sin dato → null.
-        if (st?.sampleCount && Number.isFinite(mean)) {
-          return {
-            mean,
-            min: finiteOr(st.min, mean),
-            max: finiteOr(st.max, mean),
-            stDev: finiteOr(st.stDev, 0),
-            samples: st.sampleCount,
-          };
-        }
+/** Estadísticas de **un** intervalo (primera banda con media finita) o `null`. */
+function intervalStats(interval: { outputs?: unknown }): SuerteStats | null {
+  for (const out of values(interval.outputs)) {
+    for (const band of values((out as { bands?: unknown }).bands)) {
+      const st = (band as { stats?: StatsApiBandStats }).stats;
+      const mean = Number(st?.mean);
+      // Requiere media **finita**: `"NaN"` (todo nube tras SCL) o sin muestras
+      // → se ignora este intervalo/banda; sin ninguna válida → null.
+      if (st?.sampleCount && Number.isFinite(mean)) {
+        return {
+          mean,
+          min: finiteOr(st.min, mean),
+          max: finiteOr(st.max, mean),
+          stDev: finiteOr(st.stDev, 0),
+          samples: st.sampleCount,
+        };
       }
     }
   }
   return null;
+}
+
+export function parseStats(json: {
+  data?: { outputs?: unknown }[];
+}): SuerteStats | null {
+  for (const interval of json.data ?? []) {
+    const s = intervalStats(interval);
+    if (s) return s;
+  }
+  return null;
+}
+
+/** Un punto de la curva temporal: su ventana `[from,to)` y sus estadísticas. */
+export interface SeriesPoint {
+  from: string | null;
+  to: string | null;
+  stats: SuerteStats | null;
+}
+
+/**
+ * Serie temporal: **un punto por intervalo** de la respuesta (con `interval`).
+ * Conserva los huecos (`stats: null` cuando el intervalo cayó todo-nube) para no
+ * falsear la curva; el cliente decide si interpola.
+ */
+export function parseStatsSeries(json: {
+  data?: { interval?: { from?: string; to?: string }; outputs?: unknown }[];
+}): SeriesPoint[] {
+  return (json.data ?? []).map((interval) => ({
+    from: interval.interval?.from ?? null,
+    to: interval.interval?.to ?? null,
+    stats: intervalStats(interval),
+  }));
 }
