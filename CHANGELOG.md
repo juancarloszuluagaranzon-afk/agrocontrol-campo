@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — capa NIR (reflectancia del infrarrojo cercano)
+
+- Nueva capa **🛰️ NIR (reflectancia)**: muestra la **banda B08** de Sentinel-2 (NIR ~842 nm, 10 m) como
+  variable espectral **cruda**, no como índice. Escala de **grises** (oscuro = reflectancia baja → claro =
+  alta) y leyenda **"NIR · reflectancia · baja → alta"** con valores reales de reflectancia (0–0,6),
+  explícitamente distinta de las de vigor/humedad. Reutiliza todo el sistema existente (WMS de CDSE,
+  fecha Antes/Después, máscara "solo fincas", toggle, caché offline); solo requiere crear la capa `NIR` en
+  la config de CDSE con su evalscript y agregar `NIR` a `NEXT_PUBLIC_SENTINELHUB_LAYERS`.
+
 ### Fix — Peralonso (y todo tablón pequeño) ya muestra el índice · máscara raster
 
 - La máscara "solo nuestras fincas" pasa a ser una **imagen PNG precomputada** por planta
