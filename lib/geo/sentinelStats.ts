@@ -92,8 +92,10 @@ export function statsBody(
     aggregation: {
       timeRange: { from: `${fromISO}T00:00:00Z`, to: `${toISO}T23:59:59Z` },
       aggregationInterval: { of: dayDur(fromISO, toISO) },
-      resx: 10,
-      resy: 10,
+      // La geometría va en grados (CRS84) → resx/resy también en grados.
+      // ~10 m ≈ 0,00009° (Sentinel-2 a 10 m). Con "10" tomaba 10°/píxel → 0 píx.
+      resx: 0.00009,
+      resy: 0.00009,
       evalscript: statEvalscript(index),
     },
     // Sin `calculations` → la Statistical API calcula las estadísticas por
