@@ -102,14 +102,8 @@ export async function GET(req: NextRequest) {
       });
     }
     const json = await res.json();
-    const stats = parseStats(json);
-    // `?debug=1`: incluye la respuesta cruda (truncada) para diagnóstico.
-    const debug =
-      sp.get("debug") === "1"
-        ? { upstream: JSON.stringify(json).slice(0, 1500) }
-        : {};
     return NextResponse.json(
-      { configured: true, stats, ...debug },
+      { configured: true, stats: parseStats(json) },
       { headers: { "Cache-Control": "private, max-age=3600" } },
     );
   } catch {
