@@ -110,4 +110,29 @@ describe("parseStats", () => {
     expect(parseStats(json)).toBeNull();
     expect(parseStats({})).toBeNull();
   });
+
+  it('trata "NaN" (todo nube tras SCL, con sampleCount>0) como sin dato', () => {
+    const json = {
+      data: [
+        {
+          outputs: {
+            index: {
+              bands: {
+                B0: {
+                  stats: {
+                    mean: "NaN",
+                    min: "NaN",
+                    max: "NaN",
+                    stDev: "NaN",
+                    sampleCount: 1121,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    };
+    expect(parseStats(json)).toBeNull();
+  });
 });

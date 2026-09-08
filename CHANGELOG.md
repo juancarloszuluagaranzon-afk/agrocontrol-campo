@@ -12,6 +12,9 @@ versionado [SemVer](https://semver.org/lang/es/).
   admiten escenas más nubladas por defecto (`maxCloudCoverage` 20 → **60 %**; afinable con `?maxcc=`). En el
   Valle (muy nublado, peor en La Niña) esto **reduce los "sin dato (nubes)"** y **quita el sesgo** de la media.
   Cambio retrocompatible en `/api/sentinel-stats`. Ver **ADR-0028**.
+- `parseStats` ahora trata la media **`"NaN"`** (que devuelve la Statistical API cuando, tras enmascarar con
+  SCL, no queda ningún píxel válido pese a `sampleCount > 0`) como **sin dato** → el panel muestra
+  "sin dato (nubes)" en vez de "media NaN".
 
 ### Suertes — estadísticas de índice por tablón (media/mín/máx)
 
