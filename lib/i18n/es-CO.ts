@@ -113,6 +113,26 @@ export const t = {
     titulo: "Ubicación · Rio Map",
     puntoCompartido: "Punto compartido",
   },
+  auth: {
+    olvide: "¿Olvidaste tu contraseña?",
+    recuperarTitulo: "Recuperar contraseña",
+    recuperarAyuda:
+      "Escribe tu correo y te enviamos un enlace para crear una contraseña nueva.",
+    enviarEnlace: "Enviar enlace",
+    enlaceEnviado:
+      "Si el correo está registrado, te enviamos un enlace. Revisa también la carpeta de spam.",
+    volverEntrar: "Volver a entrar",
+    restablecerTitulo: "Nueva contraseña",
+    restablecerAyuda: "Elige una contraseña nueva para tu cuenta.",
+    nueva: "Nueva contraseña",
+    confirmar: "Confirmar contraseña",
+    guardar: "Guardar contraseña",
+    guardada: "Contraseña actualizada. Entrando…",
+    verificando: "Verificando el enlace…",
+    enlaceInvalido:
+      "El enlace no es válido o ya venció. Pide uno nuevo desde la pantalla de entrar.",
+    irAEntrar: "Ir a entrar",
+  },
   maestro: {
     titulo: "Maestro de suertes",
     buscar: "Buscar suerte o hacienda…",

@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Cuenta — recuperar la contraseña por correo
+
+- Nuevo **"¿Olvidaste tu contraseña?"** en el login: escribes tu correo y Supabase te envía un enlace
+  que abre **`/restablecer`**, donde eliges una contraseña nueva (con confirmación) y entras directo.
+  Antes solo el administrador podía resetearla a mano. Requiere registrar la URL de retorno en el
+  dashboard de Supabase (Redirect URLs). Ver **ADR-0030**.
+
 ### Suertes — serie temporal de índice (curva del ciclo)
 
 - La ruta `/api/sentinel-stats` acepta **`?interval=P<n>D`** (p. ej. `P30D`): en vez de un único

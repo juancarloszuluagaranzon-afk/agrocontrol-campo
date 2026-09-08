@@ -102,7 +102,8 @@ HTTPS es requisito para el GPS; Vercel lo cubre.
 3. **Build**: el `package.json` ya usa `next build --webpack` (Serwist). No se
    requiere config extra.
 4. En Supabase → **Authentication → URL Configuration**, agrega el dominio de
-   Vercel a _Site URL_ y _Redirect URLs_.
+   Vercel a _Site URL_ y _Redirect URLs_, **incluyendo `<dominio>/restablecer`**
+   (destino del enlace de recuperación de contraseña, ADR-0030).
 
 > AOI para tiles offline (bbox WGS84): `lon −76.185..−76.053, lat 4.235..4.385`.
 > Para uso productivo, validar la licencia de los tiles de Esri (§20).
