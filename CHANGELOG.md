@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Maestro — refrescado al 8 de septiembre de 2026 (espejo del ingenio)
+
+- Se regeneró el maestro desde el `maestro.csv` de maestro-riopaila (cortes de agosto en 47 suertes
+  RIOP, maestro al 31 de agosto y corte de septiembre en 12 suertes RIOP). RIOP: 605 suertes, 81
+  cambian de número de corte y 102 de fecha de último corte. Castilla/Cauca: 908 suertes (25 nuevas),
+  69 cortes y 83 cambios de técnico. Edad y uso recalculados a la fecha del CSV.
+
 ### Suertes — radar Sentinel-1 (curva sin huecos por nube)
 
 - `/api/sentinel-stats` acepta ahora índices de **radar** `VV`, `VH` (dB) y `RVI` además de los ópticos.
