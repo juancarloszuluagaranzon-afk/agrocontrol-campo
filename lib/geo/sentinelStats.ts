@@ -13,7 +13,7 @@ export type OpticalIndex = (typeof STAT_INDEXES)[number];
 
 /**
  * Índices de **radar** (Sentinel-1 GRD). El radar atraviesa la nube, así que la
- * serie es densa incluso en época lluviosa (ADR-0030) — complementa al óptico,
+ * serie es densa incluso en época lluviosa (ADR-0031) — complementa al óptico,
  * que en el Valle pierde meses por nube. VV/VH en dB; RVI = índice de vegetación
  * de radar (4·VH/(VV+VH)), proxy de biomasa/estructura del dosel.
  */

@@ -1,0 +1,98 @@
+# Sincroniza el maestro agronómico de Rio Map con el `maestro.csv` del ingenio
+# (repo maestro-riopaila, fuente de verdad; ADR-0032). Regenera los JSON con
+# `scripts/import_maestro.mjs`, corre los tests del maestro y, si hay cambios,
+# abre (o actualiza) un PR. Nunca toca `main` directamente: el merge sigue
+# siendo una decisión humana.
+#
+# Disparadores: aviso desde maestro-riopaila (`repository_dispatch`, ver su
+# workflow "Avisar a Rio Map"), corrida diaria de respaldo, o a mano.
+#
+# Token: con `MAESTRO_SYNC_TOKEN` (PAT fine-grained: Contents + Pull requests
+# de este repo) el PR dispara el CI normal. Sin él usa `GITHUB_TOKEN`, que
+# exige activar "Allow GitHub Actions to create and approve pull requests" en
+# Settings → Actions y NO dispara el CI del PR (cerrar/reabrir lo dispara).
+name: Sync maestro
+
+on:
+  repository_dispatch:
+    types: [maestro-actualizado]
+  schedule:
+    - cron: "0 11 * * 1-5" # 06:00 Colombia, lunes a viernes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-maestro
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Traer el maestro del ingenio (maestro-riopaila)
+        uses: actions/checkout@v4
+        with:
+          repository: juancarloszuluagaranzon-afk/maestro-riopaila
+          path: .maestro-riopaila
+
+      - name: Regenerar los JSON del maestro
+        id: regen
+        run: |
+          node scripts/import_maestro.mjs .maestro-riopaila/maestro.csv
+          echo "csv_sha=$(git -C .maestro-riopaila rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "fecha=$(TZ=America/Bogota date +%F)" >> "$GITHUB_OUTPUT"
+          if git diff --quiet -- public/data/maestro_suertes.json public/data/maestro_castilla.json; then
+            echo "cambio=false" >> "$GITHUB_OUTPUT"
+            echo "El maestro ya está al día."
+          else
+            echo "cambio=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resumen del cambio (cuerpo del PR)
+        if: steps.regen.outputs.cambio == 'true'
+        run: node scripts/maestro_diff.mjs "${{ steps.regen.outputs.csv_sha }}" > "$RUNNER_TEMP/resumen.md"
+
+      - uses: pnpm/action-setup@v4
+        if: steps.regen.outputs.cambio == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.regen.outputs.cambio == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias
+        if: steps.regen.outputs.cambio == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Tests del maestro (forma + cobertura de cartografía)
+        if: steps.regen.outputs.cambio == 'true'
+        run: pnpm exec vitest run tests/unit/maestro.test.ts
+
+      - name: Limpiar el checkout auxiliar
+        if: steps.regen.outputs.cambio == 'true'
+        run: rm -rf .maestro-riopaila
+
+      - name: Abrir o actualizar el PR
+        if: steps.regen.outputs.cambio == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.MAESTRO_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+          branch: chore/sync-maestro
+          delete-branch: true
+          add-paths: |
+            public/data/maestro_suertes.json
+            public/data/maestro_castilla.json
+          commit-message: |
+            chore(maestro): sincronizar con el maestro del ingenio (${{ steps.regen.outputs.fecha }})
+
+            Regenerado por el workflow "Sync maestro" desde
+            maestro-riopaila@${{ steps.regen.outputs.csv_sha }} (ADR-0032).
+          title: "chore(maestro): sincronizar con el maestro del ingenio (${{ steps.regen.outputs.fecha }})"
+          body-path: ${{ runner.temp }}/resumen.md
+          labels: maestro

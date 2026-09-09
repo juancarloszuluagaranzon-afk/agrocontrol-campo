@@ -12,12 +12,20 @@ versionado [SemVer](https://semver.org/lang/es/).
   cambian de número de corte y 102 de fecha de último corte. Castilla/Cauca: 908 suertes (25 nuevas),
   69 cortes y 83 cambios de técnico. Edad y uso recalculados a la fecha del CSV.
 
+### Maestro — sincronización automática con el maestro del ingenio
+
+- Nuevo workflow **Sync maestro**: cada vez que cambia el `maestro.csv` de maestro-riopaila (aviso
+  inmediato) o una vez al día, regenera los JSON del maestro, corre sus tests y **abre solo el PR**
+  con un resumen por planta (suertes nuevas, cortes, fechas, técnicos). El merge sigue siendo humano.
+  Nuevo `scripts/maestro_diff.mjs` para ese resumen. El ADR del radar Sentinel-1 pasa a **0031**
+  (chocaba con el 0030 de contraseñas). Ver **ADR-0032**.
+
 ### Suertes — radar Sentinel-1 (curva sin huecos por nube)
 
 - `/api/sentinel-stats` acepta ahora índices de **radar** `VV`, `VH` (dB) y `RVI` además de los ópticos.
   El radar atraviesa la nube (adquiere cada ~6–12 días), así que la **serie es densa incluso en época
   lluviosa** — complementa al óptico, que en el Valle pierde meses. Usa `sentinel-1-grd` orto-rectificado
-  con GAMMA0; misma interfaz (`?index=VV&interval=P30D`). Insumo del modelo de TCH. Ver **ADR-0030**.
+  con GAMMA0; misma interfaz (`?index=VV&interval=P30D`). Insumo del modelo de TCH. Ver **ADR-0031**.
 
 ### Cuenta — recuperar la contraseña por correo
 
