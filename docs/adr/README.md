@@ -34,3 +34,5 @@ añade una nueva.
 | 0026 | Escala de color del índice activo (leyenda abajo-izquierda)       | Aceptada |
 | 0027 | Estadísticas por suerte (Statistical API de Sentinel Hub)         | Aceptada |
 | 0030 | Recuperación de contraseña por correo (Supabase Auth)             | Aceptada |
+| 0031 | Radar Sentinel-1 (VV/VH/RVI) en las estadísticas por suerte       | Aceptada |
+| 0032 | Sincronización automática del maestro con maestro-riopaila        | Aceptada |

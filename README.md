@@ -69,6 +69,15 @@ contexto **depuradas** (ADR-0002). Diccionario en
 > **Multi-planta:** el usuario elige planta al entrar (se persiste); la app carga
 > solo los datos de esa empresa. Las áreas por suerte son las oficiales.
 
+> **Maestro = espejo del ingenio (ADR-0032).** El maestro agronómico se regenera
+> desde el `maestro.csv` de [maestro-riopaila](https://github.com/juancarloszuluagaranzon-afk/maestro-riopaila).
+> El workflow **Sync maestro** lo hace solo (aviso desde ese repo o corrida diaria)
+> y abre el PR `chore/sync-maestro`; solo falta mergearlo. A mano:
+> `node scripts/import_maestro.mjs` y `node scripts/maestro_diff.mjs` para el resumen.
+> Para que el PR automático dispare el CI, crear un PAT fine-grained (Contents +
+> Pull requests de este repo) y guardarlo como secreto `MAESTRO_SYNC_TOKEN` aquí y
+> `RIOMAP_DISPATCH_TOKEN` en maestro-riopaila.
+
 ## Estado
 
 Fases 0–7 completas (cimientos, mapa de tablones, GPS y medición,

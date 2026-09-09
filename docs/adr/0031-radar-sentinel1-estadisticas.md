@@ -1,4 +1,4 @@
-# ADR-0030 — Radar Sentinel-1 en las estadísticas por suerte (curva que no pierde la nube)
+# ADR-0031 — Radar Sentinel-1 en las estadísticas por suerte (curva que no pierde la nube)
 
 Fecha: 2026-09-08 · Estado: aceptado
 
