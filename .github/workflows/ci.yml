@@ -69,6 +69,14 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Ejecutar e2e
+        env:
+          # Sentinel Hub "de mentira": sin NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID la app
+          # oculta los índices y los e2e de NIR/EVI/máscara no encuentran sus toggles.
+          # Los e2e solo verifican UI y visibilidad de capas, nunca descargan teselas,
+          # así que basta un id ficticio (no es un secreto). Lista completa de índices
+          # porque el valor por defecto es solo NDVI,NDMI.
+          NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID: e2e-sin-instancia
+          NEXT_PUBLIC_SENTINELHUB_LAYERS: NDVI,NDMI,EVI,NIR
         run: pnpm run test:e2e
 
       - uses: actions/upload-artifact@v4

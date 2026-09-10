@@ -65,11 +65,15 @@ export function MapScreen() {
         <BaseToggle />
       </div>
 
-      {/* Panel de la herramienta abierta desde el menú (arriba-izq.). */}
+      {/* Panel de la herramienta abierta desde el menú (arriba-izq.). Altura
+          acotada al espacio libre sobre el FAB de Herramientas (abajo-izq.,
+          z-20) con scroll interno: con varios índices Sentinel Hub el panel de
+          Capas crecía hasta quedar bajo el botón y sus últimas casillas no se
+          podían tocar. El margen negativo + padding evita recortar la sombra. */}
       {activeTool !== "none" &&
         activeTool !== "reporte" &&
         activeTool !== "maestro" && (
-          <div className="absolute top-28 left-2 z-10 flex max-w-[calc(100vw-1rem)] flex-col items-start gap-2">
+          <div className="absolute top-28 left-2 z-10 -m-3 flex max-h-[calc(100dvh-12rem-env(safe-area-inset-bottom,0px))] max-w-[calc(100vw-1rem+1.5rem)] flex-col items-start gap-2 overflow-y-auto overscroll-contain p-3">
             {activeTool === "plano" && <PdfPlanControl />}
             {activeTool === "foto" && <FotoCampoControl />}
             {activeTool === "lluvia" && <PrecipitacionControl />}
