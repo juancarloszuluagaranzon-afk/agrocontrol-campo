@@ -7,8 +7,26 @@ import type { Geometry } from "geojson";
  * cuerpo de la petición y parseo); la llamada con red va en `/api/sentinel-stats`.
  */
 
-/** Índices **ópticos** (Sentinel-2). */
-export const STAT_INDEXES = ["NDVI", "NDMI", "EVI", "NIR"] as const;
+/**
+ * Índices **ópticos** (Sentinel-2). Además de los base (NDVI/NDMI/EVI/NIR), los
+ * de **borde rojo** y ajuste de suelo, útiles en caña:
+ *  - **NDRE** (red-edge): antisaturación cuando el dosel ya está denso/maduro,
+ *    donde el NDVI se aplana.
+ *  - **SAVI**: NDVI con corrección de suelo (L=0,5) — caña joven con surco
+ *    ancho (1,75 m) y mucho suelo desnudo visible.
+ *  - **CI-RE** (Clorophyll Index red-edge): proxy de clorofila/nitrógeno.
+ *  - **GNDVI** (verde): sensible a clorofila, satura más tarde que el NDVI.
+ */
+export const STAT_INDEXES = [
+  "NDVI",
+  "NDMI",
+  "EVI",
+  "NIR",
+  "NDRE",
+  "SAVI",
+  "CI-RE",
+  "GNDVI",
+] as const;
 export type OpticalIndex = (typeof STAT_INDEXES)[number];
 
 /**
@@ -51,6 +69,17 @@ const FORMULA: Record<OpticalIndex, { bands: string[]; expr: string }> = {
     expr: "2.5 * (s.B08 - s.B04) / (s.B08 + 6.0 * s.B04 - 7.5 * s.B02 + 1.0)",
   },
   NIR: { bands: ["B08"], expr: "s.B08" },
+  // Borde rojo (B05) — antisaturación en dosel denso/caña madura.
+  NDRE: { bands: ["B05", "B08"], expr: "(s.B08 - s.B05) / (s.B08 + s.B05)" },
+  // Ajuste de suelo L=0,5 (caña joven, surco 1,75 m con suelo visible).
+  SAVI: {
+    bands: ["B04", "B08"],
+    expr: "1.5 * (s.B08 - s.B04) / (s.B08 + s.B04 + 0.5)",
+  },
+  // Índice de clorofila de borde rojo (B07/B05) − 1 — proxy de N/clorofila.
+  "CI-RE": { bands: ["B05", "B07"], expr: "(s.B07 / s.B05) - 1" },
+  // NDVI verde (B03) — satura más tarde que el NDVI rojo.
+  GNDVI: { bands: ["B03", "B08"], expr: "(s.B08 - s.B03) / (s.B08 + s.B03)" },
 };
 
 /**

@@ -51,6 +51,46 @@ describe("SAR (Sentinel-1)", () => {
   });
 });
 
+describe("índices ópticos nuevos (borde rojo / suelo / verde)", () => {
+  it("isStatIndex acepta NDRE, SAVI, CI-RE y GNDVI", () => {
+    expect(isStatIndex("NDRE")).toBe(true);
+    expect(isStatIndex("SAVI")).toBe(true);
+    expect(isStatIndex("CI-RE")).toBe(true);
+    expect(isStatIndex("GNDVI")).toBe(true);
+    // siguen siendo ópticos, no radar
+    expect(isSarIndex("NDRE")).toBe(false);
+  });
+  it("NDRE usa el borde rojo B05 con B08 y enmascara con SCL", () => {
+    const s = statEvalscript("NDRE");
+    expect(s).toContain('"B05"');
+    expect(s).toContain('"B08"');
+    expect(s).toContain("(s.B08 - s.B05) / (s.B08 + s.B05)");
+    expect(s).toContain('"SCL"');
+  });
+  it("SAVI aplica el ajuste de suelo L=0,5 (factor 1.5 y +0.5)", () => {
+    const s = statEvalscript("SAVI");
+    expect(s).toContain("1.5 * (s.B08 - s.B04) / (s.B08 + s.B04 + 0.5)");
+    expect(s).toContain('"B04"');
+    expect(s).toContain('"B08"');
+  });
+  it("CI-RE usa la razón B07/B05 − 1", () => {
+    const s = statEvalscript("CI-RE");
+    expect(s).toContain("(s.B07 / s.B05) - 1");
+    expect(s).toContain('"B07"');
+    expect(s).toContain('"B05"');
+  });
+  it("GNDVI usa el verde B03 con B08", () => {
+    const s = statEvalscript("GNDVI");
+    expect(s).toContain("(s.B08 - s.B03) / (s.B08 + s.B03)");
+    expect(s).toContain('"B03"');
+  });
+  it("statsBody arma S2 L2A para un índice de borde rojo", () => {
+    const b = statsBody(geom, "2026-08-06", "2026-08-20", "NDRE");
+    expect(b.input.data[0]?.type).toBe("sentinel-2-l2a");
+    expect(b.aggregation.evalscript).toContain('"B05"');
+  });
+});
+
 describe("statEvalscript", () => {
   it("NIR emite B08 crudo y enmascara nubes por píxel con SCL", () => {
     const s = statEvalscript("NIR");
