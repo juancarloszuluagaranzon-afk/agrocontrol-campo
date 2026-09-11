@@ -2,6 +2,7 @@
 
 import { MapView } from "@/components/map/MapView";
 import { SearchBox } from "@/components/map/SearchBox";
+import { IndexToggles } from "@/components/map/IndexToggles";
 import { LayerToggles } from "@/components/map/LayerToggles";
 import { BaseToggle } from "@/components/map/BaseToggle";
 import { Legend } from "@/components/map/Legend";
@@ -82,6 +83,7 @@ export function MapScreen() {
                 <Legend />
               </>
             )}
+            {activeTool === "indices" && <IndexToggles />}
           </div>
         )}
 

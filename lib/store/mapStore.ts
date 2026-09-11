@@ -28,6 +28,7 @@ export type MeasureMode = "off" | "area" | "distance";
 export type ToolId =
   | "none"
   | "capas"
+  | "indices"
   | "medir"
   | "marcadores"
   | "mediciones"
