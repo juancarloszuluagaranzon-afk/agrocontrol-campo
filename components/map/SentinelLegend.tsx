@@ -84,6 +84,27 @@ const NIR_BINS: Bin[] = [
   { from: 0.5, color: "#ffffff" }, // ≥ 0,5 (alta)
 ];
 
+// NDRE (borde rojo, B05/B08): rampa clorofila suelo→verde oscuro. Antisaturación
+// en dosel denso/caña madura. Los colores coinciden con el evalscript de la capa
+// NDRE en CDSE (ver ADR / evalscript de color).
+const NDRE_BINS: Bin[] = [
+  { from: -1, color: "#b8a878" }, // < 0 (suelo / sin veg)
+  { from: 0.0, color: "#f0cc73" },
+  { from: 0.2, color: "#99cc5c" },
+  { from: 0.35, color: "#4da647" },
+  { from: 0.5, color: "#006b2b" }, // ≥ 0,5 (dosel denso / alto N)
+];
+
+// SAVI (ajustado al suelo, B04/B08, L=0,5): tan (suelo expuesto) → verde. Útil en
+// caña joven con surco ancho. Colores = evalscript de la capa SAVI en CDSE.
+const SAVI_BINS: Bin[] = [
+  { from: -1, color: "#c7b887" }, // < 0,1 (suelo expuesto)
+  { from: 0.1, color: "#d9db80" },
+  { from: 0.3, color: "#8cc773" },
+  { from: 0.5, color: "#4d9e4d" },
+  { from: 0.7, color: "#006626" }, // ≥ 0,7 (cobertura alta)
+];
+
 const INDEX_LEGENDS: Record<string, IndexLegend> = {
   NDVI: {
     title: "NDVI · vigor de la vegetación",
@@ -109,6 +130,18 @@ const INDEX_LEGENDS: Record<string, IndexLegend> = {
     bins: NIR_BINS,
     ticks: [1, 2, 3, 4, 5], // 0,1 · 0,2 · 0,3 · 0,4 · 0,5
     ends: ["baja", "alta"],
+  },
+  NDRE: {
+    title: "NDRE · clorofila (borde rojo)",
+    bins: NDRE_BINS,
+    ticks: [1, 2, 3, 4], // 0 · 0,2 · 0,35 · 0,5
+    ends: ["joven / suelo", "densa / alto N"],
+  },
+  SAVI: {
+    title: "SAVI · vegetación (ajustado al suelo)",
+    bins: SAVI_BINS,
+    ticks: [1, 2, 3, 4], // 0,1 · 0,3 · 0,5 · 0,7
+    ends: ["suelo expuesto", "cobertura alta"],
   },
 };
 

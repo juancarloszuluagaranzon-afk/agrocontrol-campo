@@ -31,6 +31,8 @@ const DEFAULT_LABELS: Record<string, string> = {
   NDMI: "NDMI (humedad)",
   EVI: "EVI (vigor)",
   NIR: "NIR (reflectancia)",
+  NDRE: "NDRE (borde rojo)",
+  SAVI: "SAVI (suelo)",
   NDWI: "NDWI (agua)",
   "TRUE-COLOR": "Color real",
   "FALSE-COLOR": "Color falso",
