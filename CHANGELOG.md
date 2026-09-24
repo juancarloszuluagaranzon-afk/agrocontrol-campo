@@ -24,6 +24,12 @@ versionado [SemVer](https://semver.org/lang/es/).
   (lluvia hoy)") no se podían tocar. El panel de herramientas ahora se acota al espacio libre sobre el
   botón y hace scroll interno.
 
+### Analítica — Vercel Web Analytics
+
+- Conteo de visitantes y vistas de página con `@vercel/analytics` (componente `<Analytics />` en el
+  layout raíz). Sin cookies ni datos personales; solo reporta en producción y no interfiere con el
+  modo offline. Se activa desde el panel del proyecto en Vercel.
+
 ### Maestro — refrescado al 8 de septiembre de 2026 (espejo del ingenio)
 
 - Se regeneró el maestro desde el `maestro.csv` de maestro-riopaila (cortes de agosto en 47 suertes
