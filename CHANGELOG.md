@@ -5,6 +5,17 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### CI — e2e de Sentinel Hub verdes sin credenciales
+
+- El job e2e de GitHub Actions arrancaba sin `NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID`, la app ocultaba
+  los índices y las pruebas de NIR y de la máscara EVI fallaban en cada corrida desde el 7-sep. Ahora
+  el job define un id ficticio y la lista completa de índices: las pruebas solo verifican la UI, no
+  descargan teselas. Nada de secretos en el workflow.
+- De paso, un defecto real que ese entorno destapó: con cuatro índices el panel de **Capas** crecía
+  hasta quedar debajo del botón flotante de Herramientas y las últimas casillas (p. ej. "Pluviómetros
+  (lluvia hoy)") no se podían tocar. El panel de herramientas ahora se acota al espacio libre sobre el
+  botón y hace scroll interno.
+
 ### Maestro — refrescado al 8 de septiembre de 2026 (espejo del ingenio)
 
 - Se regeneró el maestro desde el `maestro.csv` de maestro-riopaila (cortes de agosto en 47 suertes
