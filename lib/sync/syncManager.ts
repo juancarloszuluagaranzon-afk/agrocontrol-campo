@@ -42,6 +42,58 @@ export async function fetchAllRows<T>(
   return rows;
 }
 
+/**
+ * Forma mínima del query builder que usa `fetchRowsSince`. Se tipa aparte (y se
+ * castea) porque con un nombre de tabla en unión los tipos generados no
+ * reconocen columnas comunes como `updated_at`; también simplifica el fake en
+ * los tests. Todas las tablas incrementales tienen `updated_at` (ADR-0033).
+ */
+export interface ConsultaIncremental {
+  gte(columna: string, valor: string): ConsultaIncremental;
+  order(columna: string, opts?: { ascending?: boolean }): ConsultaIncremental;
+  range(
+    desde: number,
+    hasta: number,
+  ): PromiseLike<{ data: unknown[] | null; error: unknown }>;
+}
+
+export interface OpcionesIncremental {
+  /** Cursor ISO (ya con solape): solo filas con `updated_at >= since`. */
+  since: string | null;
+  /** Solo filas con `fecha >= fechaDesde` (tablas con columna `fecha`). */
+  fechaDesde?: string;
+}
+
+/**
+ * Baja las filas cambiadas desde `since` (o todas las de la ventana si es
+ * null), ordenadas por `updated_at` y paginadas. Devuelve `null` si alguna
+ * página falla. La primera sincronización de un dispositivo baja el conjunto
+ * completo; las siguientes, solo lo que cambió (ADR-0033).
+ */
+export async function fetchRowsSince<T extends { updated_at: string }>(
+  supabase: SupabaseClient<Database>,
+  table: TableName,
+  opts: OpcionesIncremental,
+): Promise<T[] | null> {
+  const rows: T[] = [];
+  let offset = 0;
+  for (;;) {
+    let q = supabase.from(table).select("*") as unknown as ConsultaIncremental;
+    if (opts.since) q = q.gte("updated_at", opts.since);
+    if (opts.fechaDesde) q = q.gte("fecha", opts.fechaDesde);
+    const { data, error } = await q
+      .order("updated_at", { ascending: true })
+      .order("id")
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (error) return null;
+    if (!data || data.length === 0) break;
+    rows.push(...(data as T[]));
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return rows;
+}
+
 type MarcadorRow = Database["public"]["Tables"]["marcadores"]["Insert"];
 
 /**

@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Sincronización — incremental, cada 60 s y solo en primer plano
+
+- Supabase restringió el proyecto por agotar el **egress** (5,82 de 5 GB): cada 20 s la app bajaba
+  completas las tablas compartidas (~10.000 lecturas de lluvia, 2-3 MB por ciclo). Ahora baja **solo lo
+  que cambió** desde el último `updated_at` (cursor por tabla, fusión por id), las precipitaciones se
+  acotan al **año en curso** (mínimo 60 días), el intervalo pasa a **60 s** y no sincroniza con la
+  pestaña oculta. Primera sincronización de cada dispositivo: completa, una sola vez. Ver **ADR-0033**.
+
 ### CI — e2e de Sentinel Hub verdes sin credenciales
 
 - El job e2e de GitHub Actions arrancaba sin `NEXT_PUBLIC_SENTINELHUB_INSTANCE_ID`, la app ocultaba

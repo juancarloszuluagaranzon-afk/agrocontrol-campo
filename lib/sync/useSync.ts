@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { useHidrologiaStore } from "@/lib/store/hidrologiaStore";
 import { useEncuestaStore } from "@/lib/store/encuestaStore";
+import { useSyncStore, type TablaIncremental } from "@/lib/store/syncStore";
 import { useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/types";
 import {
   pushPendingMarcadores,
   pushPendingMediciones,
@@ -15,7 +18,16 @@ import {
   pushPendingLecturasHidro,
   pushPendingEncuesta,
   fetchAllRows,
+  fetchRowsSince,
+  type PushResult,
 } from "@/lib/sync/syncManager";
+import {
+  cursorDesde,
+  desdeConSolape,
+  fusionarRemoto,
+  inicioVentanaPrecipitaciones,
+  podarPorFecha,
+} from "@/lib/sync/incremental";
 import type { Marcador } from "@/domain/marcadores/schema";
 import type { Medicion } from "@/domain/mediciones/schema";
 import type { Precipitacion } from "@/domain/precipitaciones/schema";
@@ -23,12 +35,79 @@ import type { LecturaHidro } from "@/domain/hidrologia/schema";
 import type { RespuestaEncuesta } from "@/domain/encuesta/schema";
 
 const E2E = process.env.NEXT_PUBLIC_E2E === "1";
-const INTERVALO_MS = 20_000;
+/** Antes 20 s. Con descarga incremental cada ciclo pesa bytes, no megas, pero
+ *  el conteo de peticiones también cuenta (logs, cuota): 60 s basta en campo. */
+const INTERVALO_MS = 60_000;
+
+/** Contrato mínimo de los stores con outbox (todos lo cumplen). */
+interface StoreOutbox<T extends { id: string; updated_at: string }> {
+  items: T[];
+  pending: string[];
+  setUserId: (id: string) => void;
+  setSyncing: (v: boolean) => void;
+  markSynced: (ids: string[]) => void;
+  replaceAll: (items: T[]) => void;
+}
+
+type Push<T> = (
+  supabase: SupabaseClient<Database>,
+  items: T[],
+  pendingIds: string[],
+  authUid: string,
+) => Promise<PushResult>;
 
 /**
- * Orquesta la sincronización del outbox (§14): marcadores y mediciones privados.
- * Cuando hay red y sesión, sube los pendientes y baja los del usuario (para
- * verlos en cualquier dispositivo). Reintenta al volver la conexión y por intervalo.
+ * Sube el outbox de una tabla y baja **solo lo que cambió** desde el último
+ * cursor (ADR-0033). Sin cursor (primer uso, cambio de usuario) baja la
+ * ventana completa y reemplaza; con cursor, fusiona por id. El cursor solo
+ * avanza si la descarga fue completa.
+ */
+async function sincronizarTabla<T extends { id: string; updated_at: string }>(
+  supabase: SupabaseClient<Database>,
+  tabla: TablaIncremental,
+  leer: () => StoreOutbox<T>,
+  push: Push<T>,
+  uid: string,
+  fechaDesde?: string,
+): Promise<void> {
+  const store = leer();
+  store.setSyncing(true);
+  store.setUserId(uid);
+  if (store.pending.length > 0) {
+    const res = await push(supabase, store.items, store.pending, uid);
+    if (res.syncedIds.length > 0) store.markSynced(res.syncedIds);
+  }
+  const sync = useSyncStore.getState();
+  const cursor = sync.cursores[tabla] ?? null;
+  const rows = await fetchRowsSince<T>(supabase, tabla, {
+    since: cursor ? desdeConSolape(cursor) : null,
+    fechaDesde,
+  });
+  if (!rows) return;
+  // Estado fresco: el push y el usuario pudieron cambiar `items`/`pending`
+  // mientras bajábamos.
+  const cur = leer();
+  let fusion = fusionarRemoto(
+    cur.items,
+    rows,
+    cur.pending,
+    cursor ? "fusionar" : "reemplazar",
+  );
+  if (fechaDesde) {
+    fusion = podarPorFecha(
+      fusion as unknown as Array<T & { fecha: string }>,
+      fechaDesde,
+    ) as unknown as T[];
+  }
+  cur.replaceAll(fusion);
+  const siguiente = cursorDesde(rows, cursor);
+  if (siguiente) sync.setCursor(tabla, siguiente);
+}
+
+/**
+ * Orquesta la sincronización del outbox (§14): sube pendientes y baja cambios
+ * cuando hay red, sesión y la pestaña está visible. Reintenta al volver la
+ * conexión, al volver a primer plano y por intervalo.
  */
 export function useSync(): void {
   const { user } = useUser();
@@ -44,118 +123,55 @@ export function useSync(): void {
     if (E2E || !user) return;
     if (enCurso.current) return;
     if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    // En segundo plano (pestaña oculta, teléfono bloqueado) no vale la pena
+    // gastar red ni cuota: se reanuda al volver a primer plano.
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState === "hidden"
+    )
+      return;
     enCurso.current = true;
     setSyncing(true);
     try {
       const supabase = createClient();
+      // Si cambió el usuario, los cursores no sirven: descarga completa.
+      useSyncStore.getState().prepararParaUsuario(user.id);
 
-      // Marcadores: subir pendientes y bajar los del usuario.
-      const mar = useMarcadoresStore.getState();
-      mar.setUserId(user.id);
-      if (mar.pending.length > 0) {
-        const res = await pushPendingMarcadores(
-          supabase,
-          mar.items,
-          mar.pending,
-          user.id,
-        );
-        if (res.syncedIds.length > 0) mar.markSynced(res.syncedIds);
-      }
-      const marcadores = await fetchAllRows<Marcador>(supabase, "marcadores");
-      if (marcadores) {
-        const cur = useMarcadoresStore.getState();
-        const localPending = cur.items.filter((m) =>
-          cur.pending.includes(m.id),
-        );
-        const byId = new Map<string, Marcador>();
-        for (const m of marcadores) byId.set(m.id, m);
-        for (const m of localPending) byId.set(m.id, m);
-        cur.replaceAll([...byId.values()]);
-      }
-
-      // Mediciones: subir pendientes y bajar las del usuario.
-      const med = useMedicionesStore.getState();
-      med.setSyncing(true);
-      med.setUserId(user.id);
-      if (med.pending.length > 0) {
-        const res = await pushPendingMediciones(
-          supabase,
-          med.items,
-          med.pending,
-          user.id,
-        );
-        if (res.syncedIds.length > 0) med.markSynced(res.syncedIds);
-      }
-      const mediciones = await fetchAllRows<Medicion>(supabase, "mediciones");
-      if (mediciones) {
-        const cur = useMedicionesStore.getState();
-        const localPending = cur.items.filter((m) =>
-          cur.pending.includes(m.id),
-        );
-        const byId = new Map<string, Medicion>();
-        for (const m of mediciones) byId.set(m.id, m);
-        for (const m of localPending) byId.set(m.id, m);
-        cur.replaceAll([...byId.values()]);
-      }
-
-      // Precipitaciones: subir pendientes y bajar TODAS (lectura compartida).
-      const prec = usePrecipitacionesStore.getState();
-      prec.setSyncing(true);
-      prec.setUserId(user.id);
-      if (prec.pending.length > 0) {
-        const res = await pushPendingPrecipitaciones(
-          supabase,
-          prec.items,
-          prec.pending,
-          user.id,
-        );
-        if (res.syncedIds.length > 0) prec.markSynced(res.syncedIds);
-      }
-      const precipitaciones = await fetchAllRows<Precipitacion>(
+      await sincronizarTabla<Marcador>(
+        supabase,
+        "marcadores",
+        () => useMarcadoresStore.getState(),
+        pushPendingMarcadores,
+        user.id,
+      );
+      await sincronizarTabla<Medicion>(
+        supabase,
+        "mediciones",
+        () => useMedicionesStore.getState(),
+        pushPendingMediciones,
+        user.id,
+      );
+      // Precipitaciones (compartidas): solo la ventana vigente (año en curso,
+      // mínimo 60 días) — el histórico completo vive en Supabase, no en el móvil.
+      await sincronizarTabla<Precipitacion>(
         supabase,
         "precipitaciones",
+        () => usePrecipitacionesStore.getState(),
+        pushPendingPrecipitaciones,
+        user.id,
+        inicioVentanaPrecipitaciones(new Date()),
       );
-      if (precipitaciones) {
-        const cur = usePrecipitacionesStore.getState();
-        const localPending = cur.items.filter((p) =>
-          cur.pending.includes(p.id),
-        );
-        const byId = new Map<string, Precipitacion>();
-        for (const p of precipitaciones) byId.set(p.id, p);
-        for (const p of localPending) byId.set(p.id, p);
-        cur.replaceAll([...byId.values()]);
-      }
-
-      // Lecturas hidrológicas: subir pendientes y bajar TODAS (compartidas).
-      const hidro = useHidrologiaStore.getState();
-      hidro.setSyncing(true);
-      hidro.setUserId(user.id);
-      if (hidro.pending.length > 0) {
-        const res = await pushPendingLecturasHidro(
-          supabase,
-          hidro.items,
-          hidro.pending,
-          user.id,
-        );
-        if (res.syncedIds.length > 0) hidro.markSynced(res.syncedIds);
-      }
-      const lecturasHidro = await fetchAllRows<LecturaHidro>(
+      await sincronizarTabla<LecturaHidro>(
         supabase,
         "lecturas_hidrologicas",
+        () => useHidrologiaStore.getState(),
+        pushPendingLecturasHidro,
+        user.id,
       );
-      if (lecturasHidro) {
-        const cur = useHidrologiaStore.getState();
-        const localPending = cur.items.filter((l) =>
-          cur.pending.includes(l.id),
-        );
-        const byId = new Map<string, LecturaHidro>();
-        for (const l of lecturasHidro) byId.set(l.id, l);
-        for (const l of localPending) byId.set(l.id, l);
-        cur.replaceAll([...byId.values()]);
-      }
 
       // Encuesta de satisfacción: subir pendiente y bajar la propia (RLS ya
-      // filtra a "solo mi fila" — a lo sumo una, por el índice único).
+      // filtra a "solo mi fila" — a lo sumo una, por el índice único). No tiene
+      // `updated_at`, así que sigue con descarga completa (una fila).
       const enc = useEncuestaStore.getState();
       enc.setSyncing(true);
       enc.setUserId(user.id);
@@ -174,13 +190,9 @@ export function useSync(): void {
       );
       if (encuesta) {
         const cur = useEncuestaStore.getState();
-        const localPending = cur.items.filter((r) =>
-          cur.pending.includes(r.id),
+        cur.replaceAll(
+          fusionarRemoto(cur.items, encuesta, cur.pending, "reemplazar"),
         );
-        const byId = new Map<string, RespuestaEncuesta>();
-        for (const r of encuesta) byId.set(r.id, r);
-        for (const r of localPending) byId.set(r.id, r);
-        cur.replaceAll([...byId.values()]);
       }
     } catch {
       /* reintenta en el próximo ciclo */
@@ -200,11 +212,16 @@ export function useSync(): void {
   useEffect(() => {
     void flush();
     const onOnline = () => void flush();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void flush();
+    };
     const id = setInterval(() => void flush(), INTERVALO_MS);
     window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(id);
       window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [
     flush,
