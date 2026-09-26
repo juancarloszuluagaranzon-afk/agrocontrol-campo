@@ -22,9 +22,9 @@ test("máscara: EVI se recorta a las fincas (incluida Peralonso)", async ({
     )
     .toBe(true);
 
-  // Encender EVI: Herramientas → Capas → checkbox EVI.
+  // Encender EVI: Herramientas → Índices satelitales → EVI.
   await page.getByRole("button", { name: "Herramientas" }).click();
-  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("button", { name: "Índices satelitales" }).click();
   await page.getByText("EVI (vigor)").click();
 
   // La máscara raster debe existir y quedar visible al encender el índice. Es la
