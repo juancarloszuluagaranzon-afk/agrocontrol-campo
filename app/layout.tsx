@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { t } from "@/lib/i18n/es-CO";
 
@@ -33,6 +34,10 @@ export default function RootLayout({
     <html lang="es-CO" className="h-full antialiased">
       <body className="bg-background text-foreground flex min-h-full flex-col">
         {children}
+        {/* Vercel Web Analytics: conteo de visitas y páginas sin cookies. Solo
+            envía en producción (en dev no hace nada) y falla en silencio sin
+            red, así que no afecta el modo offline. */}
+        <Analytics />
       </body>
     </html>
   );
