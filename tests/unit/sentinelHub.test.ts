@@ -92,6 +92,10 @@ describe("sentinelHubTilesUrl", () => {
     expect(url).toContain("MAXCC=20");
   });
 
+  it("pide UPSAMPLING=NEAREST para ver los píxeles de 10 m como cuadros", () => {
+    expect(sentinelHubTilesUrl(opts)).toContain("UPSAMPLING=NEAREST");
+  });
+
   it("deja el marcador {bbox-epsg-3857} sin escapar para MapLibre", () => {
     const url = sentinelHubTilesUrl(opts);
     expect(url).toContain("&BBOX={bbox-epsg-3857}");
