@@ -157,6 +157,11 @@ export function sentinelHubTimeRange(
  * para teselado, sin la inversión de ejes de 1.3.0). Con `time` (ventana
  * `YYYY-MM-DD/YYYY-MM-DD`) se fija la fecha; sin él, CDSE devuelve la imagen más
  * reciente bajo `MAXCC`.
+ *
+ * `UPSAMPLING=NEAREST`: al acercar, cada píxel de 10 m de Sentinel-2 se ve como
+ * un cuadro nítido (como en la zonificación de Cenicaña), en vez de la
+ * interpolación por defecto, que suaviza y dibuja curvas de nivel falsas.
+ * Verificado contra CDSE sobre la suerte 3107-780.
  */
 export function sentinelHubTilesUrl(opts: {
   instanceId: string;
@@ -175,6 +180,7 @@ export function sentinelHubTilesUrl(opts: {
     WIDTH: "256",
     HEIGHT: "256",
     MAXCC: String(opts.maxCloudCoverage),
+    UPSAMPLING: "NEAREST",
   });
   // `{bbox-epsg-3857}` y `TIME` se concatenan aparte: el marcador de MapLibre no
   // debe ir URL-encoded, y el rango de TIME va como en la doc de CDSE (con `/`).

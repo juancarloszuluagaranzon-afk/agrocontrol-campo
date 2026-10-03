@@ -102,6 +102,9 @@ export function baseStyle(): StyleSpecification {
         type: "raster",
         source: mapId,
         layout: { visibility: "none" },
+        // Más allá del zoom 16 MapLibre agranda la tesela: "nearest" mantiene los
+        // píxeles de 10 m como cuadros en vez de difuminarlos.
+        paint: { "raster-resampling": "nearest" },
       });
     }
   }

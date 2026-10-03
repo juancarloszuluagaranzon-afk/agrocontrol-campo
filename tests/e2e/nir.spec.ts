@@ -21,4 +21,18 @@ test("NIR: toggle en Índices y leyenda de reflectancia", async ({ page }) => {
   await expect(page.getByText("NIR · reflectancia")).toBeVisible();
   await expect(page.getByText("baja", { exact: true })).toBeVisible();
   await expect(page.getByText("alta", { exact: true })).toBeVisible();
+
+  // Píxeles de 10 m nítidos al acercar: la capa usa remuestreo "nearest".
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const m = (
+          window as {
+            __e2eMap?: { getPaintProperty: (l: string, p: string) => unknown };
+          }
+        ).__e2eMap;
+        return m?.getPaintProperty("sentinel-hub-NIR", "raster-resampling");
+      }),
+    )
+    .toBe("nearest");
 });

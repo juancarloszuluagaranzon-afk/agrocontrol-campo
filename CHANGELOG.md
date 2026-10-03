@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Índices satelitales — píxeles de 10 m nítidos
+
+- Al acercar, las capas de Sentinel Hub (NDVI, NDMI, EVI, NIR…) muestran cada píxel de Sentinel-2
+  como un **cuadro de 10 m**, igual que la zonificación de Cenicaña, en vez de manchas suavizadas con
+  curvas de nivel falsas. La URL del WMS pide `UPSAMPLING=NEAREST` y la capa de MapLibre usa
+  `raster-resampling: nearest` para el sobre-zoom. Verificado contra CDSE sobre la suerte 3107-780.
+
 ### Sincronización — incremental, cada 60 s y solo en primer plano
 
 - Supabase restringió el proyecto por agotar el **egress** (5,82 de 5 GB): cada 20 s la app bajaba
