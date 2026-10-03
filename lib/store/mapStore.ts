@@ -55,6 +55,10 @@ interface MapState {
   sentinelVisible: boolean;
   toggleSentinel: () => void;
 
+  /** Capa "Edad de la caña": suertes coloreadas por rango de edad (ADR-0034). */
+  edadVisible: boolean;
+  toggleEdad: () => void;
+
   /**
    * Capas Sentinel Hub (CDSE) visibles, por id de capa (NDVI, NDMI…): Sentinel-2
    * reciente / índices vía WMS (ADR-0022). No persistido.
@@ -145,6 +149,9 @@ export const useMapStore = create<MapState>((set) => ({
   sentinelVisible: false,
   toggleSentinel: () =>
     set((state) => ({ sentinelVisible: !state.sentinelVisible })),
+
+  edadVisible: false,
+  toggleEdad: () => set((state) => ({ edadVisible: !state.edadVisible })),
 
   sentinelHubVisible: {},
   toggleSentinelHub: (layerId) =>

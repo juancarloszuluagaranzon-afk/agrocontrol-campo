@@ -7,6 +7,7 @@ import { LayerToggles } from "@/components/map/LayerToggles";
 import { BaseToggle } from "@/components/map/BaseToggle";
 import { Legend } from "@/components/map/Legend";
 import { SentinelLegend } from "@/components/map/SentinelLegend";
+import { EdadLegend } from "@/components/map/EdadLegend";
 import { SuertePanel } from "@/components/map/SuertePanel";
 import { GpsControl } from "@/components/map/GpsControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
@@ -103,8 +104,12 @@ export function MapScreen() {
         <GpsControl />
       </div>
 
-      {/* Escala de color del índice Sentinel Hub activo (abajo-izq., ADR-0026). */}
-      <SentinelLegend />
+      {/* Leyendas abajo-der.: edad de la caña (ADR-0034) y escala del índice
+          Sentinel Hub activo (ADR-0026), apiladas para no encimarse. */}
+      <div className="pointer-events-none absolute right-2 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-10 flex flex-col items-end gap-1.5">
+        <EdadLegend />
+        <SentinelLegend />
+      </div>
 
       {/* Menú de herramientas (✏️📏, abajo-izquierda). */}
       <ToolsMenu />

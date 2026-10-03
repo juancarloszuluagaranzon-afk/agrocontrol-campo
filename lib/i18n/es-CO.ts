@@ -108,6 +108,11 @@ export const t = {
     enviar: "Enviar",
     obligatorio: "Elige una calificación para continuar.",
   },
+  edad: {
+    capa: "Edad de la caña",
+    titulo: "Edad de la caña",
+    suertes: (n: number) => `${n} ${n === 1 ? "suerte" : "suertes"}`,
+  },
   compartir: {
     boton: "Compartir",
     titulo: "Ubicación · Rio Map",

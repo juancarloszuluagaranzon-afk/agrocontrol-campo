@@ -362,3 +362,52 @@ test("mapa: la capa de lluvia (gotas) se activa desde Capas sin romper el mapa",
   // El mapa sigue en pie (la capa de gotas no lo desestabiliza).
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
 });
+
+test("mapa: la capa 'Edad de la caña' colorea las suertes y muestra su leyenda (ADR-0034)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  const edad = page.getByRole("checkbox", { name: /Edad de la caña/ });
+  await edad.check();
+  await expect(edad).toBeChecked();
+
+  // La capa queda visible y su color es un `match` por sec_ste (maestro cargado).
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const m = (
+          window as unknown as {
+            __e2eMap?: {
+              getLayoutProperty: (id: string, p: string) => unknown;
+              getPaintProperty: (id: string, p: string) => unknown;
+            };
+          }
+        ).__e2eMap;
+        const vis = m?.getLayoutProperty("suertes-edad", "visibility");
+        const color = m?.getPaintProperty("suertes-edad", "fill-color");
+        return `${String(vis)}|${Array.isArray(color) ? color[0] : "plano"}`;
+      }),
+    )
+    .toBe("visible|match");
+
+  // Leyenda con los cuatro rangos y conteos.
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  await expect(leyenda.getByText("Menor a 4 meses")).toBeVisible();
+  await expect(leyenda.getByText("De 4 a 10 meses")).toBeVisible();
+  await expect(leyenda.getByText("Mayor a 10 meses")).toBeVisible();
+  await expect(leyenda.getByText("Renovación / sin dato")).toBeVisible();
+  await expect(leyenda.getByText(/\d+ suertes?/).first()).toBeVisible();
+
+  // Apagarla la oculta y retira la leyenda.
+  await edad.uncheck();
+  await expect(leyenda).toBeHidden();
+});

@@ -37,3 +37,4 @@ añade una nueva.
 | 0031 | Radar Sentinel-1 (VV/VH/RVI) en las estadísticas por suerte       | Aceptada |
 | 0032 | Sincronización automática del maestro con maestro-riopaila        | Aceptada |
 | 0033 | Sincronización incremental por `updated_at` (egress bajo control) | Aceptada |
+| 0034 | Capa "Edad de la caña" (suertes por rango de edad)                | Aceptada |
