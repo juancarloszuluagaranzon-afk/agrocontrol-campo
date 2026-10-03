@@ -213,7 +213,7 @@ export function SentinelLegend() {
   if (activos.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute right-2 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-10 flex flex-col items-end gap-1.5">
+    <div className="flex flex-col items-end gap-1.5">
       {activos.map((l) => {
         const leg = INDEX_LEGENDS[l.id];
         return leg ? <LegendCard key={l.id} leg={leg} /> : null;

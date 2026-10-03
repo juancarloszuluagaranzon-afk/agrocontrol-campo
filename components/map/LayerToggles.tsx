@@ -3,6 +3,7 @@
 import { plantaConfig } from "@/lib/plantas";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { t } from "@/lib/i18n/es-CO";
 
 /**
  * Panel de capas de contexto conmutables (§5). Se abre desde el menú de
@@ -16,6 +17,8 @@ export function LayerToggles() {
   const setActiveTool = useMapStore((s) => s.setActiveTool);
   const sentinelVisible = useMapStore((s) => s.sentinelVisible);
   const toggleSentinel = useMapStore((s) => s.toggleSentinel);
+  const edadVisible = useMapStore((s) => s.edadVisible);
+  const toggleEdad = useMapStore((s) => s.toggleEdad);
   const planta = usePlantaStore((s) => s.planta);
   const capas = plantaConfig(planta).contextLayers;
 
@@ -42,6 +45,17 @@ export function LayerToggles() {
         />
         <span aria-hidden>🛰️</span>
         Sentinel-2 (sin nubes)
+      </label>
+      {/* Suertes coloreadas por rango de edad (ADR-0034); leyenda abajo-der. */}
+      <label className="hover:bg-accent/5 flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm">
+        <input
+          type="checkbox"
+          checked={edadVisible}
+          onChange={toggleEdad}
+          className="size-4"
+        />
+        <span aria-hidden>🌱</span>
+        {t.edad.capa}
       </label>
 
       <div className="my-1 border-t border-black/5" />

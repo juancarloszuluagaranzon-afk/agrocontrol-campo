@@ -61,6 +61,7 @@ import {
   MEDICIONES_SOURCE,
   LLUVIA_HOY_SOURCE,
   LLUVIA_HOY_DOT,
+  SUERTES_EDAD,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -84,6 +85,8 @@ import { usePluviometros } from "@/lib/data/usePluviometros";
 import { lecturaDelDia } from "@/domain/precipitaciones/acumulado";
 import { NIVELES_LLUVIA, iconoGotaStep } from "@/lib/geo/lluvia";
 import type { TablonProperties } from "@/domain/suertes/schema";
+import { useMaestro } from "@/lib/data/useMaestro";
+import { expresionColorEdad, resumirEdades } from "@/domain/maestro/edad";
 
 /**
  * Dibuja una "gota" (pin teardrop) del color dado en un canvas y devuelve su
@@ -307,6 +310,15 @@ export function MapView() {
         type: "fill",
         source: SUERTES_SOURCE,
         paint: { "fill-color": "#000000", "fill-opacity": 0.12 },
+      });
+      // "Edad de la caña" (ADR-0034): relleno por rango de edad, oculto hasta
+      // encenderlo en 🗂️ Capas. El color lo fija su efecto con el maestro.
+      map.addLayer({
+        id: SUERTES_EDAD,
+        type: "fill",
+        source: SUERTES_SOURCE,
+        layout: { visibility: "none" },
+        paint: { "fill-color": "rgba(0,0,0,0)", "fill-opacity": 0.65 },
       });
       map.addLayer({
         id: SUERTES_LINE,
@@ -980,6 +992,27 @@ export function MapView() {
       sentinelVisible ? "visible" : "none",
     );
   }, [sentinelVisible, mapReady]);
+
+  // ── Edad de la caña: suertes coloreadas por rango (ADR-0034) ──
+  const edadVisible = useMapStore((s) => s.edadVisible);
+  const maestro = useMaestro();
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !map.getLayer(SUERTES_EDAD)) return;
+    if (edadVisible) {
+      // La edad se calcula en vivo (hoy), igual que la ficha del maestro.
+      map.setPaintProperty(
+        SUERTES_EDAD,
+        "fill-color",
+        expresionColorEdad(resumirEdades(maestro)) as ExpressionSpecification,
+      );
+    }
+    map.setLayoutProperty(
+      SUERTES_EDAD,
+      "visibility",
+      edadVisible ? "visible" : "none",
+    );
+  }, [edadVisible, maestro, mapReady]);
 
   // ── Capas Sentinel Hub (CDSE), conmutables desde 🗂️ Capas (ADR-0022) ──
   const sentinelHubVisible = useMapStore((s) => s.sentinelHubVisible);

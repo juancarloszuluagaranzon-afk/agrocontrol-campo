@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — capa "Edad de la caña"
+
+- Nuevo interruptor en **🗂️ Capas**: pinta cada suerte según su edad, calculada hoy con la misma
+  regla de la ficha del maestro. **Menor a 4 meses** (verde claro), **de 4 a 10** (verde intenso,
+  4 y 10 inclusive) y **mayor a 10** (ámbar, próxima a cosecha); renovación y sin fecha en gris; lo
+  que no es caña, sin color. Leyenda con suertes y hectáreas por rango. Riopaila y Castilla, también
+  sin conexión. Pedido de Operaciones Castilla. Ver **ADR-0034**.
+
 ### Índices satelitales — píxeles de 10 m nítidos
 
 - Al acercar, las capas de Sentinel Hub (NDVI, NDMI, EVI, NIR…) muestran cada píxel de Sentinel-2
