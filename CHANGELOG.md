@@ -5,6 +5,16 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Maestro — refrescado al 30 de septiembre de 2026
+
+- Rio Map tenía el maestro del 9 de septiembre: el workflow **Sync maestro** regeneraba los datos a
+  diario pero GitHub no le permite abrir el PR (falta el token o el permiso de Actions). Refresco a
+  mano desde maestro-riopaila (maestro oficial de Planeación y Control del 30-sep): Riopaila 79 suertes
+  con corte nuevo y 158 cambios de técnico; Castilla 82 cortes nuevos y 3 suertes retiradas. La edad
+  en vivo coincide con la del maestro en 1.379 de 1.394 suertes de caña; las 15 restantes son cortes
+  del 21 al 30 de septiembre cuya columna de edad del maestro no se recalculó (Rio Map, que calcula
+  desde la fecha, muestra la correcta).
+
 ### Mapa — capa "Edad de la caña"
 
 - Nuevo interruptor en **🗂️ Capas**: pinta cada suerte según su edad, calculada hoy con la misma
