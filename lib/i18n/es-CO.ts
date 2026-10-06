@@ -112,6 +112,8 @@ export const t = {
     capa: "Edad de la caña",
     titulo: "Edad de la caña",
     suertes: (n: number) => `${n} ${n === 1 ? "suerte" : "suertes"}`,
+    ayudaFiltro: "Toca un rango para mostrarlo u ocultarlo.",
+    ninguno: "Ningún rango seleccionado.",
   },
   compartir: {
     boton: "Compartir",

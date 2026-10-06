@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { TablonProperties } from "@/domain/suertes/schema";
 import { PLANTA_IDS, PLANTAS } from "@/lib/plantas";
 import type { LngLat } from "@/lib/geo/measure";
+import type { RangoEdad } from "@/domain/maestro/edad";
 
 /** Objetivo de vuelo solicitado por el buscador (o un click externo). */
 export interface FlyTarget {
@@ -58,6 +59,9 @@ interface MapState {
   /** Capa "Edad de la caña": suertes coloreadas por rango de edad (ADR-0034). */
   edadVisible: boolean;
   toggleEdad: () => void;
+  /** Rangos de edad encendidos en la leyenda (solo esos se pintan). */
+  edadRangos: Record<RangoEdad, boolean>;
+  toggleEdadRango: (id: RangoEdad) => void;
 
   /**
    * Capas Sentinel Hub (CDSE) visibles, por id de capa (NDVI, NDMI…): Sentinel-2
@@ -152,6 +156,11 @@ export const useMapStore = create<MapState>((set) => ({
 
   edadVisible: false,
   toggleEdad: () => set((state) => ({ edadVisible: !state.edadVisible })),
+  edadRangos: { joven: true, media: true, madura: true, sinDato: true },
+  toggleEdadRango: (id) =>
+    set((state) => ({
+      edadRangos: { ...state.edadRangos, [id]: !state.edadRangos[id] },
+    })),
 
   sentinelHubVisible: {},
   toggleSentinelHub: (layerId) =>

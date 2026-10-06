@@ -411,3 +411,53 @@ test("mapa: la capa 'Edad de la caña' colorea las suertes y muestra su leyenda 
   await edad.uncheck();
   await expect(leyenda).toBeHidden();
 });
+
+test("mapa: en 'Edad de la caña' se pueden apagar rangos y solo se pintan los encendidos (ADR-0034)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
+
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  const madura = leyenda.getByRole("button", { name: /Mayor a 10 meses/ });
+  await expect(madura).toHaveAttribute("aria-pressed", "true");
+
+  /** Colores presentes en el `match` de la capa. */
+  const colores = () =>
+    page.evaluate(() => {
+      const m = (
+        window as unknown as {
+          __e2eMap?: { getPaintProperty: (id: string, p: string) => unknown };
+        }
+      ).__e2eMap;
+      const c = m?.getPaintProperty("suertes-edad", "fill-color");
+      return Array.isArray(c)
+        ? c.filter(
+            (x): x is string => typeof x === "string" && x.startsWith("#"),
+          )
+        : [];
+    });
+
+  await expect.poll(colores).toContain("#f59e0b");
+  await madura.click();
+  await expect(madura).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(colores).not.toContain("#f59e0b");
+  // Los conteos siguen visibles aunque el rango esté apagado.
+  await expect(madura).toContainText(/\d+ suertes?/);
+
+  // Apagar todos muestra el aviso y deja la capa sin colores.
+  for (const nombre of [/Menor a 4 meses/, /De 4 a 10 meses/, /Renovación/]) {
+    await leyenda.getByRole("button", { name: nombre }).click();
+  }
+  await expect(leyenda.getByRole("status")).toHaveText(
+    "Ningún rango seleccionado.",
+  );
+  await expect.poll(colores).toEqual([]);
+});

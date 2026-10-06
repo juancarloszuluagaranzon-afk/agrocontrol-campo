@@ -995,6 +995,7 @@ export function MapView() {
 
   // ── Edad de la caña: suertes coloreadas por rango (ADR-0034) ──
   const edadVisible = useMapStore((s) => s.edadVisible);
+  const edadRangos = useMapStore((s) => s.edadRangos);
   const maestro = useMaestro();
   useEffect(() => {
     const map = mapRef.current;
@@ -1004,7 +1005,10 @@ export function MapView() {
       map.setPaintProperty(
         SUERTES_EDAD,
         "fill-color",
-        expresionColorEdad(resumirEdades(maestro)) as ExpressionSpecification,
+        expresionColorEdad(
+          resumirEdades(maestro),
+          edadRangos,
+        ) as ExpressionSpecification,
       );
     }
     map.setLayoutProperty(
@@ -1012,7 +1016,7 @@ export function MapView() {
       "visibility",
       edadVisible ? "visible" : "none",
     );
-  }, [edadVisible, maestro, mapReady]);
+  }, [edadVisible, edadRangos, maestro, mapReady]);
 
   // ── Capas Sentinel Hub (CDSE), conmutables desde 🗂️ Capas (ADR-0022) ──
   const sentinelHubVisible = useMapStore((s) => s.sentinelHubVisible);

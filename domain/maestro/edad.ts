@@ -95,11 +95,17 @@ export function resumirEdades(
 
 /**
  * Expresión `fill-color` de MapLibre: color del rango según `sec_ste` del
- * tablón; transparente si la suerte no es caña o no está en el maestro.
+ * tablón; transparente si la suerte no es caña, no está en el maestro o su
+ * rango está apagado en `activos` (por defecto, todos encendidos).
  */
-export function expresionColorEdad(resumen: ResumenEdad): unknown {
+export function expresionColorEdad(
+  resumen: ResumenEdad,
+  activos?: Partial<Record<RangoEdad, boolean>>,
+): unknown {
   const ramas: unknown[] = [];
   for (const r of RANGOS_EDAD) {
+    // Rango apagado en la leyenda: sin color (solo contorno), ADR-0034.
+    if (activos && activos[r.id] === false) continue;
     const secs = resumen.suertes[r.id];
     if (secs.length === 0) continue;
     ramas.push(secs, r.color);

@@ -37,3 +37,14 @@ no hacen falta datos nuevos.
 - Riesgo: si el maestro trae una fecha de corte equivocada, la suerte cae en
   otro rango. Es el mismo dato de la ficha, así que el error se ve y se corrige
   en el maestro del ingenio.
+
+## Adenda (2026-10-06) — filtrar por rango
+
+A pedido del usuario, cada rango de la leyenda es un **interruptor** (`aria-pressed`):
+solo se pintan los encendidos y los apagados quedan sin color, con su contorno.
+Se pueden combinar (p. ej. solo "Mayor a 10 meses" para ver la caña próxima a
+cosecha). Los conteos de suertes y hectáreas se ven siempre, aunque el rango esté
+apagado. La selección vive en `mapStore.edadRangos` (no persistida: arranca con
+los cuatro encendidos y se recuerda mientras la app siga abierta). Si se apagan
+todos, la leyenda avisa "Ningún rango seleccionado". `expresionColorEdad()`
+recibe los rangos activos y omite los apagados.
