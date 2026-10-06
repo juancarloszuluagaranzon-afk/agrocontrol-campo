@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — filtrar la capa "Edad de la caña" por rango
+
+- En la leyenda de la capa, **cada rango se toca para mostrarlo u ocultarlo**: solo se pintan los
+  encendidos (por ejemplo, solo "Mayor a 10 meses" para ver la caña próxima a cosecha). Los conteos
+  de suertes y hectáreas siguen visibles para todos los rangos. Ver **ADR-0034** (adenda).
+
 ### Maestro — refrescado al 30 de septiembre de 2026
 
 - Rio Map tenía el maestro del 9 de septiembre: el workflow **Sync maestro** regeneraba los datos a

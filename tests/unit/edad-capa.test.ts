@@ -123,3 +123,41 @@ describe("resumirEdades / expresionColorEdad", () => {
     expect(expresionColorEdad(resumirEdades({}, HOY))).toBe("rgba(0,0,0,0)");
   });
 });
+
+describe("expresionColorEdad con rangos apagados", () => {
+  const maestro: Maestro = {
+    "2-001": suerte({ fecha_ultimo_corte: haceMeses(1) }),
+    "2-002": suerte({ fecha_ultimo_corte: haceMeses(6) }),
+    "2-003": suerte({ fecha_ultimo_corte: haceMeses(11) }),
+  };
+  const color = (id: string) => RANGOS_EDAD.find((x) => x.id === id)?.color;
+
+  it("solo pinta los rangos encendidos", () => {
+    const expr = expresionColorEdad(resumirEdades(maestro, HOY), {
+      joven: false,
+      media: false,
+      madura: true,
+      sinDato: true,
+    }) as unknown[];
+    expect(expr.slice(2, 4)).toEqual([["2-003"], color("madura")]);
+    expect(expr).not.toContain(color("joven"));
+    expect(expr).not.toContain(color("media"));
+  });
+
+  it("sin rangos encendidos todo queda transparente", () => {
+    expect(
+      expresionColorEdad(resumirEdades(maestro, HOY), {
+        joven: false,
+        media: false,
+        madura: false,
+        sinDato: false,
+      }),
+    ).toBe("rgba(0,0,0,0)");
+  });
+
+  it("sin el parámetro, todos encendidos (compatibilidad)", () => {
+    const expr = expresionColorEdad(resumirEdades(maestro, HOY)) as unknown[];
+    expect(expr).toContain(color("joven"));
+    expect(expr).toContain(color("madura"));
+  });
+});
