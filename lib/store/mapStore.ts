@@ -156,7 +156,13 @@ export const useMapStore = create<MapState>((set) => ({
 
   edadVisible: false,
   toggleEdad: () => set((state) => ({ edadVisible: !state.edadVisible })),
-  edadRangos: { joven: true, media: true, madura: true, sinDato: true },
+  edadRangos: {
+    joven: true,
+    media: true,
+    madura: true,
+    cosecha: true,
+    sinDato: true,
+  },
   toggleEdadRango: (id) =>
     set((state) => ({
       edadRangos: { ...state.edadRangos, [id]: !state.edadRangos[id] },

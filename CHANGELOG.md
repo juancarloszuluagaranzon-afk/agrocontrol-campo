@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — rango "Para cosecha" en la capa de edad
+
+- La capa **Edad de la caña** separa la caña a cosechar: **de 10 a 11,8 meses** (ámbar) y **para
+  cosecha, 11,8 meses o más** (rojo), con su propio interruptor en la leyenda. Hoy: 30 suertes en
+  Riopaila y 54 en Castilla. Ver **ADR-0034** (adenda).
+
 ### Mapa — filtrar la capa "Edad de la caña" por rango
 
 - En la leyenda de la capa, **cada rango se toca para mostrarlo u ocultarlo**: solo se pintan los

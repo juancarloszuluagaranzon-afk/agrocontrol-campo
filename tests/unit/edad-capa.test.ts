@@ -46,9 +46,21 @@ describe("rangoEdad", () => {
     expect(rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(7) }), HOY)).toBe(
       "media",
     );
-    expect(rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(12) }), HOY)).toBe(
+    expect(rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(11) }), HOY)).toBe(
       "madura",
     );
+    expect(rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(13) }), HOY)).toBe(
+      "cosecha",
+    );
+  });
+
+  it("11,8 meses (como lo muestra la ficha) ya es para cosecha; 11,7 todavía no", () => {
+    expect(
+      rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(11.8) }), HOY),
+    ).toBe("cosecha");
+    expect(
+      rangoEdad(suerte({ fecha_ultimo_corte: haceMeses(11.7) }), HOY),
+    ).toBe("madura");
   });
 
   it("4 y 10 meses exactos van en el rango medio (inclusive)", () => {
@@ -89,6 +101,7 @@ describe("resumirEdades / expresionColorEdad", () => {
     "1-001": suerte({ fecha_ultimo_corte: haceMeses(1), area_neta_ha: 5 }),
     "1-002": suerte({ fecha_ultimo_corte: haceMeses(6), area_neta_ha: 7 }),
     "1-003": suerte({ fecha_ultimo_corte: haceMeses(11), area_neta_ha: 9 }),
+    "1-006": suerte({ fecha_ultimo_corte: haceMeses(12.5), area_neta_ha: 4 }),
     "1-004": suerte({ variedad: "RENOVACION", area_neta_ha: 2 }),
     "1-005": suerte({ uso: "ARROZ", area_neta_ha: 50 }),
   };
@@ -99,9 +112,16 @@ describe("resumirEdades / expresionColorEdad", () => {
       joven: ["1-001"],
       media: ["1-002"],
       madura: ["1-003"],
+      cosecha: ["1-006"],
       sinDato: ["1-004"],
     });
-    expect(r.hectareas).toEqual({ joven: 5, media: 7, madura: 9, sinDato: 2 });
+    expect(r.hectareas).toEqual({
+      joven: 5,
+      media: 7,
+      madura: 9,
+      cosecha: 4,
+      sinDato: 2,
+    });
   });
 
   it("arma un match por sec_ste con el color de cada rango y transparente por defecto", () => {
@@ -112,7 +132,8 @@ describe("resumirEdades / expresionColorEdad", () => {
     expect(expr.slice(2, 4)).toEqual([["1-001"], color("joven")]);
     expect(expr.slice(4, 6)).toEqual([["1-002"], color("media")]);
     expect(expr.slice(6, 8)).toEqual([["1-003"], color("madura")]);
-    expect(expr.slice(8, 10)).toEqual([["1-004"], color("sinDato")]);
+    expect(expr.slice(8, 10)).toEqual([["1-006"], color("cosecha")]);
+    expect(expr.slice(10, 12)).toEqual([["1-004"], color("sinDato")]);
     expect(expr.at(-1)).toBe("rgba(0,0,0,0)");
   });
 
@@ -150,6 +171,7 @@ describe("expresionColorEdad con rangos apagados", () => {
         joven: false,
         media: false,
         madura: false,
+        cosecha: false,
         sinDato: false,
       }),
     ).toBe("rgba(0,0,0,0)");
