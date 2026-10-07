@@ -64,7 +64,7 @@ export function EdadLegend() {
                   }}
                 />
                 <span
-                  className={`min-w-0 flex-1 truncate ${on ? "" : "line-through"}`}
+                  className={`min-w-0 flex-1 leading-tight ${on ? "" : "line-through"}`}
                 >
                   {r.etiqueta}
                 </span>

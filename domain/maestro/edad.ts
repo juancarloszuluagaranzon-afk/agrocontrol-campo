@@ -7,9 +7,10 @@ import {
 /**
  * Capa "Edad de la caña" (ADR-0034): agrupa las suertes por rango de edad para
  * pintarlas en el mapa. Pedido de Operaciones Castilla: menor a 4 meses, de 4 a
- * 10 meses (ambos inclusive) y mayor a 10 meses, un color por rango.
+ * 10 meses (ambos inclusive), de 10 a 11,8 y para cosecha (11,8 o más), un color
+ * por rango (el corte de cosecha lo fijó el usuario el 6-oct-2026).
  */
-export type RangoEdad = "joven" | "media" | "madura" | "sinDato";
+export type RangoEdad = "joven" | "media" | "madura" | "cosecha" | "sinDato";
 
 export interface RangoEdadInfo {
   id: RangoEdad;
@@ -17,17 +18,27 @@ export interface RangoEdadInfo {
   color: string;
 }
 
-/** Orden de la leyenda. Ámbar = caña próxima a cosecha. */
+/** Orden de la leyenda. Ámbar = próxima a cosecha; rojo = para cosecha. */
 export const RANGOS_EDAD: readonly RangoEdadInfo[] = [
   { id: "joven", etiqueta: "Menor a 4 meses", color: "#a3e635" },
   { id: "media", etiqueta: "De 4 a 10 meses", color: "#15803d" },
-  { id: "madura", etiqueta: "Mayor a 10 meses", color: "#f59e0b" },
+  { id: "madura", etiqueta: "De 10 a 11,8 meses", color: "#f59e0b" },
+  {
+    id: "cosecha",
+    etiqueta: "Para cosecha (11,8 meses o más)",
+    color: "#dc2626",
+  },
   { id: "sinDato", etiqueta: "Renovación / sin dato", color: "#9ca3af" },
 ];
 
-/** Límites en meses: [0, 4) joven · [4, 10] media · (10, ∞) madura. */
+/**
+ * Límites en meses: [0, 4) joven · [4, 10] media · (10, 11,8) madura ·
+ * [11,8, ∞) para cosecha. La edad es la de la ficha (redondeada a 1 decimal),
+ * así lo que la ficha muestra como 11,8 cae en "para cosecha".
+ */
 export const EDAD_LIMITE_JOVEN = 4;
 export const EDAD_LIMITE_MADURA = 10;
+export const EDAD_LIMITE_COSECHA = 11.8;
 
 function esCana(uso: string | null): boolean {
   const u = (uso ?? "").toUpperCase();
@@ -57,7 +68,8 @@ export function rangoEdad(
   const meses = edadSuerteMeses(info, hoy);
   if (meses < EDAD_LIMITE_JOVEN) return "joven";
   if (meses <= EDAD_LIMITE_MADURA) return "media";
-  return "madura";
+  if (meses < EDAD_LIMITE_COSECHA) return "madura";
+  return "cosecha";
 }
 
 export interface ResumenEdad {
@@ -76,12 +88,14 @@ export function resumirEdades(
     joven: [],
     media: [],
     madura: [],
+    cosecha: [],
     sinDato: [],
   };
   const hectareas: Record<RangoEdad, number> = {
     joven: 0,
     media: 0,
     madura: 0,
+    cosecha: 0,
     sinDato: 0,
   };
   for (const [sec, info] of Object.entries(maestro)) {

@@ -48,3 +48,12 @@ apagado. La selección vive en `mapStore.edadRangos` (no persistida: arranca con
 los cuatro encendidos y se recuerda mientras la app siga abierta). Si se apagan
 todos, la leyenda avisa "Ningún rango seleccionado". `expresionColorEdad()`
 recibe los rangos activos y omite los apagados.
+
+## Adenda (2026-10-06) — rango "para cosecha"
+
+El usuario fijó que **la caña a cosechar es la de 11,8 meses o más**. El rango
+"mayor a 10" se divide en dos: **de 10 a 11,8 meses** (más de 10 y menos de 11,8,
+ámbar) y **para cosecha, 11,8 meses o más** (rojo). La comparación usa la edad
+redondeada a un decimal, la misma que muestra la ficha: lo que la ficha dice
+11,8 cae en "para cosecha". Quedan cinco rangos, todos filtrables. Las etiquetas
+de la leyenda pasan a dos líneas en vez de truncarse.

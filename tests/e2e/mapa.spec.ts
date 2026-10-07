@@ -403,7 +403,10 @@ test("mapa: la capa 'Edad de la caña' colorea las suertes y muestra su leyenda 
   const leyenda = page.getByRole("region", { name: "Edad de la caña" });
   await expect(leyenda.getByText("Menor a 4 meses")).toBeVisible();
   await expect(leyenda.getByText("De 4 a 10 meses")).toBeVisible();
-  await expect(leyenda.getByText("Mayor a 10 meses")).toBeVisible();
+  await expect(leyenda.getByText("De 10 a 11,8 meses")).toBeVisible();
+  await expect(
+    leyenda.getByText("Para cosecha (11,8 meses o más)"),
+  ).toBeVisible();
   await expect(leyenda.getByText("Renovación / sin dato")).toBeVisible();
   await expect(leyenda.getByText(/\d+ suertes?/).first()).toBeVisible();
 
@@ -426,8 +429,8 @@ test("mapa: en 'Edad de la caña' se pueden apagar rangos y solo se pintan los e
   await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
 
   const leyenda = page.getByRole("region", { name: "Edad de la caña" });
-  const madura = leyenda.getByRole("button", { name: /Mayor a 10 meses/ });
-  await expect(madura).toHaveAttribute("aria-pressed", "true");
+  const cosecha = leyenda.getByRole("button", { name: /Para cosecha/ });
+  await expect(cosecha).toHaveAttribute("aria-pressed", "true");
 
   /** Colores presentes en el `match` de la capa. */
   const colores = () =>
@@ -445,15 +448,20 @@ test("mapa: en 'Edad de la caña' se pueden apagar rangos y solo se pintan los e
         : [];
     });
 
-  await expect.poll(colores).toContain("#f59e0b");
-  await madura.click();
-  await expect(madura).toHaveAttribute("aria-pressed", "false");
-  await expect.poll(colores).not.toContain("#f59e0b");
+  await expect.poll(colores).toContain("#dc2626");
+  await cosecha.click();
+  await expect(cosecha).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(colores).not.toContain("#dc2626");
   // Los conteos siguen visibles aunque el rango esté apagado.
-  await expect(madura).toContainText(/\d+ suertes?/);
+  await expect(cosecha).toContainText(/\d+ suertes?/);
 
   // Apagar todos muestra el aviso y deja la capa sin colores.
-  for (const nombre of [/Menor a 4 meses/, /De 4 a 10 meses/, /Renovación/]) {
+  for (const nombre of [
+    /Menor a 4 meses/,
+    /De 4 a 10 meses/,
+    /De 10 a 11,8 meses/,
+    /Renovación/,
+  ]) {
     await leyenda.getByRole("button", { name: nombre }).click();
   }
   await expect(leyenda.getByRole("status")).toHaveText(
