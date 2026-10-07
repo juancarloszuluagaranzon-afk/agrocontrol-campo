@@ -61,7 +61,7 @@ tests/{unit,e2e}/               Pruebas
 ## Datos
 
 `public/data/` contiene la cartografía de **dos plantas** (ADR-0007): **Riopaila**
-(1.378 tablones / 610 suertes) y **Castilla** (2.445 tablones / 853 suertes), cada
+(1.378 tablones / 610 suertes) y **Castilla** (2.197 tablones / 782 suertes, cartografía de sep-2026), cada
 una con su catálogo y su maestro agronómico (WGS84, EPSG:4326), más capas de
 contexto **depuradas** (ADR-0002). Diccionario en
 [`public/data/README_DATOS.md`](public/data/README_DATOS.md).

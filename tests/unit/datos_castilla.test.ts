@@ -11,13 +11,13 @@ async function loadJson(name: string): Promise<unknown> {
 }
 
 describe("integridad de los datos de Castilla (§ ADR-0007)", () => {
-  it("la capa de tablones valida; 2445 tablones / 853 suertes", async () => {
+  it("la capa de tablones valida; 2197 tablones / 782 suertes (sep-2026)", async () => {
     const fc = tablonesGeojsonSchema.parse(
       await loadJson("tablones_castilla.geojson"),
     );
-    expect(fc.features).toHaveLength(2445);
+    expect(fc.features).toHaveLength(2197);
     const suertes = new Set(fc.features.map((f) => f.properties.sec_ste));
-    expect(suertes.size).toBe(853);
+    expect(suertes.size).toBe(782);
     // toda feature trae código y planta de Castilla/Invasión.
     expect(fc.features.every((f) => f.properties.sec_ste.length > 0)).toBe(
       true,
@@ -29,16 +29,18 @@ describe("integridad de los datos de Castilla (§ ADR-0007)", () => {
     ).toBe(true);
   });
 
-  it("el catálogo valida y cuadra con la capa (2445)", async () => {
+  it("el catálogo valida y cuadra con la capa (2197)", async () => {
     const catalogo = catalogoSchema.parse(
       await loadJson("tablones_castilla_catalogo.json"),
     );
-    expect(catalogo).toHaveLength(2445);
+    expect(catalogo).toHaveLength(2197);
     const ids = new Set(catalogo.map((c) => c.tab_id));
     expect(ids.size).toBe(catalogo.length); // tab_id único
   });
 
-  it("el maestro de Castilla cruza ≥ 96% de las suertes", async () => {
+  // 95 % desde la cartografía de sep-2026: salieron 79 suertes que ya no son
+  // caña (sí estaban en el maestro), así que el cruce bajó de 96,2 % a 95,8 %.
+  it("el maestro de Castilla cruza ≥ 95% de las suertes", async () => {
     const fc = tablonesGeojsonSchema.parse(
       await loadJson("tablones_castilla.geojson"),
     );
@@ -47,6 +49,6 @@ describe("integridad de los datos de Castilla (§ ADR-0007)", () => {
     );
     const suertes = new Set(fc.features.map((f) => f.properties.sec_ste));
     const conDatos = [...suertes].filter((s) => maestro[s]);
-    expect(conDatos.length / suertes.size).toBeGreaterThanOrEqual(0.96);
+    expect(conDatos.length / suertes.size).toBeGreaterThanOrEqual(0.95);
   });
 });

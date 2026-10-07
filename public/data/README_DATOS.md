@@ -114,9 +114,17 @@ integración es directa (sin heurísticas de área).
 | `tablones_castilla_catalogo.json` | JSON array | Catálogo ligero (buscador). |
 | `maestro_castilla.json` | JSON por `sec_ste` | Agronomía por suerte (CAST + CAUC). |
 
-- **2.445 tablones / 853 suertes / 60 sectores / 61 haciendas.** Empresas en el
-  insumo: Agrícola Castilla (776 suertes) + Agrícola Invasión (77).
-- **Cruce con el maestro: 96 %** (821/853: 775 CAST + 46 CAUC). Las 32 suertes sin
+- **2.197 tablones / 782 suertes / 54 sectores / 54 haciendas** (insumo `stes_castilla_Sep_2026`,
+  Agrícola Castilla). Respecto a jun-2026 salieron 79 suertes de 9 haciendas que dejaron de ser caña
+  (Tamboral, Vista Hermosa, Llanito, Llanito Muchilanga, San Luis Agrícola, La María, Guabito, Las
+  Cañas y una de Botero Bengala) y entraron 8. Las 6 haciendas que quedaron sin ninguna suerte
+  (Tamboral, Vista Hermosa, Llanito, Llanito Muchilanga, San Luis Agrícola, La María) también salen de
+  `contexto_castilla_haciendas`; los contornos que nunca tuvieron tablones (piña, La Primavera) se
+  conservan.
+- **Supervisores** por tablón, normalizados a una grafía única (`SUPERVISORES` en el conversor).
+- El insumo de sep-2026 **no trae el número de tablón**: el conversor lo hereda del tablón de la
+  cartografía anterior más cercano (2.170 de 2.178 `tab_id` de suertes comunes se conservan).
+- **Cruce con el maestro: 95,8 %** (749/782: 724 CAST + 25 CAUC). Las 33 suertes sin
   dato igual se dibujan (geometría + sector + hacienda + área del shapefile).
 - Un tablón partido en varios polígonos con el mismo número se fusiona en **un**
   tablón (MultiPolygon, área sumada) para que `tab_id` sea llave única.
@@ -124,6 +132,6 @@ integración es directa (sin heurísticas de área).
 Reproducir:
 
 ```bash
-python scripts/convertir_castilla.py            # shapefile -> geojson + catálogo
+python scripts/convertir_castilla.py ~/Documents/Cartografias/Castilla/stes_castilla_Sep_2026  # shapefile -> geojson + catálogo
 python scripts/convertir_maestro.py castilla    # maestro.csv -> maestro_castilla.json
 ```

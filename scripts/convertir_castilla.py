@@ -12,11 +12,14 @@ Uso:
     python scripts/convertir_castilla.py [ruta_sin_extension]
 
 Por defecto busca el shapefile en
-`~/Documents/Cartografias/STES_AGRICOLAS_JUN_9_2026`.
+`~/Documents/Cartografias/STES_AGRICOLAS_JUN_9_2026`. Insumos sin campo `Tablon`
+(p. ej. `stes_castilla_Sep_2026`) conservan la numeración por cercanía, y los
+supervisores se normalizan a una grafía única (`SUPERVISORES`).
 """
 
 import json
 import struct
+import unicodedata
 import sys
 from collections import Counter
 from pathlib import Path
@@ -137,11 +140,109 @@ def centroid(polys):
     return round(cx / (6 * A), 7), round(cy / (6 * A), 7)
 
 
+# Grafía única de supervisores (estilo de Riopaila: nombre propio, sin tildes
+# salvo la ñ). El insumo de sep-2026 mezcla mayúsculas, minúsculas y erratas
+# ("ALEXANDER MUÑOS" / "alexander muñoz"); se toma la variante mayoritaria.
+SUPERVISORES = {
+    "ADOLFO LUCUMI": "Adolfo Lucumi",
+    "ALEXANDER MUNOS": "Alexander Muñoz",
+    "ALEXANDER MUNOZ": "Alexander Muñoz",
+    "EDWIN ARANGO": "Edwin Arango",
+    "EDWIN VILLACORTE": "Edwin Villacorte",
+    "HERMINSUL FERNANDEZ": "Herminsul Fernandez",
+    "HERMILSUN FERNANDEZ": "Herminsul Fernandez",
+    "JOSE ARBELAEZ": "Jose Arbelaez",
+    "JUAN RAMIREZ": "Juan Ramirez",
+    "NESTOR QUIGUANAS": "Nestor Quiguanas",
+    "NESTOR QUIGUANAZ": "Nestor Quiguanas",
+    "OCTAVIO VARGAS": "Octavio Vargas",
+}
+
+
+def _clave(nombre: str) -> str:
+    sin = unicodedata.normalize("NFKD", nombre).encode("ascii", "ignore")
+    return " ".join(sin.decode().upper().split())
+
+
+def normalizar_supervisor(nombre: str) -> str:
+    """Nombre canónico; uno desconocido queda en formato Título, avisando."""
+    nombre = " ".join(nombre.split())
+    if not nombre:
+        return ""
+    canon = SUPERVISORES.get(_clave(nombre))
+    if canon:
+        return canon
+    print(f"  AVISO: supervisor sin grafía canónica: {nombre!r}")
+    return nombre.title()
+
+
+def tablones_previos() -> dict[str, list[tuple[int, float, float]]]:
+    """(tablón, lon, lat) por suerte en la cartografía actual, para conservar
+    los números de tablón cuando el insumo no trae el campo `Tablon`."""
+    path = DATA / "tablones_castilla.geojson"
+    if not path.exists():
+        return {}
+    previos: dict[str, list[tuple[int, float, float]]] = {}
+    for f in json.loads(path.read_text(encoding="utf-8"))["features"]:
+        p = f["properties"]
+        previos.setdefault(p["sec_ste"], []).append(
+            (int(p["tablon"]), float(p["lon"]), float(p["lat"]))
+        )
+    return previos
+
+
+def numerar_tablones(
+    centros: list[tuple[float, float]], previos: list[tuple[int, float, float]]
+) -> list[int]:
+    """Asigna a cada polígono de una suerte el número del tablón previo más
+    cercano (emparejamiento voraz por distancia); los sobrantes reciben números
+    nuevos consecutivos. Así un redibujo no renumera los tablones."""
+    pares = sorted(
+        ((lon - plon) ** 2 + (lat - plat) ** 2, i, t)
+        for i, (lon, lat) in enumerate(centros)
+        for t, plon, plat in previos
+    )
+    asignado: dict[int, int] = {}
+    usados: set[int] = set()
+    for _d, i, t in pares:
+        if i in asignado or t in usados:
+            continue
+        asignado[i] = t
+        usados.add(t)
+    siguiente = max(usados, default=0) + 1
+    out = []
+    for i in range(len(centros)):
+        if i not in asignado:
+            asignado[i] = siguiente
+            siguiente += 1
+        out.append(asignado[i])
+    return out
+
+
 def main() -> None:
     base = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SHP
     rows = read_dbf(base.with_suffix(".dbf"))
     shapes = read_shp_polygons(base.with_suffix(".shp"))
     assert len(rows) == len(shapes), f"{len(rows)} dbf vs {len(shapes)} shp"
+
+    # Cartografía anterior (antes de sobrescribirla): para conservar números de
+    # tablón y saber qué haciendas salieron.
+    previos_todos = tablones_previos()
+
+    # Insumos sin campo `Tablon` (sep-2026): se numera por cercanía al tablón
+    # de la cartografía actual (ver `numerar_tablones`).
+    if rows and "Tablon" not in rows[0]:
+        previos = previos_todos
+        por_code: dict[str, list[int]] = {}
+        for idx, r in enumerate(rows):
+            por_code.setdefault(r["Suerte_Sap"].strip(), []).append(idx)
+        for code, idxs in por_code.items():
+            centros = []
+            for idx in idxs:
+                polys = rings_to_polygons(shapes[idx]) if shapes[idx] else []
+                centros.append(centroid(polys) if polys else (0.0, 0.0))
+            for idx, t in zip(idxs, numerar_tablones(centros, previos.get(code, []))):
+                rows[idx]["Tablon"] = str(t)
 
     # Agrupa por (suerte, tablón): el `tab_id` es la llave primaria, así que un
     # tablón partido en varios polígonos (mismo número) es UN tablón
@@ -197,7 +298,7 @@ def main() -> None:
                     "planta": EMPRESA.get(
                         r0["Empresa"].strip(), r0["Empresa"].strip()
                     ),
-                    "supervisor": "",
+                    "supervisor": normalizar_supervisor(r0.get("Supervisor", "")),
                     "jefe_zona": r0["Jefe_zona"].strip(),
                     "tablon": tablon,
                     "tablon_total": por_suerte[code],
@@ -233,6 +334,30 @@ def main() -> None:
         f"OK: {len(features)} tablones / {len(por_suerte)} suertes "
         f"-> tablones_castilla.geojson (+catalogo). Saltados: {skipped}"
     )
+
+    # Contornos de hacienda (capa de contexto): se quitan SOLO los sectores que
+    # tenían tablones en la cartografía anterior y ya no tienen ninguno (las
+    # haciendas que salieron). Contornos que nunca tuvieron tablones (fincas de
+    # piña, etc.) se conservan.
+    sectores = {f["properties"]["sector"] for f in features}
+    salieron = {code.split("-")[0] for code in previos_todos} - sectores
+    ctx_path = DATA / "contexto_castilla_haciendas.geojson"
+    if ctx_path.exists() and salieron:
+        ctx = json.loads(ctx_path.read_text(encoding="utf-8"))
+        antes = len(ctx["features"])
+        ctx["features"] = [
+            f
+            for f in ctx["features"]
+            if str(f["properties"].get("SECTOR_SAP", "")).strip() not in salieron
+        ]
+        ctx_path.write_text(
+            json.dumps(ctx, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        print(
+            f"   contexto_castilla_haciendas: {antes} -> {len(ctx['features'])} "
+            "contornos (sectores vigentes)"
+        )
 
 
 if __name__ == "__main__":
