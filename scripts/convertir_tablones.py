@@ -27,10 +27,11 @@ tr = Transformer.from_crs("EPSG:3115", "EPSG:4326", always_xy=True)
 
 
 # Grafía única de supervisores: el shapefile de Riopaila trae erratas y
-# mayúsculas mezcladas ("Alverto Vasquez", "Alberto vasquez").
+# mayúsculas mezcladas ("Alverto Vasquez", "Alberto vasquez", "Hector lopez").
 SUPERVISORES = {
     "ALBERTO VASQUEZ": "Alberto Vasquez",
     "ALVERTO VASQUEZ": "Alberto Vasquez",
+    "HECTOR LOPEZ": "Hector Lopez",
 }
 
 
