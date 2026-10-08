@@ -5,6 +5,18 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Castilla — cartografía de septiembre de 2026
+
+- Mapa de Castilla actualizado con la cartografía de suertes de **septiembre de 2026**: 2.197
+  tablones de 782 suertes en 54 haciendas (antes 2.445 / 853). **Salen 79 suertes de 9 haciendas**
+  que dejaron de ser caña (Tamboral, Vista Hermosa, Llanito, Llanito Muchilanga, San Luis Agrícola,
+  La María, Guabito, Las Cañas y una de Botero Bengala) y **entran 8**; 11 suertes cambian de área por
+  redigitalización. Las 6 haciendas que quedaron sin suertes salen también de los contornos y las
+  etiquetas.
+- **Supervisores** en la ficha de cada tablón de Castilla (antes vacíos), con grafía unificada.
+- El conversor `scripts/convertir_castilla.py` acepta insumos sin número de tablón: lo hereda del
+  tablón anterior más cercano (2.170 de 2.178 se conservan).
+
 ### Mapa — rango "Para cosecha" en la capa de edad
 
 - La capa **Edad de la caña** separa la caña a cosechar: **de 10 a 11,8 meses** (ámbar) y **para
