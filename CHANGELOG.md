@@ -5,11 +5,11 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
-### Riopaila — supervisor "Alberto Vasquez" unificado
+### Riopaila — supervisores "Alberto Vasquez" y "Hector Lopez" unificados
 
-- Tres tablones de Riopaila traían el supervisor mal escrito ("Alverto Vasquez", "Alberto vasquez");
-  ahora los 167 dicen **Alberto Vasquez**. El conversor `scripts/convertir_tablones.py` normaliza la
-  grafía para las próximas regeneraciones.
+- Tablones de Riopaila con el supervisor mal escrito ("Alverto Vasquez", "Alberto vasquez", "Hector
+  lopez"): ahora todos dicen **Alberto Vasquez** (167) y **Hector Lopez** (156). El conversor
+  `scripts/convertir_tablones.py` normaliza la grafía para las próximas regeneraciones.
 
 ### Castilla — cartografía de septiembre de 2026
 
