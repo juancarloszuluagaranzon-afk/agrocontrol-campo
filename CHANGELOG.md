@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Riopaila — supervisor "Alberto Vasquez" unificado
+
+- Tres tablones de Riopaila traían el supervisor mal escrito ("Alverto Vasquez", "Alberto vasquez");
+  ahora los 167 dicen **Alberto Vasquez**. El conversor `scripts/convertir_tablones.py` normaliza la
+  grafía para las próximas regeneraciones.
+
 ### Castilla — cartografía de septiembre de 2026
 
 - Mapa de Castilla actualizado con la cartografía de suertes de **septiembre de 2026**: 2.197
