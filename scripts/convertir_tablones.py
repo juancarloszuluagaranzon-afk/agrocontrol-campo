@@ -26,6 +26,19 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "public" / "data"
 tr = Transformer.from_crs("EPSG:3115", "EPSG:4326", always_xy=True)
 
 
+# Grafía única de supervisores: el shapefile de Riopaila trae erratas y
+# mayúsculas mezcladas ("Alverto Vasquez", "Alberto vasquez").
+SUPERVISORES = {
+    "ALBERTO VASQUEZ": "Alberto Vasquez",
+    "ALVERTO VASQUEZ": "Alberto Vasquez",
+}
+
+
+def normalizar_supervisor(nombre):
+    nombre = " ".join((nombre or "").split())
+    return SUPERVISORES.get(nombre.upper(), nombre)
+
+
 def rings_from_shape(shape):
     """Devuelve los anillos del polígono como listas de (x,y) en EPSG:3115."""
     parts = list(shape.parts) + [len(shape.points)]
@@ -75,7 +88,7 @@ def main():
                 "sector": (d["sector"] or "").strip(),
                 "hacienda": (d["nombre"] or "").strip(),
                 "planta": (d["planta"] or "").strip(),
-                "supervisor": (d["supervisor"] or "").strip(),
+                "supervisor": normalizar_supervisor(d["supervisor"]),
                 "jefe_zona": (d["jefe_zona"] or "").strip(),
                 "ha_oficial": round(float(d["Ha"] or 0), 3),
                 "lat": round(clat, 7),
