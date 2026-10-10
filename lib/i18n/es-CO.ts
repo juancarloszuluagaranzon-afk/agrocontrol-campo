@@ -114,6 +114,7 @@ export const t = {
     suertes: (n: number) => `${n} ${n === 1 ? "suerte" : "suertes"}`,
     ayudaFiltro: "Toca un rango para mostrarlo u ocultarlo.",
     ninguno: "Ningún rango seleccionado.",
+    modoIndice: "Índice visible solo en los rangos encendidos.",
   },
   compartir: {
     boton: "Compartir",

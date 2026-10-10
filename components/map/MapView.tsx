@@ -62,6 +62,7 @@ import {
   LLUVIA_HOY_SOURCE,
   LLUVIA_HOY_DOT,
   SUERTES_EDAD,
+  SUERTES_EDAD_BORDE,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -86,7 +87,11 @@ import { lecturaDelDia } from "@/domain/precipitaciones/acumulado";
 import { NIVELES_LLUVIA, iconoGotaStep } from "@/lib/geo/lluvia";
 import type { TablonProperties } from "@/domain/suertes/schema";
 import { useMaestro } from "@/lib/data/useMaestro";
-import { expresionColorEdad, resumirEdades } from "@/domain/maestro/edad";
+import {
+  expresionColorEdad,
+  expresionVeloEdad,
+  resumirEdades,
+} from "@/domain/maestro/edad";
 
 /**
  * Dibuja una "gota" (pin teardrop) del color dado en un canvas y devuelve su
@@ -329,6 +334,15 @@ export function MapView() {
           "line-width": 1.2,
           "line-opacity": 0.9,
         },
+      });
+      // Borde por rango de edad: solo en "modo índice" (edad + índice
+      // satelital encendidos), cuando el relleno de edad pasa a velo.
+      map.addLayer({
+        id: SUERTES_EDAD_BORDE,
+        type: "line",
+        source: SUERTES_SOURCE,
+        layout: { visibility: "none" },
+        paint: { "line-color": "rgba(0,0,0,0)", "line-width": 2.5 },
       });
       map.addLayer({
         id: SUERTES_SELECTED,
@@ -996,27 +1010,58 @@ export function MapView() {
   // ── Edad de la caña: suertes coloreadas por rango (ADR-0034) ──
   const edadVisible = useMapStore((s) => s.edadVisible);
   const edadRangos = useMapStore((s) => s.edadRangos);
+  // "Modo índice": con un índice satelital (o el Sentinel-2 sin nubes)
+  // encendido, la edad filtra en vez de rellenar (ADR-0034, adenda).
+  const indiceEncendido = useMapStore(
+    (s) =>
+      s.sentinelVisible || Object.values(s.sentinelHubVisible).some(Boolean),
+  );
   const maestro = useMaestro();
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady || !map.getLayer(SUERTES_EDAD)) return;
+    if (
+      !map ||
+      !mapReady ||
+      !map.getLayer(SUERTES_EDAD) ||
+      !map.getLayer(SUERTES_EDAD_BORDE)
+    )
+      return;
+    const modoIndice = edadVisible && indiceEncendido;
     if (edadVisible) {
       // La edad se calcula en vivo (hoy), igual que la ficha del maestro.
+      const resumen = resumirEdades(maestro);
       map.setPaintProperty(
         SUERTES_EDAD,
         "fill-color",
-        expresionColorEdad(
-          resumirEdades(maestro),
-          edadRangos,
-        ) as ExpressionSpecification,
+        (modoIndice
+          ? expresionVeloEdad(resumen, edadRangos)
+          : expresionColorEdad(resumen, edadRangos)) as ExpressionSpecification,
       );
+      // Velo casi opaco en modo índice; relleno translúcido en modo normal.
+      map.setPaintProperty(
+        SUERTES_EDAD,
+        "fill-opacity",
+        modoIndice ? 0.85 : 0.65,
+      );
+      if (modoIndice) {
+        map.setPaintProperty(
+          SUERTES_EDAD_BORDE,
+          "line-color",
+          expresionColorEdad(resumen, edadRangos) as ExpressionSpecification,
+        );
+      }
     }
     map.setLayoutProperty(
       SUERTES_EDAD,
       "visibility",
       edadVisible ? "visible" : "none",
     );
-  }, [edadVisible, edadRangos, maestro, mapReady]);
+    map.setLayoutProperty(
+      SUERTES_EDAD_BORDE,
+      "visibility",
+      modoIndice ? "visible" : "none",
+    );
+  }, [edadVisible, edadRangos, indiceEncendido, maestro, mapReady]);
 
   // ── Capas Sentinel Hub (CDSE), conmutables desde 🗂️ Capas (ADR-0022) ──
   const sentinelHubVisible = useMapStore((s) => s.sentinelHubVisible);

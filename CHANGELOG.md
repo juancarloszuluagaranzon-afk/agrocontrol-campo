@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — ver índices solo en las suertes filtradas por edad
+
+- Con **Edad de la caña** y un **índice satelital** encendidos, la edad funciona como filtro: las
+  suertes de los rangos encendidos muestran el índice con su borde de color, y el resto queda
+  velado. Ejemplo: solo "Para cosecha" + NDMI. Ver **ADR-0034** (adenda).
+
 ### Riopaila — supervisores "Alberto Vasquez" y "Hector Lopez" unificados
 
 - Tablones de Riopaila con el supervisor mal escrito ("Alverto Vasquez", "Alberto vasquez", "Hector

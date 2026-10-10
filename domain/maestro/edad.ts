@@ -127,3 +127,26 @@ export function expresionColorEdad(
   if (ramas.length === 0) return "rgba(0,0,0,0)";
   return ["match", ["get", "sec_ste"], ...ramas, "rgba(0,0,0,0)"];
 }
+
+/** Velo sobre las suertes fuera del filtro cuando hay un índice encendido. */
+export const VELO_EDAD = "#0a0f1a";
+
+/**
+ * Modo índice (ADR-0034, adenda): con un índice satelital encendido, la capa de
+ * edad deja de rellenar con su color y **vela** todo lo que no está en un rango
+ * encendido, para que el índice se vea solo dentro de las suertes filtradas.
+ * Las suertes filtradas quedan transparentes (se ve el índice); el resto, con
+ * velo. Sin ningún rango encendido, todo queda velado.
+ */
+export function expresionVeloEdad(
+  resumen: ResumenEdad,
+  activos?: Partial<Record<RangoEdad, boolean>>,
+): unknown {
+  const visibles: string[] = [];
+  for (const r of RANGOS_EDAD) {
+    if (activos && activos[r.id] === false) continue;
+    visibles.push(...resumen.suertes[r.id]);
+  }
+  if (visibles.length === 0) return VELO_EDAD;
+  return ["match", ["get", "sec_ste"], visibles, "rgba(0,0,0,0)", VELO_EDAD];
+}

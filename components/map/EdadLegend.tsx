@@ -24,6 +24,10 @@ export function EdadLegend() {
   const toggleRango = useMapStore((s) => s.toggleEdadRango);
   const tablonSeleccionado = useMapStore((s) => s.selected !== null);
   const midiendo = useMapStore((s) => s.measureMode !== "off");
+  const modoIndice = useMapStore(
+    (s) =>
+      s.sentinelVisible || Object.values(s.sentinelHubVisible).some(Boolean),
+  );
   const maestro = useMaestro();
   const resumen = useMemo(() => resumirEdades(maestro), [maestro]);
 
@@ -40,6 +44,11 @@ export function EdadLegend() {
     >
       <p className="text-sm font-semibold">{t.edad.titulo}</p>
       <p className="text-accent/60 mb-1.5">{t.edad.ayudaFiltro}</p>
+      {modoIndice && (
+        <p className="mb-1.5 rounded-md bg-sky-50 px-1.5 py-1 text-sky-800">
+          🛰️ {t.edad.modoIndice}
+        </p>
+      )}
       <ul className="space-y-0.5">
         {RANGOS_EDAD.map((r) => {
           const n = resumen.suertes[r.id].length;

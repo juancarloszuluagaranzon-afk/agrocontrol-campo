@@ -19,6 +19,8 @@ export const SUERTES_SOURCE = "suertes";
 export const SUERTES_FILL = "suertes-fill";
 // Capa "Edad de la caña" (ADR-0034): relleno por rango de edad, sobre SUERTES_FILL.
 export const SUERTES_EDAD = "suertes-edad";
+// Borde por rango de edad, solo en modo índice (edad + índice satelital encendidos).
+export const SUERTES_EDAD_BORDE = "suertes-edad-borde";
 export const SUERTES_LINE = "suertes-line";
 export const SUERTES_SELECTED = "suertes-selected";
 // Etiqueta de nomenclatura: cada tablón rotula el código de su suerte.
