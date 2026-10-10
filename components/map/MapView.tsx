@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, {
   type Map as MlMap,
   type MapGeoJSONFeature,
@@ -63,6 +63,8 @@ import {
   LLUVIA_HOY_DOT,
   SUERTES_EDAD,
   SUERTES_EDAD_BORDE,
+  EDAD_LLUVIA_LABEL,
+  EDAD_LLUVIA_SOURCE,
   SUERTES_FILL,
   SUERTES_LABEL,
   SUERTES_LINE,
@@ -90,8 +92,20 @@ import { useMaestro } from "@/lib/data/useMaestro";
 import {
   expresionColorEdad,
   expresionVeloEdad,
+  RANGOS_EDAD,
   resumirEdades,
 } from "@/domain/maestro/edad";
+import {
+  asignarPluviometros,
+  centrosDeSuertes,
+  etiquetaLluvia,
+  lluviaPorSuerte,
+  nivelLluvia,
+  NIVELES_LLUVIA_SUERTE,
+  ventanaLluvia,
+} from "@/domain/precipitaciones/porSuerte";
+import { useCatalogo } from "@/lib/data/useCatalogo";
+import { useThiessen } from "@/lib/data/useThiessen";
 
 /**
  * Dibuja una "gota" (pin teardrop) del color dado en un canvas y devuelve su
@@ -371,6 +385,33 @@ export function MapView() {
           "text-color": "#ffffff",
           "text-halo-color": "#0f172a",
           "text-halo-width": 1.2,
+        },
+      });
+
+      // Lluvia acumulada reciente sobre las suertes filtradas por edad
+      // (ADR-0034): un rótulo "12 mm" en el centro de cada suerte, con halo del
+      // color de su nivel. Se llena en su efecto.
+      map.addSource(EDAD_LLUVIA_SOURCE, {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: EDAD_LLUVIA_LABEL,
+        type: "symbol",
+        source: EDAD_LLUVIA_SOURCE,
+        minzoom: 11,
+        layout: {
+          visibility: "none",
+          "text-field": ["get", "etiqueta"],
+          "text-font": ["Open Sans Semibold"],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 11, 11, 15, 15],
+          "text-offset": [0, 1.1],
+          "text-allow-overlap": true,
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": ["get", "color"],
+          "text-halo-width": 2.4,
         },
       });
 
@@ -905,6 +946,89 @@ export function MapView() {
       map.setLayoutProperty(LLUVIA_HOY_DOT, "visibility", vis);
     }
   }, [lluviaItems, pluviometrosRef, verLluvia, mapReady, planta]);
+
+  // ── Lluvia acumulada reciente en las suertes filtradas por edad (ADR-0034) ──
+  const edadVisibleLluvia = useMapStore((s) => s.edadVisible);
+  const edadRangosLluvia = useMapStore((s) => s.edadRangos);
+  const edadLluvia = useMapStore((s) => s.edadLluvia);
+  const edadLluviaDias = useMapStore((s) => s.edadLluviaDias);
+  const catalogo = useCatalogo();
+  const thiessen = useThiessen();
+  const maestroLluvia = useMaestro();
+  // Asignación suerte → pluviómetro: solo cambia con la cartografía.
+  const asignacionLluvia = useMemo(
+    () =>
+      asignarPluviometros(
+        centrosDeSuertes(catalogo),
+        thiessen,
+        pluviometrosRef,
+      ),
+    [catalogo, thiessen, pluviometrosRef],
+  );
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    const source = map.getSource(EDAD_LLUVIA_SOURCE) as
+      | GeoJSONSource
+      | undefined;
+    if (!source || !map.getLayer(EDAD_LLUVIA_LABEL)) return;
+    const activa =
+      edadVisibleLluvia && edadLluvia && pluviometrosRef.length > 0;
+    if (activa) {
+      const resumen = resumirEdades(maestroLluvia);
+      const filtradas = new Set(
+        RANGOS_EDAD.filter((r) => edadRangosLluvia[r.id]).flatMap(
+          (r) => resumen.suertes[r.id],
+        ),
+      );
+      const { fechas } = ventanaLluvia(new Date(), edadLluviaDias);
+      const lluvia = lluviaPorSuerte(
+        lluviaItems,
+        planta ?? "",
+        asignacionLluvia,
+        fechas,
+      );
+      const centros = new Map(
+        centrosDeSuertes(catalogo).map((c) => [c.sec_ste, c]),
+      );
+      const features: Feature<Point>[] = [];
+      for (const sec of filtradas) {
+        const c = centros.get(sec);
+        const l = lluvia.get(sec);
+        if (!c || !l) continue;
+        const nivel = NIVELES_LLUVIA_SUERTE.find(
+          (n) => n.id === nivelLluvia(l.mm),
+        );
+        features.push({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [c.lon, c.lat] },
+          properties: {
+            sec_ste: sec,
+            etiqueta: etiquetaLluvia(l),
+            color: nivel?.color ?? "#6b7280",
+          },
+        });
+      }
+      source.setData({ type: "FeatureCollection", features });
+    }
+    map.setLayoutProperty(
+      EDAD_LLUVIA_LABEL,
+      "visibility",
+      activa ? "visible" : "none",
+    );
+  }, [
+    edadVisibleLluvia,
+    edadRangosLluvia,
+    edadLluvia,
+    edadLluviaDias,
+    lluviaItems,
+    asignacionLluvia,
+    catalogo,
+    maestroLluvia,
+    pluviometrosRef,
+    planta,
+    mapReady,
+  ]);
 
   // ── Mediciones guardadas sobre el mapa (§5) ──
   const mediciones = useMedicionesStore((s) => s.items);

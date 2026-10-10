@@ -3,6 +3,7 @@ import type { TablonProperties } from "@/domain/suertes/schema";
 import { PLANTA_IDS, PLANTAS } from "@/lib/plantas";
 import type { LngLat } from "@/lib/geo/measure";
 import type { RangoEdad } from "@/domain/maestro/edad";
+import type { DiasLluvia } from "@/domain/precipitaciones/porSuerte";
 
 /** Objetivo de vuelo solicitado por el buscador (o un click externo). */
 export interface FlyTarget {
@@ -62,6 +63,11 @@ interface MapState {
   /** Rangos de edad encendidos en la leyenda (solo esos se pintan). */
   edadRangos: Record<RangoEdad, boolean>;
   toggleEdadRango: (id: RangoEdad) => void;
+  /** Lluvia acumulada reciente sobre las suertes filtradas (ADR-0034). */
+  edadLluvia: boolean;
+  toggleEdadLluvia: () => void;
+  edadLluviaDias: DiasLluvia;
+  setEdadLluviaDias: (d: DiasLluvia) => void;
 
   /**
    * Capas Sentinel Hub (CDSE) visibles, por id de capa (NDVI, NDMI…): Sentinel-2
@@ -167,6 +173,10 @@ export const useMapStore = create<MapState>((set) => ({
     set((state) => ({
       edadRangos: { ...state.edadRangos, [id]: !state.edadRangos[id] },
     })),
+  edadLluvia: false,
+  toggleEdadLluvia: () => set((state) => ({ edadLluvia: !state.edadLluvia })),
+  edadLluviaDias: 3,
+  setEdadLluviaDias: (edadLluviaDias) => set({ edadLluviaDias }),
 
   sentinelHubVisible: {},
   toggleSentinelHub: (layerId) =>

@@ -115,6 +115,11 @@ export const t = {
     ayudaFiltro: "Toca un rango para mostrarlo u ocultarlo.",
     ninguno: "Ningún rango seleccionado.",
     modoIndice: "Índice visible solo en los rangos encendidos.",
+    lluvia: "Lluvia de los últimos",
+    dias: (n: number) => `${n} días`,
+    lluviaVentana: (desde: string, hasta: string) =>
+      `Del ${desde} al ${hasta} (día vencido). * = faltan lecturas.`,
+    lluviaSinRed: "Castilla aún no tiene pluviómetros en Rio Map.",
   },
   compartir: {
     boton: "Compartir",

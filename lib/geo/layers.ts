@@ -21,6 +21,9 @@ export const SUERTES_FILL = "suertes-fill";
 export const SUERTES_EDAD = "suertes-edad";
 // Borde por rango de edad, solo en modo índice (edad + índice satelital encendidos).
 export const SUERTES_EDAD_BORDE = "suertes-edad-borde";
+// Lluvia acumulada reciente sobre las suertes filtradas por edad (ADR-0034).
+export const EDAD_LLUVIA_SOURCE = "edad-lluvia";
+export const EDAD_LLUVIA_LABEL = "edad-lluvia-label";
 export const SUERTES_LINE = "suertes-line";
 export const SUERTES_SELECTED = "suertes-selected";
 // Etiqueta de nomenclatura: cada tablón rotula el código de su suerte.
