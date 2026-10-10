@@ -68,3 +68,21 @@ capa entra en **modo índice**: `suertes-edad` deja de rellenar y pasa a **velo*
 (`expresionVeloEdad`), y la nueva capa `suertes-edad-borde` dibuja el borde de
 las suertes filtradas en el color de su rango. Sin índice, la capa vuelve al
 relleno normal. La leyenda avisa "Índice visible solo en los rangos encendidos".
+
+## Adenda (2026-10-10) — lluvia acumulada en las suertes filtradas
+
+Para decidir si se puede entrar a cosechar, el NDMI (agua en hoja) no basta: lo
+que manda es el suelo. Con la capa de edad encendida, la leyenda ofrece
+**"Lluvia de los últimos 3 / 5 / 7 días"**: cada suerte de los rangos encendidos
+muestra un rótulo "12 mm" con halo de color por nivel. Lógica pura en
+`domain/precipitaciones/porSuerte.ts`:
+
+- Cada suerte toma el pluviómetro cuyo **polígono de Thiessen** contiene su
+  centro (promedio de los centros de sus tablones ponderado por área); si cae
+  fuera de la red, el pluviómetro más cercano.
+- Ventana que **termina ayer** (la lluvia se carga día vencido). Una lectura por
+  día (la más reciente); "s/d" sin lecturas y asterisco si faltan días.
+- Niveles **iniciales, a validar con Operaciones**: hasta 5 mm (verde), de 5 a
+  15 mm (ámbar), más de 15 mm (azul). Constantes `LLUVIA_UMBRAL_*`.
+- Solo Riopaila: Castilla aún no tiene red de pluviómetros en Rio Map; la
+  leyenda lo indica.

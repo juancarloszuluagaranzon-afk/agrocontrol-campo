@@ -535,3 +535,115 @@ test("mapa: con 'Edad de la caña' e índice encendidos, el índice solo se ve e
     .poll(estado)
     .toEqual({ borde: "none", porDefecto: "rgba(0,0,0,0)" });
 });
+
+test("mapa: lluvia acumulada reciente sobre las suertes filtradas por edad (ADR-0034)", async ({
+  page,
+}) => {
+  // Lecturas de 2 mm/día en todos los pluviómetros los 3 días previos (día vencido).
+  const ids: number[] = await (
+    await page.request.get("/data/pluviometros_riopaila.json")
+  )
+    .json()
+    .then((l: Array<{ id: number }>) => l.map((p) => p.id));
+  await page.addInitScript((pluvs: number[]) => {
+    const p = (n: number) => String(n).padStart(2, "0");
+    const hoy = new Date();
+    const items = [];
+    for (let i = 1; i <= 3; i++) {
+      const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i);
+      const fecha = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+      for (const id of pluvs) {
+        items.push({
+          id: `e2e-${id}-${fecha}`,
+          autor: "e2e",
+          planta: "riopaila",
+          pluviometro: id,
+          fecha,
+          mm: 2,
+          nota: "",
+          deleted: false,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        });
+      }
+    }
+    localStorage.setItem(
+      "agrocontrol-precipitaciones",
+      JSON.stringify({
+        state: { items, pending: [], syncing: false, userId: "" },
+        version: 0,
+      }),
+    );
+  }, ids);
+
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
+
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  for (const nombre of [
+    /Menor a 4 meses/,
+    /De 4 a 10 meses/,
+    /De 10 a 11,8 meses/,
+    /Renovación/,
+  ]) {
+    await leyenda.getByRole("button", { name: nombre }).click();
+  }
+  await leyenda
+    .getByRole("checkbox", { name: /Lluvia de los últimos/ })
+    .check();
+  await expect(leyenda.getByRole("button", { name: "3 días" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(leyenda.getByText("Hasta 5 mm")).toBeVisible();
+
+  /** Rótulos de lluvia en el mapa. */
+  const rotulos = () =>
+    page.evaluate(() => {
+      const m = (
+        window as unknown as {
+          __e2eMap?: {
+            getLayoutProperty: (id: string, p: string) => unknown;
+            getSource: (id: string) =>
+              | {
+                  serialize: () => {
+                    data?: {
+                      features?: Array<{ properties: { etiqueta: string } }>;
+                    };
+                  };
+                }
+              | undefined;
+          };
+        }
+      ).__e2eMap;
+      const fc = m?.getSource("edad-lluvia")?.serialize().data;
+      const et = (fc?.features ?? []).map((f) => f.properties.etiqueta);
+      return {
+        visible: m?.getLayoutProperty("edad-lluvia-label", "visibility"),
+        n: et.length,
+        etiquetas: [...new Set(et)],
+      };
+    });
+  // Solo las suertes "Para cosecha", todas con 3 × 2 mm = 6 mm.
+  await expect
+    .poll(rotulos)
+    .toMatchObject({ visible: "visible", etiquetas: ["6 mm"] });
+  expect((await rotulos()).n).toBeGreaterThan(0);
+
+  // 5 días: faltan 2 días de lecturas → asterisco.
+  await leyenda.getByRole("button", { name: "5 días" }).click();
+  await expect.poll(rotulos).toMatchObject({ etiquetas: ["6 mm*"] });
+
+  // Apagar la lluvia oculta los rótulos.
+  await leyenda
+    .getByRole("checkbox", { name: /Lluvia de los últimos/ })
+    .uncheck();
+  await expect.poll(rotulos).toMatchObject({ visible: "none" });
+});

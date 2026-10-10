@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — lluvia acumulada reciente en las suertes filtradas por edad
+
+- En la leyenda de **Edad de la caña**: **"Lluvia de los últimos 3 / 5 / 7 días"**. Cada suerte de los
+  rangos encendidos muestra los mm acumulados de su pluviómetro (polígono de Thiessen), con color por
+  nivel: hasta 5 mm, de 5 a 15 mm y más de 15 mm (umbrales iniciales, a validar). La ventana termina
+  ayer (día vencido); "s/d" sin lecturas y asterisco si faltan días. Solo Riopaila. Ver
+  **ADR-0034** (adenda).
+
 ### Mapa — ver índices solo en las suertes filtradas por edad
 
 - Con **Edad de la caña** y un **índice satelital** encendidos, la edad funciona como filtro: las

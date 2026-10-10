@@ -2,9 +2,24 @@
 
 import { useMemo } from "react";
 import { RANGOS_EDAD, resumirEdades } from "@/domain/maestro/edad";
+import {
+  NIVELES_LLUVIA_SUERTE,
+  OPCIONES_DIAS_LLUVIA,
+  ventanaLluvia,
+} from "@/domain/precipitaciones/porSuerte";
 import { useMaestro } from "@/lib/data/useMaestro";
+import { usePluviometros } from "@/lib/data/usePluviometros";
 import { t } from "@/lib/i18n/es-CO";
 import { useMapStore } from "@/lib/store/mapStore";
+
+/** "2026-10-07" → "7 oct". */
+const fechaCorta = (iso: string) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, d).toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "short",
+  });
+};
 
 const fmtHa = (ha: number) =>
   ha.toLocaleString("es-CO", {
@@ -28,8 +43,14 @@ export function EdadLegend() {
     (s) =>
       s.sentinelVisible || Object.values(s.sentinelHubVisible).some(Boolean),
   );
+  const lluvia = useMapStore((s) => s.edadLluvia);
+  const toggleLluvia = useMapStore((s) => s.toggleEdadLluvia);
+  const dias = useMapStore((s) => s.edadLluviaDias);
+  const setDias = useMapStore((s) => s.setEdadLluviaDias);
+  const conRed = usePluviometros().length > 0;
   const maestro = useMaestro();
   const resumen = useMemo(() => resumirEdades(maestro), [maestro]);
+  const { desde, hasta } = ventanaLluvia(new Date(), dias);
 
   if (!visible) return null;
   // No encimarse con los paneles inferiores (mismo criterio que SentinelLegend).
@@ -40,7 +61,7 @@ export function EdadLegend() {
   return (
     <section
       aria-label={t.edad.titulo}
-      className="bg-background/95 pointer-events-auto w-64 rounded-xl p-2.5 text-xs shadow-lg ring-1 ring-black/10"
+      className="bg-background/95 pointer-events-auto max-h-[calc(100dvh-13rem)] w-64 overflow-y-auto overscroll-contain rounded-xl p-2.5 text-xs shadow-lg ring-1 ring-black/10"
     >
       <p className="text-sm font-semibold">{t.edad.titulo}</p>
       <p className="text-accent/60 mb-1.5">{t.edad.ayudaFiltro}</p>
@@ -92,6 +113,66 @@ export function EdadLegend() {
           {t.edad.ninguno}
         </p>
       )}
+
+      {/* Lluvia acumulada reciente sobre las suertes filtradas (ADR-0034). */}
+      <div className="mt-2 border-t border-black/10 pt-2">
+        {conRed ? (
+          <>
+            <label className="flex min-h-9 cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={lluvia}
+                onChange={toggleLluvia}
+                className="size-4"
+              />
+              <span aria-hidden>🌧️</span>
+              <span className="font-medium">{t.edad.lluvia}</span>
+            </label>
+            <div
+              role="group"
+              aria-label={t.edad.lluvia}
+              className="mt-1 flex gap-1"
+            >
+              {OPCIONES_DIAS_LLUVIA.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  aria-pressed={dias === d}
+                  onClick={() => setDias(d)}
+                  className={`min-h-9 flex-1 rounded-md px-1 ring-1 ${
+                    dias === d
+                      ? "bg-primary text-accent font-semibold ring-transparent"
+                      : "ring-black/15"
+                  }`}
+                >
+                  {t.edad.dias(d)}
+                </button>
+              ))}
+            </div>
+            {lluvia && (
+              <>
+                <ul className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-0.5">
+                  {NIVELES_LLUVIA_SUERTE.map((n) => (
+                    <li key={n.id} className="flex items-center gap-1.5">
+                      <span
+                        aria-hidden
+                        className="inline-block size-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: n.color }}
+                      />
+                      {n.etiqueta}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-accent/60 mt-1">
+                  {t.edad.lluviaVentana(fechaCorta(desde), fechaCorta(hasta))}
+                </p>
+              </>
+            )}
+          </>
+        ) : (
+          <p className="text-accent/60">🌧️ {t.edad.lluviaSinRed}</p>
+        )}
+      </div>
     </section>
   );
 }
