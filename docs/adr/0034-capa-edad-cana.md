@@ -57,3 +57,14 @@ El usuario fijó que **la caña a cosechar es la de 11,8 meses o más**. El rang
 redondeada a un decimal, la misma que muestra la ficha: lo que la ficha dice
 11,8 cae en "para cosecha". Quedan cinco rangos, todos filtrables. Las etiquetas
 de la leyenda pasan a dos líneas en vez de truncarse.
+
+## Adenda (2026-10-10) — filtro de índices por edad
+
+Objetivo del usuario: filtrar, por ejemplo, la caña para cosecha y ver **solo en
+esas suertes** un índice satelital (NDMI) para decidir a cuáles entrar. Con la
+edad y un índice (Sentinel Hub o Sentinel-2 sin nubes) encendidos a la vez, la
+capa entra en **modo índice**: `suertes-edad` deja de rellenar y pasa a **velo**
+(`#0a0f1a`, opacidad 0,85) sobre todo lo que no está en un rango encendido
+(`expresionVeloEdad`), y la nueva capa `suertes-edad-borde` dibuja el borde de
+las suertes filtradas en el color de su rango. Sin índice, la capa vuelve al
+relleno normal. La leyenda avisa "Índice visible solo en los rangos encendidos".

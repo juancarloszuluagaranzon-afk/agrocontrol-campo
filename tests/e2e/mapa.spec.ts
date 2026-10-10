@@ -469,3 +469,69 @@ test("mapa: en 'Edad de la caña' se pueden apagar rangos y solo se pintan los e
   );
   await expect.poll(colores).toEqual([]);
 });
+
+test("mapa: con 'Edad de la caña' e índice encendidos, el índice solo se ve en los rangos filtrados (ADR-0034)", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  // Edad: solo "Para cosecha".
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  for (const nombre of [
+    /Menor a 4 meses/,
+    /De 4 a 10 meses/,
+    /De 10 a 11,8 meses/,
+    /Renovación/,
+  ]) {
+    await leyenda.getByRole("button", { name: nombre }).click();
+  }
+
+  /** Estado de las capas de edad en el estilo del mapa. */
+  const estado = () =>
+    page.evaluate(() => {
+      const m = (
+        window as unknown as {
+          __e2eMap?: {
+            getLayoutProperty: (id: string, p: string) => unknown;
+            getPaintProperty: (id: string, p: string) => unknown;
+          };
+        }
+      ).__e2eMap;
+      const relleno = m?.getPaintProperty("suertes-edad", "fill-color");
+      return {
+        borde: m?.getLayoutProperty("suertes-edad-borde", "visibility"),
+        // modo normal: match con color por defecto transparente;
+        // modo índice: match con velo por defecto.
+        porDefecto: Array.isArray(relleno) ? relleno.at(-1) : relleno,
+      };
+    });
+  await expect
+    .poll(estado)
+    .toEqual({ borde: "none", porDefecto: "rgba(0,0,0,0)" });
+
+  // Encender NDMI: la edad pasa a modo índice (velo fuera del filtro + bordes).
+  await page.getByRole("button", { name: "Cerrar" }).first().click();
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Índices satelitales" }).click();
+  await page.getByText("NDMI (humedad)").click();
+  await expect
+    .poll(estado)
+    .toEqual({ borde: "visible", porDefecto: "#0a0f1a" });
+  await expect(
+    leyenda.getByText("Índice visible solo en los rangos encendidos."),
+  ).toBeVisible();
+
+  // Apagar el índice vuelve al modo normal.
+  await page.getByText("NDMI (humedad)").click();
+  await expect
+    .poll(estado)
+    .toEqual({ borde: "none", porDefecto: "rgba(0,0,0,0)" });
+});

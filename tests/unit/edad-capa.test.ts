@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   expresionColorEdad,
+  expresionVeloEdad,
   rangoEdad,
   RANGOS_EDAD,
   resumirEdades,
+  VELO_EDAD,
 } from "@/domain/maestro/edad";
 import type { Maestro, SuerteMaestro } from "@/domain/maestro/schema";
 
@@ -181,5 +183,45 @@ describe("expresionColorEdad con rangos apagados", () => {
     const expr = expresionColorEdad(resumirEdades(maestro, HOY)) as unknown[];
     expect(expr).toContain(color("joven"));
     expect(expr).toContain(color("madura"));
+  });
+});
+
+describe("expresionVeloEdad (modo índice)", () => {
+  const maestro: Maestro = {
+    "3-001": suerte({ fecha_ultimo_corte: haceMeses(1) }),
+    "3-002": suerte({ fecha_ultimo_corte: haceMeses(13) }),
+    "3-003": suerte({ fecha_ultimo_corte: haceMeses(12.5) }),
+  };
+
+  it("deja transparentes solo las suertes de los rangos encendidos y vela el resto", () => {
+    const expr = expresionVeloEdad(resumirEdades(maestro, HOY), {
+      joven: false,
+      media: false,
+      madura: false,
+      cosecha: true,
+      sinDato: false,
+    }) as unknown[];
+    expect(expr[0]).toBe("match");
+    expect(expr[1]).toEqual(["get", "sec_ste"]);
+    expect((expr[2] as string[]).sort()).toEqual(["3-002", "3-003"]);
+    expect(expr[3]).toBe("rgba(0,0,0,0)");
+    expect(expr[4]).toBe(VELO_EDAD);
+  });
+
+  it("sin rangos encendidos vela todo", () => {
+    expect(
+      expresionVeloEdad(resumirEdades(maestro, HOY), {
+        joven: false,
+        media: false,
+        madura: false,
+        cosecha: false,
+        sinDato: false,
+      }),
+    ).toBe(VELO_EDAD);
+  });
+
+  it("sin el parámetro, todas las suertes de caña quedan visibles", () => {
+    const expr = expresionVeloEdad(resumirEdades(maestro, HOY)) as unknown[];
+    expect((expr[2] as string[]).length).toBe(3);
   });
 });
