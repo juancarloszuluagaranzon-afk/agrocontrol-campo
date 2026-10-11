@@ -38,3 +38,4 @@ añade una nueva.
 | 0032 | Sincronización automática del maestro con maestro-riopaila        | Aceptada |
 | 0033 | Sincronización incremental por `updated_at` (egress bajo control) | Aceptada |
 | 0034 | Capa "Edad de la caña" (suertes por rango de edad)                | Aceptada |
+| 0035 | Robustez en campo: sin recargas automáticas y GPS estable         | Aceptada |
