@@ -81,15 +81,22 @@ function enAnillo(lon: number, lat: number, anillo: Anillo): boolean {
   return dentro;
 }
 
-/** Punto dentro de un polígono (exterior menos huecos). */
+/**
+ * Punto dentro de un polígono por la regla **par-impar** sobre todos sus
+ * anillos: dentro si está en un número impar de ellos. Cubre los huecos
+ * normales y también el caso de `contexto_thiessen.geojson`, que guarda las
+ * partes separadas de cada polígono (recortado a las fincas) como anillos de un
+ * solo `Polygon`; con la regla "exterior menos huecos" ninguna suerte caía
+ * dentro y todas se asignaban por cercanía.
+ */
 export function puntoEnPoligono(
   lon: number,
   lat: number,
   poligono: Anillo[],
 ): boolean {
-  const [exterior, ...huecos] = poligono;
-  if (!exterior || !enAnillo(lon, lat, exterior)) return false;
-  return !huecos.some((h) => enAnillo(lon, lat, h));
+  let n = 0;
+  for (const anillo of poligono) if (enAnillo(lon, lat, anillo)) n++;
+  return n % 2 === 1;
 }
 
 export interface PoligonoThiessen {

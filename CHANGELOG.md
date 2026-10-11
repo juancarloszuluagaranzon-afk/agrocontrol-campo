@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia por suerte — asignación por polígono de Thiessen corregida
+
+- El archivo de Thiessen guarda las partes separadas de cada polígono como anillos de un solo
+  polígono, y la regla anterior las tomaba como huecos: ninguna suerte caía dentro y todas se
+  asignaban al pluviómetro más cercano. Con la regla par-impar, 531 de 610 suertes de Riopaila caen en
+  su polígono; las 79 restantes (centro en vías o franjas) siguen por cercanía.
+
 ### Mapa — lluvia acumulada reciente en las suertes filtradas por edad
 
 - En la leyenda de **Edad de la caña**: **"Lluvia de los últimos 3 / 5 / 7 días"**. Cada suerte de los

@@ -69,6 +69,13 @@ describe("puntoEnPoligono / asignarPluviometros", () => {
     expect(puntoEnPoligono(3, 3, conHueco)).toBe(true);
   });
 
+  it("acepta partes separadas guardadas como anillos de un solo Polygon (forma del Thiessen real)", () => {
+    const partes = [...cuadrado(0, 0, 1, 1), ...cuadrado(5, 5, 6, 6)];
+    expect(puntoEnPoligono(0.5, 0.5, partes)).toBe(true);
+    expect(puntoEnPoligono(5.5, 5.5, partes)).toBe(true);
+    expect(puntoEnPoligono(3, 3, partes)).toBe(false);
+  });
+
   it("asigna por Thiessen y, fuera de la red, al pluviómetro más cercano", () => {
     const a = asignarPluviometros(
       [
@@ -159,5 +166,32 @@ describe("lluviaPorSuerte / etiquetaLluvia / nivelLluvia", () => {
     expect(nivelLluvia(15)).toBe("moderada");
     expect(nivelLluvia(15.1)).toBe("alta");
     expect(nivelLluvia(null)).toBe("sinDato");
+  });
+});
+
+describe("asignación con los datos reales de Riopaila", () => {
+  it("la mayoría de las suertes cae dentro de su polígono de Thiessen", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const data = join(process.cwd(), "public", "data");
+    const th = JSON.parse(
+      await readFile(join(data, "contexto_thiessen.geojson"), "utf-8"),
+    ) as {
+      features: Array<{
+        properties: { Pluviometr: number };
+        geometry: { type: string; coordinates: number[][][] };
+      }>;
+    };
+    const cat = JSON.parse(
+      await readFile(join(data, "tablones_catalogo.json"), "utf-8"),
+    ) as Array<{ sec_ste: string; lon: number; lat: number; ha: number }>;
+    const centros = centrosDeSuertes(cat);
+    const dentro = centros.filter((c) =>
+      th.features.some((f) =>
+        puntoEnPoligono(c.lon, c.lat, f.geometry.coordinates),
+      ),
+    );
+    // 531 de 610 en oct-2026; el resto cae en vías/franjas fuera de los polígonos.
+    expect(dentro.length / centros.length).toBeGreaterThan(0.8);
   });
 });
