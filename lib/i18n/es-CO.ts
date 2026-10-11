@@ -31,6 +31,10 @@ export const t = {
   },
   gps: {
     afinando: "Afinando ubicación…",
+    activar: "Activar mi ubicación",
+    centrar: "Centrar en mi ubicación",
+    seguir: "Seguir mi ubicación",
+    siguiendo: "Siguiendo tu ubicación",
   },
   foto: {
     titulo: "Foto de campo",

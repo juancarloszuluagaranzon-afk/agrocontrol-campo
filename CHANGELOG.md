@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Campo — GPS más estable y modo "seguirme"
+
+- El GPS ya no muestra "No se pudo obtener la ubicación" mientras sigue buscando: solo avisa si el
+  permiso está denegado. Arranca con una posición aproximada y se reinicia solo si se queda quieto.
+- **Modo seguirme**: el mapa acompaña al técnico; al arrastrar el mapa se suelta y el botón de GPS
+  lo reactiva. La **pantalla queda encendida** mientras el GPS está activo.
+- La brújula dejó de redibujarse 60 veces por segundo: menos calor y batería, y el punto GPS se
+  actualiza sin retraso en teléfonos de gama media. Ver **ADR-0035**.
+
 ### Campo — la app ya no se reinicia al volver la señal
 
 - La librería del modo sin conexión **recargaba la página cada vez que volvía la señal**: con señal
