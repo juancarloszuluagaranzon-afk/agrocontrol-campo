@@ -32,3 +32,23 @@ Rio Map es funcionar mejor que Avenza en esas condiciones. La revisión encontr�
   trabajo.
 - El GPS queda encendido entre sesiones una vez que el técnico lo activa (como
   Avenza). No hay botón de apagado aún; si se pide, se agrega y limpia la marca.
+
+## Decisión (parte 2) — GPS estable
+
+- **Sin falsos errores**: solo el permiso denegado se muestra como error
+  (`errorGpsDefinitivo`). "Sin posición" y "tiempo agotado" son transitorios y
+  la app sigue en "Afinando ubicación…". Tiempo de espera de 30 s.
+- **Arranque rápido**: además del seguimiento satelital se pide una posición
+  aproximada reciente (Wi-Fi/celda o última conocida, hasta 2 min de vieja) para
+  no dejar el mapa sin punto mientras el satélite converge.
+- **Vigilante**: si pasan 30 s sin posición nueva, se reinicia el seguimiento; y
+  se reinicia al volver a primer plano.
+- **Pantalla encendida** mientras el GPS está activo (`useWakeLock`, Screen Wake
+  Lock API): con la pantalla apagada el navegador pausa el GPS.
+- **Modo "seguirme"** (`gpsSeguir`): el mapa acompaña cada posición nueva
+  (`easeTo`, sin interrumpir vuelos en curso). Arrastrar el mapa lo desactiva;
+  el botón muestra "Seguir mi ubicación" (borde azul) y al tocarlo vuelve a
+  seguir (relleno azul).
+- **Brújula liviana**: el cono se redibuja solo si cambió el rumbo (≥ 1°), la
+  posición o el zoom (`necesitaRedibujoCono`), en vez de 60 veces por segundo.
+- El punto GPS incluye `mapReady` en sus dependencias (gotcha de CLAUDE.md).

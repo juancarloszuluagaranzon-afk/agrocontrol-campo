@@ -58,3 +58,48 @@ export function accuracyCircle(
     properties: {},
   };
 }
+
+/**
+ * Tipo de error de la geolocalización del navegador (ADR-0035). Solo el
+ * permiso denegado (1) es definitivo; "sin posición" (2) y "tiempo agotado" (3)
+ * son **transitorios** en campo (cielo tapado, arranque en frío sin datos
+ * móviles): el GPS sigue buscando y no se debe mostrar como fallo.
+ */
+export function errorGpsDefinitivo(code: number): boolean {
+  return code === 1;
+}
+
+/** Sin una posición nueva en este tiempo, se reinicia el seguimiento. */
+export const GPS_WATCHDOG_MS = 30_000;
+
+export interface EstadoCono {
+  lon: number;
+  lat: number;
+  rumbo: number;
+  zoom: number;
+}
+
+/** Diferencia angular más corta entre dos rumbos (grados, 0–180). */
+function deltaRumbo(a: number, b: number): number {
+  const d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+/**
+ * ¿Hay que redibujar el cono de orientación? Antes se redibujaba 60 veces por
+ * segundo aunque nada cambiara, y cada redibujo obliga a MapLibre a reprocesar
+ * la geometría: saturaba teléfonos de gama media y retrasaba el punto GPS.
+ * Ahora solo si cambió el rumbo (≥ 1°), la posición o el zoom.
+ */
+export function necesitaRedibujoCono(
+  previo: EstadoCono | null,
+  nuevo: EstadoCono,
+): boolean {
+  if (!previo) return true;
+  return (
+    deltaRumbo(previo.rumbo, nuevo.rumbo) >= 1 ||
+    previo.lon !== nuevo.lon ||
+    previo.lat !== nuevo.lat ||
+    Math.abs(previo.zoom - nuevo.zoom) >= 0.05
+  );
+}

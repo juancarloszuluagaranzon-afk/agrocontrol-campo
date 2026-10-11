@@ -103,6 +103,9 @@ interface MapState {
   /** Solicitud de centrar en la posición actual. */
   centerNonce: number;
   centerOnMe: () => void;
+  /** Modo "seguirme": el mapa acompaña al técnico en cada posición (ADR-0035). */
+  gpsSeguir: boolean;
+  setGpsSeguir: (v: boolean) => void;
 
   // ── Brújula / orientación (indicador tipo Avenza, §5) ──
   /** Indicador de orientación activo (el usuario habilitó la brújula). */
@@ -217,6 +220,8 @@ export const useMapStore = create<MapState>((set) => ({
   setGpsActive: (gpsActive) => set({ gpsActive }),
   centerNonce: 0,
   centerOnMe: () => set((state) => ({ centerNonce: state.centerNonce + 1 })),
+  gpsSeguir: false,
+  setGpsSeguir: (gpsSeguir) => set({ gpsSeguir }),
 
   compassActive: false,
   setCompassActive: (compassActive) =>
