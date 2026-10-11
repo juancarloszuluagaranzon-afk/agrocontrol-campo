@@ -399,14 +399,17 @@ export function MapView() {
         id: EDAD_LLUVIA_LABEL,
         type: "symbol",
         source: EDAD_LLUVIA_SOURCE,
-        minzoom: 11,
+        // Desde zoom 13 (escala de suerte): más lejos se amontonaban.
+        minzoom: 13,
         layout: {
           visibility: "none",
           "text-field": ["get", "etiqueta"],
           "text-font": ["Open Sans Semibold"],
-          "text-size": ["interpolate", ["linear"], ["zoom"], 11, 11, 15, 15],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 13, 11, 16, 15],
           "text-offset": [0, 1.1],
-          "text-allow-overlap": true,
+          // Si dos rótulos chocan se muestra uno (antes se pisaban).
+          "text-allow-overlap": false,
+          "text-padding": 4,
         },
         paint: {
           "text-color": "#ffffff",

@@ -15,20 +15,43 @@ export type RangoEdad = "joven" | "media" | "madura" | "cosecha" | "sinDato";
 export interface RangoEdadInfo {
   id: RangoEdad;
   etiqueta: string;
+  /** Nombre corto para la leyenda en celular. */
+  corta: string;
   color: string;
 }
 
 /** Orden de la leyenda. Ámbar = próxima a cosecha; rojo = para cosecha. */
 export const RANGOS_EDAD: readonly RangoEdadInfo[] = [
-  { id: "joven", etiqueta: "Menor a 4 meses", color: "#a3e635" },
-  { id: "media", etiqueta: "De 4 a 10 meses", color: "#15803d" },
-  { id: "madura", etiqueta: "De 10 a 11,8 meses", color: "#f59e0b" },
+  {
+    id: "joven",
+    etiqueta: "Menor a 4 meses",
+    corta: "< 4 m",
+    color: "#a3e635",
+  },
+  {
+    id: "media",
+    etiqueta: "De 4 a 10 meses",
+    corta: "4–10 m",
+    color: "#15803d",
+  },
+  {
+    id: "madura",
+    etiqueta: "De 10 a 11,8 meses",
+    corta: "10–11,8 m",
+    color: "#f59e0b",
+  },
   {
     id: "cosecha",
     etiqueta: "Para cosecha (11,8 meses o más)",
+    corta: "Cosecha ≥ 11,8",
     color: "#dc2626",
   },
-  { id: "sinDato", etiqueta: "Renovación / sin dato", color: "#9ca3af" },
+  {
+    id: "sinDato",
+    etiqueta: "Renovación / sin dato",
+    corta: "Renov. / s. d.",
+    color: "#9ca3af",
+  },
 ];
 
 /**

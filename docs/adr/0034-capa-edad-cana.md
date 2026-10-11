@@ -86,3 +86,13 @@ muestra un rótulo "12 mm" con halo de color por nivel. Lógica pura en
   15 mm (ámbar), más de 15 mm (azul). Constantes `LLUVIA_UMBRAL_*`.
 - Solo Riopaila: Castilla aún no tiene red de pluviómetros en Rio Map; la
   leyenda lo indica.
+
+## Adenda (2026-10-10) — leyenda compacta en celular
+
+En celular la leyenda ocupaba casi dos tercios de la pantalla, era translúcida y
+los rótulos de lluvia se amontonaban. En pantallas de menos de 640 px la leyenda
+arranca **plegada** como una barra ("Edad de la caña · 1 de 5 rangos · 🌧️ 7 d"),
+y abierta usa fichas en dos columnas con nombres cortos (`corta` en
+`RANGOS_EDAD` y `NIVELES_LLUVIA_SUERTE`), sin hectáreas ni textos de ayuda, con
+tope de 45 % de la altura. Fondo opaco. En pantallas grandes se ve completa. Los
+rótulos de lluvia aparecen desde zoom 13 y sin superponerse.
