@@ -691,3 +691,30 @@ test("mapa: en celular la leyenda de edad arranca plegada y abierta no pasa del 
     leyenda.getByRole("button", { name: "Mostrar la leyenda de edad" }),
   ).toContainText("4 de 5 rangos");
 });
+
+test.describe("GPS tras una recarga", () => {
+  test.use({
+    geolocation: { latitude: 4.36, longitude: -76.11, accuracy: 8 },
+    permissions: ["geolocation"],
+  });
+
+  test("mapa: si el GPS estaba encendido, se reanuda solo después de recargar", async ({
+    page,
+  }) => {
+    await page.goto("/mapa");
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+    await page.getByRole("button", { name: "Activar mi ubicación" }).click();
+    const centrar = page.getByRole("button", {
+      name: "Centrar en mi ubicación",
+    });
+    await expect(centrar).toHaveAttribute("aria-pressed", "true");
+
+    await page.reload();
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+    // Sin tocar nada: el GPS vuelve a estar activo y con posición.
+    await expect(
+      page.getByRole("button", { name: "Centrar en mi ubicación" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText(/± \d+ m/)).toBeVisible();
+  });
+});

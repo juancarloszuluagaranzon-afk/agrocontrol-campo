@@ -5,6 +5,13 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Campo — la app ya no se reinicia al volver la señal
+
+- La librería del modo sin conexión **recargaba la página cada vez que volvía la señal**: con señal
+  intermitente, la app se reiniciaba muchas veces y el GPS quedaba apagado. Se desactivó esa recarga.
+- El GPS (y la brújula en Android) **se reanudan solos** si estaban encendidos antes de una recarga o
+  de que Android cerrara la pestaña. Ver **ADR-0035**.
+
 ### Lluvia por suerte — asignación por polígono de Thiessen corregida
 
 - El archivo de Thiessen guarda las partes separadas de cada polígono como anillos de un solo

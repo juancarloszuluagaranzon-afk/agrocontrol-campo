@@ -11,6 +11,10 @@ import { compassNecesitaCalibracion } from "@/lib/geo/orientation";
 import { gpsAfinando } from "@/lib/geo/gps";
 import { formatMetros } from "@/lib/geo/format";
 import { t } from "@/lib/i18n/es-CO";
+import {
+  guardarGpsPersistido,
+  leerGpsPersistido,
+} from "@/lib/geo/gpsPersistido";
 
 /** Precisión (m) por encima de la cual avisamos que el GPS es pobre (§13, §20). */
 const PRECISION_POBRE_M = 30;
@@ -31,6 +35,37 @@ export function GpsControl() {
   const centeredRef = useRef(false);
   // Ya se re-centró en el primer fix preciso de esta sesión de GPS.
   const refinedRef = useRef(false);
+
+  // Reanuda el GPS (y la brújula) si estaban encendidos antes de una recarga o
+  // de que Android cerrara la pestaña. Solo con el permiso ya concedido: sin
+  // gesto del usuario no se debe pedir permiso nuevo.
+  useEffect(() => {
+    const previo = leerGpsPersistido();
+    if (!previo.gps || useMapStore.getState().gpsActive) return;
+    const permisos =
+      typeof navigator !== "undefined" ? navigator.permissions : undefined;
+    if (!permisos?.query) return;
+    let vigente = true;
+    void permisos
+      .query({ name: "geolocation" })
+      .then((estado) => {
+        if (!vigente || estado.state !== "granted") return;
+        centeredRef.current = false;
+        refinedRef.current = false;
+        setGpsActive(true);
+        // En Android la brújula no requiere gesto; en iOS fallará y queda apagada.
+        if (previo.brujula)
+          void requestOrientationPermission().then((ok) =>
+            setCompassActive(ok),
+          );
+      })
+      .catch(() => {
+        /* sin API de permisos: el técnico reactiva el GPS a mano */
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [setGpsActive, setCompassActive]);
 
   // Sigue la posición y la orientación mientras estén activos.
   useGeolocation(gpsActive);
@@ -55,8 +90,12 @@ export function GpsControl() {
       centeredRef.current = false;
       refinedRef.current = false;
       setGpsActive(true);
+      guardarGpsPersistido({ gps: true, brujula: false });
       // El permiso de orientación (iOS) debe pedirse dentro del gesto del click.
-      void requestOrientationPermission().then((ok) => setCompassActive(ok));
+      void requestOrientationPermission().then((ok) => {
+        setCompassActive(ok);
+        guardarGpsPersistido({ gps: true, brujula: ok });
+      });
     } else {
       centerOnMe();
     }
