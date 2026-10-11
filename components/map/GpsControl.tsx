@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useMapStore } from "@/lib/store/mapStore";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
+import { useWakeLock } from "@/lib/geo/useWakeLock";
 import {
   requestOrientationPermission,
   useDeviceHeading,
@@ -32,6 +33,8 @@ export function GpsControl() {
   const compassActive = useMapStore((s) => s.compassActive);
   const setCompassActive = useMapStore((s) => s.setCompassActive);
   const headingAccuracy = useMapStore((s) => s.headingAccuracy);
+  const seguir = useMapStore((s) => s.gpsSeguir);
+  const setSeguir = useMapStore((s) => s.setGpsSeguir);
   const centeredRef = useRef(false);
   // Ya se re-centró en el primer fix preciso de esta sesión de GPS.
   const refinedRef = useRef(false);
@@ -53,6 +56,7 @@ export function GpsControl() {
         centeredRef.current = false;
         refinedRef.current = false;
         setGpsActive(true);
+        setSeguir(true);
         // En Android la brújula no requiere gesto; en iOS fallará y queda apagada.
         if (previo.brujula)
           void requestOrientationPermission().then((ok) =>
@@ -65,11 +69,13 @@ export function GpsControl() {
     return () => {
       vigente = false;
     };
-  }, [setGpsActive, setCompassActive]);
+  }, [setGpsActive, setCompassActive, setSeguir]);
 
-  // Sigue la posición y la orientación mientras estén activos.
+  // Sigue la posición y la orientación mientras estén activos, y mantiene la
+  // pantalla encendida para que el navegador no pause el GPS (ADR-0035).
   useGeolocation(gpsActive);
   useDeviceHeading(compassActive);
+  useWakeLock(gpsActive);
 
   // Centra en la primera lectura (rápida, aproximada) y **re-centra** una vez al
   // llegar el primer fix preciso, para no quedar fijado en la posición burda.
@@ -90,6 +96,7 @@ export function GpsControl() {
       centeredRef.current = false;
       refinedRef.current = false;
       setGpsActive(true);
+      setSeguir(true);
       guardarGpsPersistido({ gps: true, brujula: false });
       // El permiso de orientación (iOS) debe pedirse dentro del gesto del click.
       void requestOrientationPermission().then((ok) => {
@@ -97,6 +104,8 @@ export function GpsControl() {
         guardarGpsPersistido({ gps: true, brujula: ok });
       });
     } else {
+      // Si el técnico movió el mapa, el botón vuelve a "seguirme".
+      setSeguir(true);
       centerOnMe();
     }
   }
@@ -113,10 +122,15 @@ export function GpsControl() {
         onClick={onClick}
         aria-pressed={gpsActive}
         aria-label={
-          gpsActive ? "Centrar en mi ubicación" : "Activar mi ubicación"
+          !gpsActive ? t.gps.activar : seguir ? t.gps.centrar : t.gps.seguir
         }
+        title={gpsActive && seguir ? t.gps.siguiendo : undefined}
         className={`grid size-12 place-items-center rounded-full text-xl shadow-lg ring-1 ring-black/10 ${
-          gpsActive ? "bg-blue-600 text-white" : "bg-background"
+          !gpsActive
+            ? "bg-background"
+            : seguir
+              ? "bg-blue-600 text-white"
+              : "bg-background text-blue-600 ring-2 ring-blue-600"
         }`}
       >
         ◎
