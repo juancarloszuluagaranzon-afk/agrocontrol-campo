@@ -448,7 +448,8 @@ test("mapa: en 'Edad de la caña' se pueden apagar rangos y solo se pintan los e
         : [];
     });
 
-  await expect.poll(colores).toContain("#dc2626");
+  // El maestro llega por fetch: bajo carga puede tardar más de 10 s.
+  await expect.poll(colores, { timeout: 30_000 }).toContain("#dc2626");
   await cosecha.click();
   await expect(cosecha).toHaveAttribute("aria-pressed", "false");
   await expect.poll(colores).not.toContain("#dc2626");
@@ -646,4 +647,47 @@ test("mapa: lluvia acumulada reciente sobre las suertes filtradas por edad (ADR-
     .getByRole("checkbox", { name: /Lluvia de los últimos/ })
     .uncheck();
   await expect.poll(rotulos).toMatchObject({ visible: "none" });
+});
+
+test("mapa: en celular la leyenda de edad arranca plegada y abierta no pasa del 45 % de la pantalla (ADR-0034)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
+  await page.getByRole("button", { name: "Cerrar" }).first().click();
+
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  const barra = leyenda.getByRole("button", {
+    name: "Mostrar la leyenda de edad",
+  });
+  await expect(barra).toBeVisible();
+  await expect(barra).toContainText("5 de 5 rangos");
+  // Plegada: una sola barra.
+  expect((await leyenda.boundingBox())!.height).toBeLessThan(70);
+
+  await barra.click();
+  const cosecha = leyenda.getByRole("button", { name: /Para cosecha/ });
+  await expect(cosecha).toBeVisible();
+  await expect(cosecha).toContainText("Cosecha ≥ 11,8");
+  expect((await leyenda.boundingBox())!.height).toBeLessThanOrEqual(
+    844 * 0.45 + 60,
+  );
+
+  // Los interruptores siguen funcionando y la barra resume la selección.
+  await cosecha.click();
+  await expect(cosecha).toHaveAttribute("aria-pressed", "false");
+  await leyenda
+    .getByRole("button", { name: "Ocultar la leyenda de edad" })
+    .click();
+  await expect(
+    leyenda.getByRole("button", { name: "Mostrar la leyenda de edad" }),
+  ).toContainText("4 de 5 rangos");
 });

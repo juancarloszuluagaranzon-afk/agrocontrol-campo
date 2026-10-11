@@ -17,6 +17,7 @@ export type NivelLluvia = "seca" | "moderada" | "alta" | "sinDato";
 export interface NivelLluviaInfo {
   id: NivelLluvia;
   etiqueta: string;
+  corta: string;
   color: string;
 }
 
@@ -28,10 +29,10 @@ export const LLUVIA_UMBRAL_MODERADA = 5;
 export const LLUVIA_UMBRAL_ALTA = 15;
 
 export const NIVELES_LLUVIA_SUERTE: readonly NivelLluviaInfo[] = [
-  { id: "seca", etiqueta: "Hasta 5 mm", color: "#16a34a" },
-  { id: "moderada", etiqueta: "De 5 a 15 mm", color: "#d97706" },
-  { id: "alta", etiqueta: "Más de 15 mm", color: "#2563eb" },
-  { id: "sinDato", etiqueta: "Sin lecturas", color: "#6b7280" },
+  { id: "seca", etiqueta: "Hasta 5 mm", corta: "≤ 5", color: "#16a34a" },
+  { id: "moderada", etiqueta: "De 5 a 15 mm", corta: "5–15", color: "#d97706" },
+  { id: "alta", etiqueta: "Más de 15 mm", corta: "> 15", color: "#2563eb" },
+  { id: "sinDato", etiqueta: "Sin lecturas", corta: "s. d.", color: "#6b7280" },
 ];
 
 export function nivelLluvia(mm: number | null): NivelLluvia {

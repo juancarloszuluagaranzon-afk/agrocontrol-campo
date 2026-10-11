@@ -12,6 +12,13 @@ versionado [SemVer](https://semver.org/lang/es/).
   asignaban al pluviómetro más cercano. Con la regla par-impar, 531 de 610 suertes de Riopaila caen en
   su polígono; las 79 restantes (centro en vías o franjas) siguen por cercanía.
 
+### Mapa — leyenda de edad compacta en celular
+
+- En celular la leyenda de **Edad de la caña** arranca plegada como una barra de una línea; abierta
+  usa fichas en dos columnas con nombres cortos y no pasa del 45 % de la pantalla. Fondo opaco (antes
+  se transparentaba el mapa). Los rótulos de lluvia aparecen desde zoom 13 y ya no se pisan. En
+  computador, sin cambios. Ver **ADR-0034** (adenda).
+
 ### Mapa — lluvia acumulada reciente en las suertes filtradas por edad
 
 - En la leyenda de **Edad de la caña**: **"Lluvia de los últimos 3 / 5 / 7 días"**. Cada suerte de los
