@@ -39,3 +39,4 @@ añade una nueva.
 | 0033 | Sincronización incremental por `updated_at` (egress bajo control) | Aceptada |
 | 0034 | Capa "Edad de la caña" (suertes por rango de edad)                | Aceptada |
 | 0035 | Robustez en campo: sin recargas automáticas y GPS estable         | Aceptada |
+| 0036 | Mapa sin señal descargable y apertura con la sesión guardada      | Aceptada |

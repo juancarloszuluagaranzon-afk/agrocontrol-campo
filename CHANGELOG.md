@@ -5,6 +5,21 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Campo — mapa sin señal y apertura inmediata sin conexión
+
+- **📥 Mapa sin señal** (menú de herramientas): descarga el satélite alrededor de todas las suertes de
+  la planta, del zoom 10 al 18 (Riopaila ≈ 5.900 teselas / 115 MB; Castilla ≈ 9.300 / 180 MB), y las
+  letras de las etiquetas. Va a un caché propio que no se borra al navegar otras zonas (el caché al
+  vuelo tiene tope de 3.000). Con progreso, se puede detener y completar después; pide al navegador
+  almacenamiento persistente.
+- Sin señal y sin la tesela exacta (zoom 19, o fuera de lo descargado), el service worker amplía un
+  trozo de una tesela de menor zoom: se ve borroso pero no queda el fondo vacío.
+- Las letras de las etiquetas se guardan un año (antes, 1 hora: sin señal desaparecían los rótulos).
+- La app **abre al instante con el último usuario** sin esperar a Supabase. Antes, con el token vencido
+  y sin señal, quedaba ~30 s en "Cargando…" y luego decía "sin sesión". Una sesión inválida de verdad
+  (no por falta de red) sí lleva a entrar de nuevo; "Salir" borra el usuario guardado. Ver
+  **ADR-0036**.
+
 ### Campo — GPS más estable y modo "seguirme"
 
 - El GPS ya no muestra "No se pudo obtener la ubicación" mientras sigue buscando: solo avisa si el

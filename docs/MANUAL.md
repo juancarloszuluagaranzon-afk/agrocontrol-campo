@@ -55,12 +55,18 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 
 ## 4. Sin conexión
 
-- Tras la primera carga, la app **abre y funciona sin señal**.
+- Tras la primera carga, la app **abre y funciona sin señal**, con tu sesión
+  guardada: no hace falta conexión para entrar.
 - Lo que registres sin red queda **pendiente**; la cabecera muestra
   _"N pendientes"_. Al volver la conexión se **sincroniza** solo
   (verás _"Sincronizando…"_ y luego _"Sincronizado"_).
-- Para llevar el **mapa offline**: navega por la zona con conexión antes de ir a
-  campo (los mosaicos se guardan en caché).
+- Para llevar el **mapa offline**: ✏️ Herramientas → **📥 Mapa sin señal** →
+  **Descargar**, con Wi-Fi y la app abierta (Riopaila ≈ 115 MB, Castilla ≈ 180
+  MB). Baja el satélite alrededor de todas las suertes de tu planta, del
+  panorama al detalle. Si se corta, toca **Completar** y sigue donde iba. Hazlo
+  una vez por planta; **Borrar** libera el espacio.
+- Sin señal, si acercas más allá de lo descargado, el mapa amplía la imagen
+  que tenga (se ve más borrosa) en vez de quedar en blanco.
 
 ## 5. Consejos de campo
 

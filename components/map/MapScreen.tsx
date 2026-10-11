@@ -19,6 +19,7 @@ import { FotoCampoControl } from "@/components/map/FotoCampoControl";
 import { PrecipitacionControl } from "@/components/map/PrecipitacionControl";
 import { ReporteLluviaControl } from "@/components/map/ReporteLluviaControl";
 import { MaestroControl } from "@/components/map/MaestroControl";
+import { MapaOfflineControl } from "@/components/map/MapaOfflineControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
 import { PlantaSelector } from "@/components/PlantaSelector";
@@ -89,6 +90,7 @@ export function MapScreen() {
               </>
             )}
             {activeTool === "indices" && <IndexToggles />}
+            {activeTool === "offline" && <MapaOfflineControl />}
           </div>
         )}
 

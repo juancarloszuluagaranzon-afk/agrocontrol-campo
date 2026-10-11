@@ -4,6 +4,7 @@ import {
   sentinelHubMapId,
   sentinelHubTilesUrl,
 } from "./sentinelHub";
+import { ESRI_IMAGERY, GLIFOS_URL } from "./teselas";
 
 /**
  * Área de interés (AOI) del ingenio, en WGS84 (§13). Se usa para centrar el mapa
@@ -16,9 +17,6 @@ export const AOI = {
   minZoom: 10,
   maxZoom: 19,
 } as const;
-
-const ESRI_IMAGERY =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
 // Mosaico Sentinel-2 "cloudless" (sin nubes) de EOX, gratis y sin API key
 // (ADR-0021). WMTS RESTful en Web Mercator (`_3857`, orden {z}/{y}/{x}). Capa
@@ -111,7 +109,7 @@ export function baseStyle(): StyleSpecification {
 
   return {
     version: 8,
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+    glyphs: GLIFOS_URL,
     sources,
     layers,
   };

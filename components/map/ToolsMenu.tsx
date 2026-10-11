@@ -20,6 +20,7 @@ const ENTRADAS: Entrada[] = [
   { id: "mediciones", icon: "📐", label: "Mediciones guardadas" },
   { id: "capas", icon: "🗂️", label: "Capas del mapa" },
   { id: "indices", icon: "🛰️", label: "Índices satelitales" },
+  { id: "offline", icon: "📥", label: "Mapa sin señal" },
 ];
 
 /**
