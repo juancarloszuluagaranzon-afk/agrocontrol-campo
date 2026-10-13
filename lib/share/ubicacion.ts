@@ -12,6 +12,8 @@ export interface PuntoCompartido {
   lon: number;
   lat: number;
   nombre: string;
+  /** Observación del marcador: va en el texto del mensaje, no en el link. */
+  nota?: string;
 }
 
 /**
@@ -46,5 +48,10 @@ export function linkUbicacion(origin: string, p: PuntoCompartido): string {
 
 /** Texto corto que acompaña al link en el mensaje de WhatsApp. */
 export function mensajeCompartir(p: PuntoCompartido): string {
-  return `📍 ${p.nombre} — Rio Map\n${formatCoordenadas(p.lon, p.lat)}`;
+  const nota = p.nota?.trim();
+  return [
+    `📍 ${p.nombre} — Rio Map`,
+    ...(nota ? [`📝 ${nota}`] : []),
+    formatCoordenadas(p.lon, p.lat),
+  ].join("\n");
 }

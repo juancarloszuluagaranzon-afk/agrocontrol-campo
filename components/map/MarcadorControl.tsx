@@ -174,7 +174,7 @@ export function MarcadorControl() {
         {lista.map((m) => (
           <li
             key={m.id}
-            className="flex items-center gap-2 rounded px-1 py-1 hover:bg-slate-50"
+            className="flex items-start gap-2 rounded px-1 py-1 hover:bg-slate-50"
           >
             <span
               aria-hidden
@@ -184,10 +184,14 @@ export function MarcadorControl() {
             <button
               type="button"
               onClick={() => flyTo({ lon: m.lon, lat: m.lat, tabId: "" })}
-              className="min-w-0 flex-1 truncate text-left text-sm"
-              title={m.nota || m.nombre}
+              className="min-w-0 flex-1 text-left"
             >
-              {m.nombre}
+              <span className="block truncate text-sm">{m.nombre}</span>
+              {m.nota.trim() && (
+                <span className="line-clamp-2 block text-[11px] whitespace-pre-line text-slate-600">
+                  {m.nota.trim()}
+                </span>
+              )}
             </button>
             <button
               type="button"
@@ -197,6 +201,7 @@ export function MarcadorControl() {
                   lon: m.lon,
                   lat: m.lat,
                   nombre: m.nombre,
+                  nota: m.nota,
                 })
               }
               aria-label={`${t.compartir.boton} ${m.nombre}`}

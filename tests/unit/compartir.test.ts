@@ -72,4 +72,32 @@ describe("mensajeCompartir", () => {
     expect(msg).toContain("Punto A");
     expect(msg).toContain("4.310000, -76.119000");
   });
+
+  it("incluye la nota del marcador en el texto, pero no en el link", () => {
+    const p = {
+      planta: "riopaila",
+      lon: -76.119,
+      lat: 4.31,
+      nombre: "Compuerta",
+      nota: "  Fuga en la compuerta\nrevisar el lunes ",
+    };
+    expect(mensajeCompartir(p).split("\n")).toEqual([
+      "📍 Compuerta — Rio Map",
+      "📝 Fuga en la compuerta",
+      "revisar el lunes",
+      "4.310000, -76.119000",
+    ]);
+    expect(linkUbicacion("https://riomap.vercel.app", p)).not.toContain("Fuga");
+  });
+
+  it("sin nota (o solo espacios) no agrega la línea de nota", () => {
+    const msg = mensajeCompartir({
+      planta: "riopaila",
+      lon: -76.119,
+      lat: 4.31,
+      nombre: "Punto A",
+      nota: "   ",
+    });
+    expect(msg).not.toContain("📝");
+  });
 });

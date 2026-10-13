@@ -9,6 +9,7 @@ import { Legend } from "@/components/map/Legend";
 import { SentinelLegend } from "@/components/map/SentinelLegend";
 import { EdadLegend } from "@/components/map/EdadLegend";
 import { SuertePanel } from "@/components/map/SuertePanel";
+import { MarcadorCard } from "@/components/map/MarcadorCard";
 import { GpsControl } from "@/components/map/GpsControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
 import { MeasureResult } from "@/components/map/MeasureResult";
@@ -117,6 +118,7 @@ export function MapScreen() {
       <ToolsMenu />
 
       {midiendo ? <MeasureResult /> : <SuertePanel />}
+      {!midiendo && <MarcadorCard />}
     </div>
   );
 }

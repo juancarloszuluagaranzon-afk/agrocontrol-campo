@@ -158,6 +158,54 @@ test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("mapa: la observación del marcador se ve en la lista y al tocarlo en el mapa", async ({
+  page,
+}) => {
+  // Viewport de celular: la nota no puede depender de un tooltip.
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Marcadores", exact: true }).click();
+  await page.getByRole("button", { name: /Nuevo marcador/ }).click();
+  await page.getByPlaceholder("Nombre del punto").fill("Canal roto");
+  await page
+    .getByPlaceholder("Nota (opcional)")
+    .fill("Fuga en el canal, avisar a riego");
+  await page.getByRole("button", { name: "Guardar aquí" }).click();
+
+  // 1) La lista muestra la nota debajo del nombre.
+  await expect(
+    page.getByText("Fuga en el canal, avisar a riego"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Cerrar" }).click();
+
+  // 2) Tocar el marcador (quedó en el centro del mapa) abre su ficha con la nota.
+  const canvas = page.locator(".maplibregl-canvas");
+  const box = (await canvas.boundingBox())!;
+  await expect
+    .poll(async () => {
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      return page.getByRole("dialog", { name: "Marcador Canal roto" }).count();
+    })
+    .toBe(1);
+  const ficha = page.getByRole("dialog", { name: "Marcador Canal roto" });
+  await expect(
+    ficha.getByText("Fuga en el canal, avisar a riego"),
+  ).toBeVisible();
+  await expect(ficha.getByRole("button", { name: /Compartir/ })).toBeVisible();
+  // La ficha del marcador tiene prioridad: no abre la suerte de debajo.
+  await expect(page.getByRole("dialog", { name: /^Tablón/ })).toHaveCount(0);
+
+  await ficha.getByRole("button", { name: "Cerrar marcador" }).click();
+  await expect(ficha).toHaveCount(0);
+});
+
 test("mapa: planilla de lluvia por técnico guarda y acumula", async ({
   page,
 }) => {

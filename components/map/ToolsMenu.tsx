@@ -34,15 +34,17 @@ export function ToolsMenu() {
   const setActiveTool = useMapStore((s) => s.setActiveTool);
   const measureMode = useMapStore((s) => s.measureMode);
   const tablonSeleccionado = useMapStore((s) => s.selected != null);
+  const marcadorAbierto = useMapStore((s) => s.marcadorAbierto != null);
 
   function elegir(id: Entrada["id"]) {
     setActiveTool(activeTool === id ? "none" : id);
     setOpen(false);
   }
 
-  // El menú se oculta mientras hay un panel inferior (medición o tablón) para no
-  // encimarse con él; reaparece al cerrarlo.
-  if (measureMode !== "off" || tablonSeleccionado) return null;
+  // El menú se oculta mientras hay un panel inferior (medición, tablón o
+  // marcador) para no encimarse con él; reaparece al cerrarlo.
+  if (measureMode !== "off" || tablonSeleccionado || marcadorAbierto)
+    return null;
 
   const algoActivo = activeTool !== "none";
 

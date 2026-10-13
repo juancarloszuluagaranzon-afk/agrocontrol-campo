@@ -50,7 +50,9 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   (más preciso que tocar con el dedo).
 - **Marcadores** (botón 📍, derecha): puntos personales que **solo tú ves**.
   **Nuevo marcador** → centra la cruz, pon **nombre**, una **nota** y un **color**,
-  y **Guardar aquí**. La lista permite **ir** a un marcador o **borrarlo**. Se
+  y **Guardar aquí**. La lista muestra la nota bajo el nombre y permite **ir** a
+  un marcador, **compartirlo** (el mensaje lleva la nota) o **borrarlo**. **Toca
+  un marcador en el mapa** para ver su ficha con la nota completa y la fecha. Se
   guardan sin conexión y se sincronizan a tus otros dispositivos.
 
 ## 4. Sin conexión

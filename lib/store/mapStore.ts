@@ -139,6 +139,9 @@ interface MapState {
   /** Modo "colocar marcador" activo (muestra retícula). */
   placingMarker: boolean;
   setPlacingMarker: (v: boolean) => void;
+  /** Marcador tocado en el mapa (id), cuya ficha con la nota está abierta. */
+  marcadorAbierto: string | null;
+  setMarcadorAbierto: (id: string | null) => void;
 }
 
 // Unión de las capas de todas las plantas (la lista es por planta): así el
@@ -152,7 +155,9 @@ const initialContext: Record<string, boolean> = Object.fromEntries(
 
 export const useMapStore = create<MapState>((set) => ({
   selected: null,
-  setSelected: (selected) => set({ selected }),
+  // Abrir una suerte cierra la ficha del marcador (ocupan el mismo lugar).
+  setSelected: (selected) =>
+    set(selected ? { selected, marcadorAbierto: null } : { selected }),
 
   activeTool: "none",
   setActiveTool: (activeTool) => set({ activeTool }),
@@ -253,4 +258,12 @@ export const useMapStore = create<MapState>((set) => ({
     set((s) => ({ markVertexNonce: s.markVertexNonce + 1 })),
   placingMarker: false,
   setPlacingMarker: (placingMarker) => set({ placingMarker }),
+  marcadorAbierto: null,
+  // Abrir un marcador cierra la ficha de la suerte (ocupan el mismo lugar).
+  setMarcadorAbierto: (marcadorAbierto) =>
+    set(
+      marcadorAbierto
+        ? { marcadorAbierto, selected: null }
+        : { marcadorAbierto },
+    ),
 }));

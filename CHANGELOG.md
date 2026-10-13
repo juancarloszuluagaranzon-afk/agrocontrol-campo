@@ -5,6 +5,14 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Marcadores — las observaciones se ven en el celular
+
+- La nota de un marcador solo existía como tooltip de la lista, que no aparece en el celular: se
+  guardaba pero no se podía leer. Ahora **tocar un marcador en el mapa** abre su ficha con el nombre, la
+  nota completa, la fecha y 📤 Compartir (tiene prioridad sobre la suerte de debajo).
+- La lista de **Mis marcadores** muestra la nota bajo el nombre (hasta dos líneas).
+- Al compartir un marcador, el mensaje incluye la nota (el link no).
+
 ### Campo — el modo seguirme no pierde posiciones
 
 - Si llega una posición GPS mientras el mapa todavía se mueve (por ejemplo, durante el centrado
