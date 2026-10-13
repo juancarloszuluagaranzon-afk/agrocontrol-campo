@@ -826,11 +826,23 @@ export function MapView() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady || !gpsActivo || !gpsSeguir || !gps) return;
-    // No interrumpir un vuelo en curso (p. ej. el centrado inicial a zoom 17).
-    if (map.isMoving()) return;
-    const c = map.getCenter();
-    if (distanciaMetros(c.lng, c.lat, gps.lon, gps.lat) < 2) return;
-    map.easeTo({ center: [gps.lon, gps.lat], duration: 400 });
+    const seguir = () => {
+      const c = map.getCenter();
+      if (distanciaMetros(c.lng, c.lat, gps.lon, gps.lat) < 2) return;
+      map.easeTo({ center: [gps.lon, gps.lat], duration: 400 });
+    };
+    if (!map.isMoving()) {
+      seguir();
+      return;
+    }
+    // No interrumpir un vuelo en curso (p. ej. el centrado inicial a zoom 17),
+    // pero tampoco perder la posición que llegó a mitad: se aplica al terminar.
+    // Si el técnico arrastra, `dragstart` apaga el seguimiento y la limpieza
+    // quita este oyente antes de que el arrastre termine.
+    map.once("moveend", seguir);
+    return () => {
+      map.off("moveend", seguir);
+    };
   }, [gps, gpsSeguir, gpsActivo, mapReady]);
 
   // ── Cono de orientación (brújula tipo Avenza, §5) ──

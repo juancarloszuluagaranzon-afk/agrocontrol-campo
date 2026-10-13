@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Campo — el modo seguirme no pierde posiciones
+
+- Si llega una posición GPS mientras el mapa todavía se mueve (por ejemplo, durante el centrado
+  inicial), el mapa la sigue al terminar el movimiento. Antes la descartaba y, en teléfonos lentos,
+  quedaba atrás hasta el siguiente punto. Ver **ADR-0035**.
+
 ### Lluvia — Castilla con su red de pluviómetros
 
 - La planilla de lluvia, el reporte mensual, las gotas de "lluvia hoy" y la lluvia por suerte de la
