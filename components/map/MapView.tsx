@@ -715,9 +715,39 @@ export function MapView() {
         },
       });
 
+      // Marcador bajo el dedo: caja de ±14 px, porque el punto mide 7 px de
+      // radio y en el celular se toca con el dedo, no con el puntero.
+      const marcadorEn = (p: { x: number; y: number }): string | null => {
+        const hits = map.queryRenderedFeatures(
+          [
+            [p.x - 14, p.y - 14],
+            [p.x + 14, p.y + 14],
+          ],
+          { layers: [MARCADORES_DOT, MARCADORES_LABEL] },
+        );
+        const id = hits[0]?.properties?.id;
+        return typeof id === "string" ? id : null;
+      };
+
+      // Tocar un marcador abre su ficha con la nota; tiene prioridad sobre la
+      // suerte que queda debajo (desactivado mientras se mide).
+      map.on("click", (e) => {
+        if (useMapStore.getState().measureMode !== "off") return;
+        const id = marcadorEn(e.point);
+        if (id) useMapStore.getState().setMarcadorAbierto(id);
+      });
+
+      map.on("mouseenter", MARCADORES_DOT, () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", MARCADORES_DOT, () => {
+        map.getCanvas().style.cursor = "";
+      });
+
       // Selección al tocar un lote (desactivada mientras se mide).
       map.on("click", SUERTES_FILL, (e) => {
         if (useMapStore.getState().measureMode !== "off") return;
+        if (marcadorEn(e.point)) return;
         const f = e.features?.[0] as MapGeoJSONFeature | undefined;
         if (f) setSelected(f.properties as unknown as TablonProperties);
       });
@@ -919,7 +949,7 @@ export function MapView() {
       features: activos(marcadores).map((m) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: [m.lon, m.lat] },
-        properties: { nombre: m.nombre, color: m.color },
+        properties: { id: m.id, nombre: m.nombre, color: m.color },
       })),
     };
     source.setData(fc);

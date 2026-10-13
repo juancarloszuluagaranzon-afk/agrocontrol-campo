@@ -134,6 +134,11 @@ export const t = {
     titulo: "Ubicación · Rio Map",
     puntoCompartido: "Punto compartido",
   },
+  marcador: {
+    ficha: "Marcador",
+    cerrar: "Cerrar marcador",
+    sinNota: "Sin observaciones.",
+  },
   auth: {
     olvide: "¿Olvidaste tu contraseña?",
     recuperarTitulo: "Recuperar contraseña",
