@@ -40,6 +40,14 @@ export interface PlantaConfig {
   maestro: string;
   /** Puntos de etiqueta de hacienda (marca de agua del modo Plano, ADR-0014). */
   haciendasLabel: string;
+  /** Red de pluviómetros (planilla de lluvia y lluvia por suerte, ADR-0009). */
+  pluviometros: string;
+  /**
+   * Asignación oficial suerte → pluviómetro, si la planta la tiene (Castilla,
+   * ADR-0037). Sin ella, cada suerte toma su polígono de Thiessen o el
+   * pluviómetro más cercano.
+   */
+  pluviometrosSuertes: string | null;
   /** Capas de contexto conmutables de esta planta (ADR-0017). */
   contextLayers: ContextLayer[];
   /** Encuadre inicial del mapa. */
@@ -61,6 +69,8 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     catalogo: "/data/tablones_catalogo.json",
     maestro: "/data/maestro_suertes.json",
     haciendasLabel: "/data/haciendas_label_riopaila.json",
+    pluviometros: "/data/pluviometros_riopaila.json",
+    pluviometrosSuertes: null,
     contextLayers: CONTEXT_LAYERS,
     aoi: {
       center: AOI.center,
@@ -82,6 +92,8 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     catalogo: "/data/tablones_castilla_catalogo.json",
     maestro: "/data/maestro_castilla.json",
     haciendasLabel: "/data/haciendas_label_castilla.json",
+    pluviometros: "/data/pluviometros_castilla.json",
+    pluviometrosSuertes: "/data/pluviometros_suertes_castilla.json",
     contextLayers: CASTILLA_CONTEXT_LAYERS,
     // bbox cartografía Castilla: [-76.496, 3.058, -76.225, 3.443] (más amplia
     // que Riopaila → un punto de zoom menos).
@@ -98,6 +110,19 @@ export const PLANTAS: Record<PlantaId, PlantaConfig> = {
     },
   },
 };
+
+/**
+ * Razón social en el encabezado de los reportes de lluvia, como la escribe el
+ * reporte oficial de Recursos Hídricos: mayúsculas sin tildes ("RIOPAILA
+ * AGRICOLA S.A.", "CASTILLA AGRICOLA S.A.").
+ */
+export function razonSocialReporte(id: string | null | undefined): string {
+  const empresa = plantaConfig(isPlantaId(id) ? id : null)
+    .empresa.normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toUpperCase();
+  return `${empresa} S.A.`;
+}
 
 /** Orden de presentación en el selector y el conmutador. */
 export const PLANTA_IDS: PlantaId[] = ["riopaila", "castilla"];

@@ -1,0 +1,392 @@
+[
+{
+"id": 2102,
+"zona": 1,
+"tecnico": "Edwin Villacorte",
+"hacienda": "Buchitolo (La Musica)",
+"sitio": null,
+"area_ha": 204.87,
+"lat": 3.3603885,
+"lon": -76.3709328
+},
+{
+"id": 2107,
+"zona": 1,
+"tecnico": "Edwith Zabdiel Arango Rojas",
+"hacienda": "Libano",
+"sitio": null,
+"area_ha": 355.33,
+"lat": 3.3961057,
+"lon": -76.2602058
+},
+{
+"id": 2108,
+"zona": 1,
+"tecnico": "Edwin Villacorte",
+"hacienda": "La Avelina",
+"sitio": null,
+"area_ha": 245.34,
+"lat": 3.3602027,
+"lon": -76.2628325
+},
+{
+"id": 2112,
+"zona": 2,
+"tecnico": "Juan Camilo Ramirez",
+"hacienda": "Nilo",
+"sitio": null,
+"area_ha": 132.86,
+"lat": 3.3082178,
+"lon": -76.3036037
+},
+{
+"id": 2114,
+"zona": 1,
+"tecnico": "Edwin Villacorte",
+"hacienda": "Buchitolo",
+"sitio": null,
+"area_ha": 102.45,
+"lat": 3.371451,
+"lon": -76.3630207
+},
+{
+"id": 2118,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "San Rafael 1",
+"sitio": null,
+"area_ha": 270.13,
+"lat": 3.4014917,
+"lon": -76.30024
+},
+{
+"id": 2120,
+"zona": 1,
+"tecnico": "Edwith Zabdiel Arango Rojas",
+"hacienda": "Castilla (Piedras Blancas)",
+"sitio": null,
+"area_ha": 240.89,
+"lat": 3.373364,
+"lon": -76.278721
+},
+{
+"id": 2124,
+"zona": 1,
+"tecnico": "Edwith Zabdiel Arango Rojas",
+"hacienda": "Chamorras",
+"sitio": null,
+"area_ha": 188.92,
+"lat": 3.3837684,
+"lon": -76.2696974
+},
+{
+"id": 2128,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "La Tupia",
+"sitio": null,
+"area_ha": 190.84,
+"lat": 3.4014917,
+"lon": -76.30024
+},
+{
+"id": 2135,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "San Jorge",
+"sitio": null,
+"area_ha": 159.75,
+"lat": 3.4201507,
+"lon": -76.2982409
+},
+{
+"id": 2211,
+"zona": 2,
+"tecnico": "Eyder Palace",
+"hacienda": "Pozo Nuevo",
+"sitio": null,
+"area_ha": 265.89,
+"lat": 3.2528788,
+"lon": -76.3099172
+},
+{
+"id": 2217,
+"zona": 2,
+"tecnico": "Juan Camilo Ramirez",
+"hacienda": "Llano del Medio",
+"sitio": null,
+"area_ha": 55.76,
+"lat": 3.2949519,
+"lon": -76.2446955
+},
+{
+"id": 2302,
+"zona": 3,
+"tecnico": "Herminsul Fernandez",
+"hacienda": "La Serafina",
+"sitio": null,
+"area_ha": 176.38,
+"lat": 3.2451336,
+"lon": -76.4322265
+},
+{
+"id": 2304,
+"zona": 3,
+"tecnico": "Herminsul Fernandez",
+"hacienda": "La Pampa I",
+"sitio": null,
+"area_ha": 205.46,
+"lat": 3.2477515,
+"lon": -76.4149245
+},
+{
+"id": 2306,
+"zona": 3,
+"tecnico": "Octavio Vargas",
+"hacienda": "El Angel",
+"sitio": null,
+"area_ha": 65.64,
+"lat": 3.2650513,
+"lon": -76.4373999
+},
+{
+"id": 2308,
+"zona": 3,
+"tecnico": "Herminsul Fernandez",
+"hacienda": "Central Colombia",
+"sitio": null,
+"area_ha": 215.25,
+"lat": 3.2620452,
+"lon": -76.4137872
+},
+{
+"id": 2310,
+"zona": 3,
+"tecnico": "Octavio Vargas",
+"hacienda": "Santa Helena",
+"sitio": null,
+"area_ha": 270.46,
+"lat": 3.2704453,
+"lon": -76.4034599
+},
+{
+"id": 2312,
+"zona": 3,
+"tecnico": "Octavio Vargas",
+"hacienda": "Chontal",
+"sitio": null,
+"area_ha": 10.66,
+"lat": 3.2508259,
+"lon": -76.3730953
+},
+{
+"id": 2316,
+"zona": 3,
+"tecnico": "Octavio Vargas",
+"hacienda": "Guengue",
+"sitio": null,
+"area_ha": 20.66,
+"lat": 3.2244698,
+"lon": -76.3866943
+},
+{
+"id": 2326,
+"zona": 2,
+"tecnico": "Juan Camilo Ramirez",
+"hacienda": "La Union",
+"sitio": null,
+"area_ha": 148.2,
+"lat": 3.2806528,
+"lon": -76.271098
+},
+{
+"id": 2340,
+"zona": 2,
+"tecnico": "Juan Camilo Ramirez",
+"hacienda": "Calanda",
+"sitio": null,
+"area_ha": 324.94,
+"lat": 3.3212535,
+"lon": -76.28868
+},
+{
+"id": 2348,
+"zona": 1,
+"tecnico": "Edwin Villacorte",
+"hacienda": "Potrerillo",
+"sitio": null,
+"area_ha": 269.81,
+"lat": 3.3720482,
+"lon": -76.2423616
+},
+{
+"id": 2364,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "Chune",
+"sitio": null,
+"area_ha": 49.5,
+"lat": 3.4225161,
+"lon": -76.2512942
+},
+{
+"id": 2366,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "Lorena",
+"sitio": null,
+"area_ha": 76.67,
+"lat": 3.4375375,
+"lon": -76.2648723
+},
+{
+"id": 2378,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "Manantial",
+"sitio": null,
+"area_ha": 67.56,
+"lat": 3.39672,
+"lon": -76.23557
+},
+{
+"id": 2506,
+"zona": 2,
+"tecnico": "Eyder Palace",
+"hacienda": "San Gabriel",
+"sitio": null,
+"area_ha": 113.76,
+"lat": 3.2395502,
+"lon": -76.3034971
+},
+{
+"id": 2510,
+"zona": 2,
+"tecnico": "Eyder Palace",
+"hacienda": "Pampa Castilla",
+"sitio": null,
+"area_ha": 259.48,
+"lat": 3.2590864,
+"lon": -76.2833769
+},
+{
+"id": 2512,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "San Andres",
+"sitio": null,
+"area_ha": 35.34,
+"lat": 3.2749721,
+"lon": -76.2807449
+},
+{
+"id": 2514,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "Porvenir",
+"sitio": null,
+"area_ha": 246.36,
+"lat": 3.2692573,
+"lon": -76.2706208
+},
+{
+"id": 2516,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "Cañon",
+"sitio": null,
+"area_ha": 164.39,
+"lat": 3.2747223,
+"lon": -76.2483295
+},
+{
+"id": 2518,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "Las Brisas",
+"sitio": null,
+"area_ha": 23.71,
+"lat": 3.2674888,
+"lon": -76.2277984
+},
+{
+"id": 2519,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "El Reporter",
+"sitio": null,
+"area_ha": 125.36,
+"lat": 3.25718,
+"lon": -76.23628
+},
+{
+"id": 2711,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "Palermo",
+"sitio": null,
+"area_ha": 243.69,
+"lat": 3.2549523,
+"lon": -76.2644916
+},
+{
+"id": 2712,
+"zona": 2,
+"tecnico": "Alexander Muñoz",
+"hacienda": "Las Cañas",
+"sitio": null,
+"area_ha": 172.54,
+"lat": 3.2405706,
+"lon": -76.2432704
+},
+{
+"id": 2908,
+"zona": 3,
+"tecnico": "Adolfo León Lucumi",
+"hacienda": "El Tamboral",
+"sitio": null,
+"area_ha": 176.17,
+"lat": 3.1548105,
+"lon": -76.3455208
+},
+{
+"id": 2954,
+"zona": 3,
+"tecnico": "Adolfo León Lucumi",
+"hacienda": "Taula",
+"sitio": null,
+"area_ha": 226.24,
+"lat": 3.1760045,
+"lon": -76.3595079
+},
+{
+"id": 2958,
+"zona": 3,
+"tecnico": "Adolfo León Lucumi",
+"hacienda": "Cuernavaca",
+"sitio": null,
+"area_ha": 178.03,
+"lat": 3.1881549,
+"lon": -76.3397235
+},
+{
+"id": 2970,
+"zona": 3,
+"tecnico": "Adolfo León Lucumi",
+"hacienda": "Chamba",
+"sitio": null,
+"area_ha": 32.83,
+"lat": 3.063295,
+"lon": -76.494446
+},
+{
+"id": 2988,
+"zona": 1,
+"tecnico": "Jose William Arbeláez",
+"hacienda": "San Rafael 2",
+"sitio": null,
+"area_ha": 238.72,
+"lat": 3.3768486,
+"lon": -76.305821
+}
+]

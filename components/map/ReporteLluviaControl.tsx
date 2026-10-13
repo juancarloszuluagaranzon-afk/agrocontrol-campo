@@ -5,6 +5,7 @@ import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
 import { usePluviometros } from "@/lib/data/usePluviometros";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { razonSocialReporte } from "@/lib/plantas";
 import {
   construirReporteMensual,
   type ReporteFila,
@@ -64,7 +65,7 @@ export function ReporteLluviaControl() {
         items,
         planta,
         anioMes,
-        "RIOPAILA AGRICOLA S.A.",
+        razonSocialReporte(planta),
       ),
     [pluviometros, items, planta, anioMes],
   );
@@ -81,7 +82,7 @@ export function ReporteLluviaControl() {
         items,
         planta,
         anioMes,
-        "RIOPAILA AGRICOLA S.A.",
+        razonSocialReporte(planta),
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

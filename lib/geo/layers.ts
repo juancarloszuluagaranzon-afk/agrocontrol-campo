@@ -246,6 +246,16 @@ export const CASTILLA_CONTEXT_LAYERS: ContextLayer[] = [
     file: "/data/contexto_castilla_tuberia.geojson",
   },
   {
+    // Gotas con los mm de hoy, como en Riopaila: MapView las dibuja desde la red
+    // de la planta (no hay geojson de contexto, ADR-0037).
+    id: "pluviometros",
+    label: "Pluviómetros (lluvia hoy)",
+    geometry: "point",
+    color: "#38bdf8",
+    defaultOn: false,
+    file: "/data/pluviometros_castilla.json",
+  },
+  {
     id: "haciendas",
     label: "Haciendas (límites)",
     geometry: "line",

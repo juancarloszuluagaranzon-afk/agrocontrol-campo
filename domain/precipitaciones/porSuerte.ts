@@ -141,16 +141,26 @@ export function centrosDeSuertes(
 }
 
 /**
- * Pluviómetro de cada suerte: el polígono de Thiessen que contiene su centro;
- * si cae fuera de todos (bordes de la red), el pluviómetro más cercano.
+ * Pluviómetro de cada suerte, en orden de preferencia:
+ * 1. la asignación oficial de la planta (Castilla, ADR-0037), si el pluviómetro
+ *    está en la red;
+ * 2. el polígono de Thiessen que contiene su centro (Riopaila);
+ * 3. el pluviómetro más cercano (bordes de la red o suertes sin asignar).
  */
 export function asignarPluviometros(
   centros: ReadonlyArray<CentroSuerte>,
   thiessen: ReadonlyArray<PoligonoThiessen>,
   pluviometros: ReadonlyArray<{ id: number; lon: number; lat: number }>,
+  oficial: ReadonlyMap<string, number> = new Map(),
 ): Map<string, number> {
   const out = new Map<string, number>();
+  const enRed = new Set(pluviometros.map((p) => p.id));
   for (const c of centros) {
+    const o = oficial.get(c.sec_ste);
+    if (o !== undefined && enRed.has(o)) {
+      out.set(c.sec_ste, o);
+      continue;
+    }
     const t = thiessen.find((p) =>
       p.poligonos.some((pol) => puntoEnPoligono(c.lon, c.lat, pol)),
     );

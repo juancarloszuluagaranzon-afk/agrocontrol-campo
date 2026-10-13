@@ -181,6 +181,27 @@ test("mapa: planilla de lluvia por técnico guarda y acumula", async ({
   await expect(page.getByText(/mes 12\.5 mm/)).toBeVisible();
 });
 
+test("mapa: Castilla tiene su red de pluviómetros en la planilla y el reporte (ADR-0037)", async ({
+  page,
+}) => {
+  await elegirPlanta(page, "castilla");
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Lluvia (precipitación)" }).click();
+  const tecnico = page.getByLabel("Técnico");
+  await expect(
+    tecnico.locator("option", { hasText: "Alexander Muñoz" }),
+  ).toBeAttached();
+  await tecnico.selectOption("Alexander Muñoz");
+  await expect(page.getByText("Las Cañas")).toBeVisible();
+
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Reporte de lluvia" }).click();
+  await expect(page.getByText("CASTILLA AGRICOLA S.A.")).toBeVisible();
+});
+
 test("mapa: el reporte de lluvia muestra la tabla y descarga el XLSX", async ({
   page,
 }) => {
@@ -647,6 +668,85 @@ test("mapa: lluvia acumulada reciente sobre las suertes filtradas por edad (ADR-
     .getByRole("checkbox", { name: /Lluvia de los últimos/ })
     .uncheck();
   await expect.poll(rotulos).toMatchObject({ visible: "none" });
+});
+
+test("mapa: en Castilla la lluvia por suerte usa la asignación oficial suerte → pluviómetro (ADR-0037)", async ({
+  page,
+}) => {
+  await elegirPlanta(page, "castilla");
+  // Solo el pluviómetro 2135 (San Jorge) tiene lecturas: 5 mm los 3 días previos.
+  await page.addInitScript(() => {
+    const p = (n: number) => String(n).padStart(2, "0");
+    const hoy = new Date();
+    const items = [];
+    for (let i = 1; i <= 3; i++) {
+      const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i);
+      const fecha = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+      items.push({
+        id: `e2e-2135-${fecha}`,
+        autor: "e2e",
+        planta: "castilla",
+        pluviometro: 2135,
+        fecha,
+        mm: 5,
+        nota: "",
+        deleted: false,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      });
+    }
+    localStorage.setItem(
+      "agrocontrol-precipitaciones",
+      JSON.stringify({
+        state: { items, pending: [], syncing: false, userId: "" },
+        version: 0,
+      }),
+    );
+  });
+
+  await page.goto("/mapa");
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "Herramientas" }).click();
+  await page.getByRole("button", { name: "Capas del mapa" }).click();
+  await page.getByRole("checkbox", { name: /Edad de la caña/ }).check();
+  const leyenda = page.getByRole("region", { name: "Edad de la caña" });
+  await leyenda
+    .getByRole("checkbox", { name: /Lluvia de los últimos/ })
+    .check();
+
+  /** Rótulo de lluvia por suerte en el mapa. */
+  const porSuerte = () =>
+    page.evaluate(() => {
+      const m = (
+        window as unknown as {
+          __e2eMap?: {
+            getSource: (id: string) =>
+              | {
+                  serialize: () => {
+                    data?: {
+                      features?: Array<{
+                        properties: { sec_ste: string; etiqueta: string };
+                      }>;
+                    };
+                  };
+                }
+              | undefined;
+          };
+        }
+      ).__e2eMap;
+      const fs = m?.getSource("edad-lluvia")?.serialize().data?.features ?? [];
+      return Object.fromEntries(
+        fs.map((f) => [f.properties.sec_ste, f.properties.etiqueta]),
+      );
+    });
+  // 2101-010 está asignada oficialmente al 2135 → 3 × 5 mm; las suertes de
+  // otros pluviómetros quedan sin dato.
+  await expect.poll(async () => (await porSuerte())["2101-010"]).toBe("15 mm");
+  expect(Object.values(await porSuerte())).toContain("s/d");
 });
 
 test("mapa: en celular la leyenda de edad arranca plegada y abierta no pasa del 45 % de la pantalla (ADR-0034)", async ({
