@@ -89,7 +89,10 @@ import { t } from "@/lib/i18n/es-CO";
 import { activos, useMarcadoresStore } from "@/lib/store/marcadoresStore";
 import { activas, useMedicionesStore } from "@/lib/store/medicionesStore";
 import { usePrecipitacionesStore } from "@/lib/store/precipitacionesStore";
-import { usePluviometros } from "@/lib/data/usePluviometros";
+import {
+  useAsignacionPluviometros,
+  usePluviometros,
+} from "@/lib/data/usePluviometros";
 import { lecturaDelDia } from "@/domain/precipitaciones/acumulado";
 import { NIVELES_LLUVIA, iconoGotaStep } from "@/lib/geo/lluvia";
 import type { TablonProperties } from "@/domain/suertes/schema";
@@ -988,6 +991,7 @@ export function MapView() {
   const edadLluviaDias = useMapStore((s) => s.edadLluviaDias);
   const catalogo = useCatalogo();
   const thiessen = useThiessen();
+  const asignacionOficial = useAsignacionPluviometros();
   const maestroLluvia = useMaestro();
   // Asignación suerte → pluviómetro: solo cambia con la cartografía.
   const asignacionLluvia = useMemo(
@@ -996,8 +1000,9 @@ export function MapView() {
         centrosDeSuertes(catalogo),
         thiessen,
         pluviometrosRef,
+        asignacionOficial,
       ),
-    [catalogo, thiessen, pluviometrosRef],
+    [catalogo, thiessen, pluviometrosRef, asignacionOficial],
   );
   useEffect(() => {
     const map = mapRef.current;

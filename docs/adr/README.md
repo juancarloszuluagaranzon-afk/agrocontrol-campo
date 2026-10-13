@@ -40,3 +40,4 @@ añade una nueva.
 | 0034 | Capa "Edad de la caña" (suertes por rango de edad)                | Aceptada |
 | 0035 | Robustez en campo: sin recargas automáticas y GPS estable         | Aceptada |
 | 0036 | Mapa sin señal descargable y apertura con la sesión guardada      | Aceptada |
+| 0037 | Lluvia de Castilla: red de pluviómetros y asignación por suerte   | Aceptada |

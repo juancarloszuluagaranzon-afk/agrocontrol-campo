@@ -88,6 +88,23 @@ describe("puntoEnPoligono / asignarPluviometros", () => {
     );
     expect(Object.fromEntries(a)).toEqual({ A: 207, B: 208, C: 209 });
   });
+
+  it("la asignación oficial manda, salvo si su pluviómetro no está en la red", () => {
+    const a = asignarPluviometros(
+      [
+        { sec_ste: "A", lon: 0.4, lat: 0.4 },
+        { sec_ste: "B", lon: 1.6, lat: 0.2 },
+        { sec_ste: "C", lon: 4.8, lat: 4.9 },
+      ],
+      thiessen,
+      pluvios,
+      new Map([
+        ["A", 209], // oficial gana a Thiessen
+        ["B", 2113], // fuera de la red → Thiessen
+      ]),
+    );
+    expect(Object.fromEntries(a)).toEqual({ A: 209, B: 208, C: 209 });
+  });
 });
 
 describe("centrosDeSuertes", () => {
@@ -193,5 +210,48 @@ describe("asignación con los datos reales de Riopaila", () => {
     );
     // 531 de 610 en oct-2026; el resto cae en vías/franjas fuera de los polígonos.
     expect(dentro.length / centros.length).toBeGreaterThan(0.8);
+  });
+});
+
+describe("red de pluviómetros de Castilla (ADR-0037)", () => {
+  it("39 pluviómetros válidos en Castilla y asignación oficial para casi todas las suertes del mapa", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const { pluviometrosRefSchema } =
+      await import("@/domain/pluviometros/schema");
+    const data = join(process.cwd(), "public", "data");
+    const red = pluviometrosRefSchema.parse(
+      JSON.parse(
+        await readFile(join(data, "pluviometros_castilla.json"), "utf-8"),
+      ),
+    );
+    expect(red.length).toBe(39);
+    for (const p of red) {
+      expect(p.lon).toBeGreaterThan(-76.55);
+      expect(p.lon).toBeLessThan(-76.18);
+      expect(p.lat).toBeGreaterThan(3.0);
+      expect(p.lat).toBeLessThan(3.5);
+      expect(p.tecnico).toBeTruthy();
+    }
+    const ids = new Set(red.map((p) => p.id));
+    const oficial = JSON.parse(
+      await readFile(join(data, "pluviometros_suertes_castilla.json"), "utf-8"),
+    ) as Record<string, number>;
+    expect(Object.values(oficial).every((pv) => ids.has(pv))).toBe(true);
+
+    const cat = JSON.parse(
+      await readFile(join(data, "tablones_castilla_catalogo.json"), "utf-8"),
+    ) as Array<{ sec_ste: string; lon: number; lat: number; ha: number }>;
+    const centros = centrosDeSuertes(cat);
+    const conOficial = centros.filter((c) => oficial[c.sec_ste] !== undefined);
+    // 753 de 782 en oct-2026; el resto va al pluviómetro más cercano.
+    expect(conOficial.length / centros.length).toBeGreaterThan(0.9);
+    const a = asignarPluviometros(
+      centros,
+      [],
+      red,
+      new Map(Object.entries(oficial)),
+    );
+    expect(a.size).toBe(centros.length);
   });
 });

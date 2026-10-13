@@ -5,6 +5,17 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Lluvia — Castilla con su red de pluviómetros
+
+- La planilla de lluvia, el reporte mensual, las gotas de "lluvia hoy" y la lluvia por suerte de la
+  capa de Edad funcionan también en **Castilla**: 39 pluviómetros de 9 técnicos, según los archivos de
+  Recursos Hídricos de Castilla.
+- En Castilla cada suerte toma el pluviómetro de la **asignación oficial** (753 de 782 suertes del
+  mapa); las demás, el más cercano. Riopaila sigue con Thiessen.
+- El encabezado de los reportes muestra la razón social de la planta ("CASTILLA AGRICOLA S.A.").
+- `scripts/gen_precip_castilla_sql.mjs` convierte el CSV de lluvia diaria de Castilla en SQL
+  idempotente por trimestre. Se carga 2026 (1-ene a 27-sep, 10.530 lecturas). Ver **ADR-0037**.
+
 ### Campo — mapa sin señal y apertura inmediata sin conexión
 
 - **📥 Mapa sin señal** (menú de herramientas): descarga el satélite alrededor de todas las suertes de

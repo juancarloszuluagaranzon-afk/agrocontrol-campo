@@ -123,7 +123,7 @@ export const t = {
     dias: (n: number) => `${n} días`,
     lluviaVentana: (desde: string, hasta: string) =>
       `Del ${desde} al ${hasta} (día vencido). * = faltan lecturas.`,
-    lluviaSinRed: "Castilla aún no tiene pluviómetros en Rio Map.",
+    lluviaSinRed: "Esta planta aún no tiene pluviómetros en Rio Map.",
     lluviaCorta: "Lluvia",
     resumen: (on: number, total: number) => `${on} de ${total} rangos`,
     abrir: "Mostrar la leyenda de edad",

@@ -7,6 +7,7 @@ import { usePluviometros } from "@/lib/data/usePluviometros";
 import { usePuntosHidrologicos } from "@/lib/data/usePuntosHidrologicos";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
+import { razonSocialReporte } from "@/lib/plantas";
 import { etiquetaPluviometro } from "@/domain/pluviometros/schema";
 import {
   acumulado,
@@ -143,7 +144,7 @@ export function PrecipitacionControl() {
       items,
       planta,
       anioMes,
-      "RIOPAILA AGRICOLA S.A.",
+      razonSocialReporte(planta),
     );
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
