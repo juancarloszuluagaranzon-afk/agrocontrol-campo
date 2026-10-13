@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  puntoCardinal,
+  siguienteOrientacion,
+  textoRumbo,
   normalizeDeg,
   shortestAngleDelta,
   lerpAngle,
@@ -8,6 +11,31 @@ import {
   compassHeadingFromEvent,
   compassNecesitaCalibracion,
 } from "@/lib/geo/orientation";
+
+describe("rumbo legible (🧭)", () => {
+  it("8 puntos cardinales en español, redondeando al más cercano", () => {
+    expect(puntoCardinal(0)).toBe("N");
+    expect(puntoCardinal(22)).toBe("N");
+    expect(puntoCardinal(23)).toBe("NE");
+    expect(puntoCardinal(90)).toBe("E");
+    expect(puntoCardinal(225)).toBe("SO");
+    expect(puntoCardinal(270)).toBe("O");
+    expect(puntoCardinal(337.6)).toBe("N");
+    expect(puntoCardinal(-45)).toBe("NO");
+  });
+
+  it("texto con grados enteros de 0 a 359", () => {
+    expect(textoRumbo(45.4)).toBe("NE 45°");
+    expect(textoRumbo(359.7)).toBe("N 0°");
+    expect(textoRumbo(-90)).toBe("O 270°");
+  });
+
+  it("el toque a la brújula: norte → gira conmigo; gira conmigo o girado → norte", () => {
+    expect(siguienteOrientacion("norte")).toBe("rumbo");
+    expect(siguienteOrientacion("rumbo")).toBe("norte");
+    expect(siguienteOrientacion("libre")).toBe("norte");
+  });
+});
 
 describe("normalizeDeg", () => {
   it("envuelve a [0,360)", () => {

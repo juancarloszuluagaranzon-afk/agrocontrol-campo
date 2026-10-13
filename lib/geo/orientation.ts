@@ -115,6 +115,33 @@ export function compassHeadingFromEvent(
   return null;
 }
 
+const PUNTOS_CARDINALES = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"] as const;
+
+/** Punto cardinal (8 rumbos, en español) de un rumbo en grados (0 = N). */
+export function puntoCardinal(deg: number): (typeof PUNTOS_CARDINALES)[number] {
+  const i = Math.round(normalizeDeg(deg) / 45) % 8;
+  return PUNTOS_CARDINALES[i] ?? "N";
+}
+
+/** Rumbo legible para el técnico: "NE 45°" (grados enteros, 0–359). */
+export function textoRumbo(deg: number): string {
+  const g = Math.round(normalizeDeg(deg)) % 360;
+  return `${puntoCardinal(g)} ${g}°`;
+}
+
+/**
+ * Orientación del mapa (botón 🧭):
+ * - "norte": norte arriba;
+ * - "rumbo": el mapa gira con el celular (lo que tienes al frente queda arriba);
+ * - "libre": el técnico lo giró con dos dedos.
+ */
+export type Orientacion = "norte" | "rumbo" | "libre";
+
+/** Qué hace un toque a la brújula: girado o en rumbo → norte; norte → rumbo. */
+export function siguienteOrientacion(actual: Orientacion): Orientacion {
+  return actual === "norte" ? "rumbo" : "norte";
+}
+
 /** Umbral (grados) por encima del cual la brújula se considera mal calibrada. */
 export const COMPASS_ACCURACY_POBRE = 20;
 

@@ -41,3 +41,4 @@ añade una nueva.
 | 0035 | Robustez en campo: sin recargas automáticas y GPS estable         | Aceptada |
 | 0036 | Mapa sin señal descargable y apertura con la sesión guardada      | Aceptada |
 | 0037 | Lluvia de Castilla: red de pluviómetros y asignación por suerte   | Aceptada |
+| 0038 | Brújula visible y mapa que gira con el celular                    | Aceptada |

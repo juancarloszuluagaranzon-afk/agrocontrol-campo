@@ -142,6 +142,98 @@ test("mapa: en móvil el buscador y el conmutador no se solapan", async ({
   await expect(page.getByRole("checkbox").first()).toBeVisible();
 });
 
+/** Giro actual del mapa (grados) vía el handle de e2e. */
+async function bearingMapa(page: import("@playwright/test").Page) {
+  return page.evaluate(() =>
+    (
+      window as unknown as { __e2eMap: { getBearing: () => number } }
+    ).__e2eMap.getBearing(),
+  );
+}
+
+async function esperarMapa(page: import("@playwright/test").Page) {
+  await expect
+    .poll(() =>
+      page.evaluate(() => Boolean((window as { __e2eMap?: unknown }).__e2eMap)),
+    )
+    .toBe(true);
+}
+
+test("mapa: la brújula está siempre visible, endereza el mapa y lo hace girar con el celular", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await esperarMapa(page);
+  const brujula = page.getByRole("button", { name: /^Brújula:/ });
+  await expect(brujula).toBeVisible();
+  await expect(brujula).toHaveAccessibleName(/norte arriba/);
+
+  // El técnico gira el mapa (arrastre con el botón derecho = giro en MapLibre).
+  const box = (await page.locator(".maplibregl-canvas").boundingBox())!;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  await page.mouse.move(cx, cy);
+  await page.mouse.down({ button: "right" });
+  await page.mouse.move(cx + 200, cy, { steps: 10 });
+  await page.mouse.up({ button: "right" });
+  await expect
+    .poll(async () => Math.abs(await bearingMapa(page)))
+    .toBeGreaterThan(5);
+  await expect(brujula).toHaveAccessibleName(/mapa girado/);
+
+  // Un toque: norte arriba.
+  await brujula.click();
+  await expect
+    .poll(async () => Math.abs(await bearingMapa(page)))
+    .toBeLessThan(0.5);
+  await expect(brujula).toHaveAccessibleName(/norte arriba/);
+
+  // Otro toque: el mapa gira con el celular. El teléfono "mira" al este (90°).
+  await brujula.click();
+  await expect(brujula).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() => {
+    const enviar = () =>
+      window.dispatchEvent(
+        Object.assign(new Event("deviceorientationabsolute"), {
+          alpha: 270,
+          absolute: true,
+        }),
+      );
+    enviar();
+    (window as unknown as { __rumbo: number }).__rumbo = window.setInterval(
+      enviar,
+      100,
+    );
+  });
+  await expect
+    .poll(async () => Math.abs((await bearingMapa(page)) - 90), {
+      timeout: 10_000,
+    })
+    .toBeLessThan(2);
+  // El rumbo en texto aparece junto al GPS.
+  await expect(page.getByTestId("rumbo")).toHaveText("🧭 E 90°");
+
+  // Otro toque: vuelve el norte arriba.
+  await brujula.click();
+  await expect(brujula).toHaveAttribute("aria-pressed", "false");
+  await expect
+    .poll(async () => Math.abs(await bearingMapa(page)))
+    .toBeLessThan(0.5);
+});
+
+test("mapa: sin sensor de brújula, el modo 'gira conmigo' avisa y vuelve al norte", async ({
+  page,
+}) => {
+  await page.goto("/mapa");
+  await esperarMapa(page);
+  const brujula = page.getByRole("button", { name: /^Brújula:/ });
+  await brujula.click();
+  await expect(page.getByText(/no reporta la brújula/)).toBeVisible({
+    timeout: 6_000,
+  });
+  await expect(brujula).toHaveAttribute("aria-pressed", "false");
+});
+
 test("mapa: crear un marcador privado lo lista", async ({ page }) => {
   await page.goto("/mapa");
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();

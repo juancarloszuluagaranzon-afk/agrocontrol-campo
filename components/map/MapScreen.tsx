@@ -11,6 +11,7 @@ import { EdadLegend } from "@/components/map/EdadLegend";
 import { SuertePanel } from "@/components/map/SuertePanel";
 import { MarcadorCard } from "@/components/map/MarcadorCard";
 import { GpsControl } from "@/components/map/GpsControl";
+import { BrujulaControl } from "@/components/map/BrujulaControl";
 import { MeasureControl } from "@/components/map/MeasureControl";
 import { MeasureResult } from "@/components/map/MeasureResult";
 import { MarcadorControl } from "@/components/map/MarcadorControl";
@@ -101,6 +102,11 @@ export function MapScreen() {
 
       {/* Maestro de suertes: panel de pantalla completa (búsqueda + ficha). */}
       {activeTool === "maestro" && <MaestroControl />}
+
+      {/* Brújula siempre visible, bajo los botones de zoom (arriba-der.). */}
+      <div className="absolute top-[76px] right-[6px] z-10">
+        <BrujulaControl />
+      </div>
 
       {/* Mi ubicación (GPS): FAB propio a la derecha (alcance con el pulgar). */}
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 -translate-y-1/2">

@@ -28,6 +28,15 @@ export const t = {
   },
   brujula: {
     calibrar: "Calibra la brújula: mueve el teléfono en forma de 8.",
+    norte: "Brújula: norte arriba. Toca para que el mapa gire contigo.",
+    rumbo:
+      "Brújula: el mapa gira contigo. Toca para volver a poner el norte arriba.",
+    libre: "Brújula: mapa girado. Toca para poner el norte arriba.",
+    activar: "Activar brújula",
+    sinPermiso:
+      "No se pudo activar la brújula. Permite el acceso a la orientación (sensores de movimiento) en el navegador y vuelve a tocar 🧭.",
+    sinSensor:
+      "Este dispositivo no reporta la brújula. El mapa queda con el norte arriba.",
   },
   gps: {
     afinando: "Afinando ubicación…",
