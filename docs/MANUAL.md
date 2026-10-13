@@ -29,7 +29,13 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
   es baja. Aparece además un **cono de orientación** que indica hacia dónde apuntas
   (usa la brújula del teléfono; gira al mover el equipo). Si el cono "baila" o
   apunta mal, **calibra** moviendo el teléfono en forma de 8. En iPhone, la primera
-  vez te pedirá permiso para la orientación.
+  vez te pedirá permiso para la orientación; si lo negaste, toca **🧭 Activar
+  brújula**. Junto a la precisión verás el rumbo, p. ej. **🧭 NE 45°**.
+- **Brújula** (botón 🧭, arriba a la derecha, bajo el zoom): siempre visible; la
+  aguja roja apunta al norte. Tócala para que **el mapa gire contigo** (lo que
+  tienes al frente queda arriba, el botón se marca en azul); tócala otra vez para
+  volver al **norte arriba**. Si giraste el mapa con dos dedos, un toque lo
+  endereza.
 - **Dibujar y medir** (menú ✏️): elige **área** o **distancia**, toca el mapa para
   marcar vértices (o usa **+ GPS** para marcar tu posición). Verás **área (ha) y
   perímetro** o **distancia (m)**. Si mides dentro de una suerte conocida, te

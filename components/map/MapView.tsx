@@ -27,7 +27,12 @@ import {
 import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
-import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
+import {
+  coneSector,
+  lerpAngle,
+  metersPerPixel,
+  shortestAngleDelta,
+} from "@/lib/geo/orientation";
 import {
   accuracyCircle,
   distanciaMetros,
@@ -270,6 +275,15 @@ export function MapView() {
     // Si el técnico arrastra el mapa, deja de seguir su ubicación (ADR-0035);
     // el botón de GPS vuelve a activarlo. `dragstart` solo lo dispara el gesto.
     map.on("dragstart", () => useMapStore.getState().setGpsSeguir(false));
+    // Giro del mapa → aguja de la brújula 🧭. Si lo gira el técnico con dos
+    // dedos (evento con `originalEvent`), la orientación queda "libre".
+    map.on("rotate", () =>
+      useMapStore.getState().setMapBearing(map.getBearing()),
+    );
+    map.on("rotatestart", (e) => {
+      if ("originalEvent" in e && e.originalEvent)
+        useMapStore.getState().setOrientacion("libre");
+    });
 
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
@@ -859,7 +873,16 @@ export function MapView() {
     const seguir = () => {
       const c = map.getCenter();
       if (distanciaMetros(c.lng, c.lat, gps.lon, gps.lat) < 2) return;
-      map.easeTo({ center: [gps.lon, gps.lat], duration: 400 });
+      // En modo "gira conmigo" el mismo movimiento conserva el rumbo; si no,
+      // easeTo cortaría el giro que aplica el efecto de orientación.
+      // Ojo: MapLibre mira si la clave `bearing` existe, no su valor; con
+      // `bearing: undefined` el giro queda en NaN y el mapa se rompe.
+      const { orientacion: o, deviceHeading: rumbo } = useMapStore.getState();
+      map.easeTo({
+        center: [gps.lon, gps.lat],
+        duration: 400,
+        ...(o === "rumbo" && rumbo != null ? { bearing: rumbo } : {}),
+      });
     };
     if (!map.isMoving()) {
       seguir();
@@ -875,6 +898,35 @@ export function MapView() {
     };
   }, [gps, gpsSeguir, gpsActivo, mapReady]);
 
+  // ── Orientación del mapa (botón 🧭): norte arriba o "gira conmigo" ──
+  const orientacion = useMapStore((s) => s.orientacion);
+  const norteNonce = useMapStore((s) => s.norteNonce);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    if (orientacion === "norte") {
+      if (Math.abs(map.getBearing()) > 0.5)
+        map.easeTo({ bearing: 0, duration: 300 });
+      return;
+    }
+    if (orientacion !== "rumbo") return;
+    // Bucle: lleva el giro del mapa al rumbo del celular por el camino corto,
+    // suavizado, sin pisar un movimiento en curso (centrado, arrastre).
+    let raf = 0;
+    const frame = () => {
+      const objetivo = useMapStore.getState().deviceHeading;
+      if (objetivo != null && !map.isMoving()) {
+        const actual = map.getBearing();
+        const delta = shortestAngleDelta(actual, objetivo);
+        if (Math.abs(delta) >= 1)
+          map.setBearing(lerpAngle(actual, objetivo, 0.25));
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [orientacion, norteNonce, mapReady]);
+
   // ── Cono de orientación (brújula tipo Avenza, §5) ──
   // Bucle de animación: interpola el rumbo por el camino corto (sin saltos en
   // 0/360) y redibuja el cono a ~60 fps. El tamaño en pantalla se mantiene
@@ -884,7 +936,7 @@ export function MapView() {
   const gpsPresente = useMapStore((s) => s.gps != null);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !mapReady) return;
     const source = map.getSource(GPS_CONE_SOURCE) as GeoJSONSource | undefined;
     if (!source) return;
 
@@ -925,7 +977,9 @@ export function MapView() {
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [compassActive, gpsPresente]);
+    // `mapReady` en deps: si la brújula se enciende antes de montar las capas,
+    // el cono aparece al quedar listo el mapa (gotcha de CLAUDE.md).
+  }, [compassActive, gpsPresente, mapReady]);
 
   // ── Centrar en mi ubicación ──
   const centerNonce = useMapStore((s) => s.centerNonce);

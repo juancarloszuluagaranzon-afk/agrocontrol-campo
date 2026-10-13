@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { TablonProperties } from "@/domain/suertes/schema";
 import { PLANTA_IDS, PLANTAS } from "@/lib/plantas";
 import type { LngLat } from "@/lib/geo/measure";
+import type { Orientacion } from "@/lib/geo/orientation";
 import type { RangoEdad } from "@/domain/maestro/edad";
 import type { DiasLluvia } from "@/domain/precipitaciones/porSuerte";
 
@@ -117,6 +118,14 @@ interface MapState {
   /** Precisión de la brújula en grados (negativa o alta = mal calibrada). */
   headingAccuracy: number | null;
   setDeviceHeading: (heading: number, accuracy: number | null) => void;
+  /** Giro actual del mapa en grados (0 = norte arriba), para la flecha 🧭. */
+  mapBearing: number;
+  setMapBearing: (b: number) => void;
+  /** Norte arriba, el mapa gira con el celular, o girado a mano (botón 🧭). */
+  orientacion: Orientacion;
+  /** Se incrementa en cada pedido de "norte arriba" (dispara el enderezado). */
+  norteNonce: number;
+  setOrientacion: (o: Orientacion) => void;
 
   // ── Medición ──
   measureMode: MeasureMode;
@@ -240,6 +249,18 @@ export const useMapStore = create<MapState>((set) => ({
   headingAccuracy: null,
   setDeviceHeading: (deviceHeading, headingAccuracy) =>
     set({ deviceHeading, headingAccuracy }),
+  mapBearing: 0,
+  setMapBearing: (mapBearing) => set({ mapBearing }),
+  orientacion: "norte",
+  norteNonce: 0,
+  // Pedir "norte" siempre cuenta (aunque ya estuviera en "norte" con el mapa
+  // girado por un vuelo): el nonce hace que MapView vuelva a enderezarlo.
+  setOrientacion: (orientacion) =>
+    set((s) =>
+      orientacion === "norte"
+        ? { orientacion, norteNonce: s.norteNonce + 1 }
+        : { orientacion },
+    ),
 
   measureMode: "off",
   vertices: [],

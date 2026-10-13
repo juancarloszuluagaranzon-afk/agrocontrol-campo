@@ -5,6 +5,16 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Mapa — brújula siempre visible y mapa que gira contigo
+
+- **Botón 🧭** arriba a la derecha, bajo el zoom, siempre visible: la aguja roja apunta al norte y
+  gira con el mapa. Un toque hace que **el mapa gire con el celular** (lo que tienes al frente queda
+  arriba); otro, vuelve al **norte arriba**. Si el mapa quedó girado con dos dedos, un toque lo
+  endereza.
+- **Rumbo en texto** junto a la precisión del GPS ("🧭 NE 45°").
+- Con el GPS encendido y sin brújula (permiso negado en iPhone), aparece **🧭 Activar brújula**. Si el
+  equipo no tiene brújula, se avisa en vez de quedarse quieto. Ver **ADR-0038**.
+
 ### Marcadores — las observaciones se ven en el celular
 
 - La nota de un marcador solo existía como tooltip de la lista, que no aparece en el celular: se

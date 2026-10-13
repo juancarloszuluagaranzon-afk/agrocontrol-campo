@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMapStore } from "@/lib/store/mapStore";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { useWakeLock } from "@/lib/geo/useWakeLock";
@@ -8,7 +8,8 @@ import {
   requestOrientationPermission,
   useDeviceHeading,
 } from "@/lib/geo/useDeviceHeading";
-import { compassNecesitaCalibracion } from "@/lib/geo/orientation";
+import { compassNecesitaCalibracion, textoRumbo } from "@/lib/geo/orientation";
+import { activarBrujula } from "@/lib/geo/activarBrujula";
 import { gpsAfinando } from "@/lib/geo/gps";
 import { formatMetros } from "@/lib/geo/format";
 import { t } from "@/lib/i18n/es-CO";
@@ -33,6 +34,8 @@ export function GpsControl() {
   const compassActive = useMapStore((s) => s.compassActive);
   const setCompassActive = useMapStore((s) => s.setCompassActive);
   const headingAccuracy = useMapStore((s) => s.headingAccuracy);
+  const deviceHeading = useMapStore((s) => s.deviceHeading);
+  const [sinPermisoBrujula, setSinPermisoBrujula] = useState(false);
   const seguir = useMapStore((s) => s.gpsSeguir);
   const setSeguir = useMapStore((s) => s.setGpsSeguir);
   const centeredRef = useRef(false);
@@ -110,6 +113,11 @@ export function GpsControl() {
     }
   }
 
+  async function encenderBrujula() {
+    const ok = await activarBrujula();
+    setSinPermisoBrujula(!ok);
+  }
+
   const precisionPobre = gps != null && gps.accuracy > PRECISION_POBRE_M;
   const calibrar = compassActive && compassNecesitaCalibracion(headingAccuracy);
   // Aviso transitorio: activo pero aún sin un fix preciso (sigue afinando).
@@ -162,6 +170,32 @@ export function GpsControl() {
         >
           ± {formatMetros(gps.accuracy)}
           {precisionPobre ? " · precisión baja" : ""}
+        </span>
+      )}
+      {compassActive && deviceHeading != null && (
+        <span
+          data-testid="rumbo"
+          className="bg-background text-accent rounded-md px-2 py-1 text-xs font-semibold tabular-nums shadow ring-1 ring-black/10"
+        >
+          🧭 {textoRumbo(deviceHeading)}
+        </span>
+      )}
+      {/* Con GPS y sin brújula (permiso negado o nunca pedido): ofrecerla. */}
+      {gpsActive && !compassActive && (
+        <button
+          type="button"
+          onClick={() => void encenderBrujula()}
+          className="bg-background rounded-md px-2 py-1 text-xs font-semibold text-blue-700 shadow ring-1 ring-black/10"
+        >
+          🧭 {t.brujula.activar}
+        </button>
+      )}
+      {sinPermisoBrujula && !compassActive && (
+        <span
+          role="alert"
+          className="bg-background max-w-52 rounded-md px-2 py-1 text-right text-xs font-medium text-amber-700 shadow ring-1 ring-black/10"
+        >
+          {t.brujula.sinPermiso}
         </span>
       )}
     </div>
