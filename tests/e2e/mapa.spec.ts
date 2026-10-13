@@ -718,3 +718,138 @@ test.describe("GPS tras una recarga", () => {
     await expect(page.getByText(/± \d+ m/)).toBeVisible();
   });
 });
+
+test.describe("GPS: modo seguirme", () => {
+  test.use({
+    geolocation: { latitude: 4.36, longitude: -76.11, accuracy: 8 },
+    permissions: ["geolocation"],
+  });
+
+  test("mapa: el mapa sigue al técnico; al arrastrar deja de seguir y el botón lo reactiva (ADR-0035)", async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/mapa");
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Boolean((window as { __e2eMap?: unknown }).__e2eMap),
+        ),
+      )
+      .toBe(true);
+
+    /** Centro actual del mapa [lon, lat]. */
+    const centro = () =>
+      page.evaluate(() => {
+        const m = (
+          window as unknown as {
+            __e2eMap: { getCenter: () => { lng: number; lat: number } };
+          }
+        ).__e2eMap;
+        const c = m.getCenter();
+        return [c.lng, c.lat];
+      });
+    const cerca = (c: number[], lon: number, lat: number) =>
+      Math.abs(c[0]! - lon) < 0.0005 && Math.abs(c[1]! - lat) < 0.0005;
+
+    await page.getByRole("button", { name: "Activar mi ubicación" }).click();
+    await expect
+      .poll(async () => cerca(await centro(), -76.11, 4.36), {
+        timeout: 15_000,
+      })
+      .toBe(true);
+
+    // El técnico camina ~250 m: el mapa lo acompaña.
+    await context.setGeolocation({
+      latitude: 4.3622,
+      longitude: -76.1108,
+      accuracy: 8,
+    });
+    await expect
+      .poll(async () => cerca(await centro(), -76.1108, 4.3622), {
+        timeout: 15_000,
+      })
+      .toBe(true);
+
+    // Arrastra el mapa: deja de seguir y el botón ofrece "Seguir mi ubicación".
+    const canvas = page.locator(".maplibregl-canvas");
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(
+      box.x + box.width / 2 + 160,
+      box.y + box.height / 2 + 60,
+      { steps: 8 },
+    );
+    await page.mouse.up();
+    const seguir = page.getByRole("button", { name: "Seguir mi ubicación" });
+    await expect(seguir).toBeVisible();
+    const tras = await centro();
+    await context.setGeolocation({
+      latitude: 4.364,
+      longitude: -76.112,
+      accuracy: 8,
+    });
+    await page.waitForTimeout(1500);
+    expect(cerca(await centro(), -76.112, 4.364)).toBe(false);
+    expect(cerca(await centro(), tras[0]!, tras[1]!)).toBe(true);
+
+    // Tocar el botón vuelve a seguir y centra.
+    await seguir.click();
+    await expect(
+      page.getByRole("button", { name: "Centrar en mi ubicación" }),
+    ).toBeVisible();
+    await expect
+      .poll(async () => cerca(await centro(), -76.112, 4.364), {
+        timeout: 15_000,
+      })
+      .toBe(true);
+  });
+});
+
+test("mapa: si el GPS tarda (tiempo agotado), no muestra error y sigue 'Afinando ubicación…' (ADR-0035)", async ({
+  page,
+}) => {
+  // GPS falso: el primer intento agota el tiempo (código 3) y no hay posición
+  // aproximada; la posición llega después por el seguimiento.
+  await page.addInitScript(() => {
+    let watchCb: ((p: GeolocationPosition) => void) | null = null;
+    const fake = {
+      getCurrentPosition: (_ok: unknown, err: (e: { code: number }) => void) =>
+        err({ code: 2 }),
+      watchPosition: (
+        ok: (p: GeolocationPosition) => void,
+        err: (e: { code: number; PERMISSION_DENIED: number }) => void,
+      ) => {
+        watchCb = ok;
+        setTimeout(() => err({ code: 3, PERMISSION_DENIED: 1 }), 50);
+        return 1;
+      },
+      clearWatch: () => undefined,
+    };
+    Object.defineProperty(navigator, "geolocation", { value: fake });
+    (window as unknown as { __entregarFix: () => void }).__entregarFix = () =>
+      watchCb?.({
+        coords: {
+          latitude: 4.36,
+          longitude: -76.11,
+          accuracy: 6,
+          heading: null,
+        },
+      } as unknown as GeolocationPosition);
+  });
+  await page.goto("/mapa");
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Activar mi ubicación" }).click();
+
+  await expect(page.getByText("Afinando ubicación…")).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByText("No se pudo obtener la ubicación.")).toHaveCount(
+    0,
+  );
+
+  await page.evaluate(() =>
+    (window as unknown as { __entregarFix: () => void }).__entregarFix(),
+  );
+  await expect(page.getByText(/± 6 m/)).toBeVisible();
+});

@@ -4,6 +4,8 @@ import {
   gpsAfinando,
   distanciaMetros,
   GPS_PRECISION_OK_M,
+  errorGpsDefinitivo,
+  necesitaRedibujoCono,
 } from "@/lib/geo/gps";
 
 describe("distanciaMetros", () => {
@@ -51,5 +53,35 @@ describe("accuracyCircle", () => {
     const c = accuracyCircle(-76.36, 3.25, -5, 8);
     const ring = c.geometry.coordinates[0]!;
     expect(ring.every((p) => p[0] === -76.36 && p[1] === 3.25)).toBe(true);
+  });
+});
+
+describe("errorGpsDefinitivo", () => {
+  it("solo el permiso denegado es definitivo; sin posición y tiempo agotado son transitorios", () => {
+    expect(errorGpsDefinitivo(1)).toBe(true);
+    expect(errorGpsDefinitivo(2)).toBe(false);
+    expect(errorGpsDefinitivo(3)).toBe(false);
+  });
+});
+
+describe("necesitaRedibujoCono", () => {
+  const base = { lon: -76.1, lat: 4.3, rumbo: 90, zoom: 16 };
+  it("dibuja la primera vez", () => {
+    expect(necesitaRedibujoCono(null, base)).toBe(true);
+  });
+  it("no redibuja si nada cambió o el rumbo varió menos de 1°", () => {
+    expect(necesitaRedibujoCono(base, { ...base })).toBe(false);
+    expect(necesitaRedibujoCono(base, { ...base, rumbo: 90.6 })).toBe(false);
+  });
+  it("redibuja por rumbo (incluido el cruce de 0/360), posición o zoom", () => {
+    expect(necesitaRedibujoCono(base, { ...base, rumbo: 92 })).toBe(true);
+    expect(
+      necesitaRedibujoCono({ ...base, rumbo: 359.5 }, { ...base, rumbo: 0.2 }),
+    ).toBe(false);
+    expect(
+      necesitaRedibujoCono({ ...base, rumbo: 359 }, { ...base, rumbo: 1 }),
+    ).toBe(true);
+    expect(necesitaRedibujoCono(base, { ...base, lat: 4.30001 })).toBe(true);
+    expect(necesitaRedibujoCono(base, { ...base, zoom: 16.2 })).toBe(true);
   });
 });

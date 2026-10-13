@@ -28,7 +28,12 @@ import { haciendaMatchExpression } from "@/lib/geo/haciendas";
 import { haciendaLabelColorExpression } from "@/domain/haciendas/schema";
 import { useHaciendasLabel } from "@/lib/data/useHaciendasLabel";
 import { coneSector, lerpAngle, metersPerPixel } from "@/lib/geo/orientation";
-import { accuracyCircle } from "@/lib/geo/gps";
+import {
+  accuracyCircle,
+  distanciaMetros,
+  necesitaRedibujoCono,
+  type EstadoCono,
+} from "@/lib/geo/gps";
 import {
   type ContextLayer,
   contextLayerFile,
@@ -259,6 +264,9 @@ export function MapView() {
       useMapStore.getState().setMapCenter([c.lng, c.lat]);
     };
     map.on("move", syncCenter);
+    // Si el técnico arrastra el mapa, deja de seguir su ubicación (ADR-0035);
+    // el botón de GPS vuelve a activarlo. `dragstart` solo lo dispara el gesto.
+    map.on("dragstart", () => useMapStore.getState().setGpsSeguir(false));
 
     map.on("load", () => {
       map.addSource(SUERTES_SOURCE, { type: "geojson", data: cfg.tablones });
@@ -805,7 +813,22 @@ export function MapView() {
         ? accuracyCircle(gps.lon, gps.lat, gps.accuracy)
         : { type: "FeatureCollection", features: [] },
     );
-  }, [gps]);
+    // `mapReady` en deps: un fix que llega antes de montar las capas se dibuja
+    // al quedar listo el mapa (gotcha de CLAUDE.md).
+  }, [gps, mapReady]);
+
+  // ── Modo "seguirme" (ADR-0035): el mapa acompaña cada posición nueva ──
+  const gpsSeguir = useMapStore((s) => s.gpsSeguir);
+  const gpsActivo = useMapStore((s) => s.gpsActive);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !gpsActivo || !gpsSeguir || !gps) return;
+    // No interrumpir un vuelo en curso (p. ej. el centrado inicial a zoom 17).
+    if (map.isMoving()) return;
+    const c = map.getCenter();
+    if (distanciaMetros(c.lng, c.lat, gps.lon, gps.lat) < 2) return;
+    map.easeTo({ center: [gps.lon, gps.lat], duration: 400 });
+  }, [gps, gpsSeguir, gpsActivo, mapReady]);
 
   // ── Cono de orientación (brújula tipo Avenza, §5) ──
   // Bucle de animación: interpola el rumbo por el camino corto (sin saltos en
@@ -827,6 +850,7 @@ export function MapView() {
 
     let raf = 0;
     let mostrado: number | null = null; // rumbo suavizado actual
+    let dibujado: EstadoCono | null = null; // último cono enviado al mapa
     const RADIO_PX = 64;
 
     const frame = () => {
@@ -836,14 +860,21 @@ export function MapView() {
       if (fix && objetivo != null) {
         mostrado =
           mostrado == null ? objetivo : lerpAngle(mostrado, objetivo, 0.2);
-        const radioM = RADIO_PX * metersPerPixel(fix.lat, map.getZoom());
-        source.setData(
-          coneSector(fix.lon, fix.lat, mostrado, {
-            apertureDeg: 60,
-            radiusM: radioM,
-            steps: 12,
-          }),
-        );
+        const zoom = map.getZoom();
+        const estado = { lon: fix.lon, lat: fix.lat, rumbo: mostrado, zoom };
+        // Solo redibuja si algo cambió de verdad (ADR-0035): antes enviaba la
+        // geometría 60 veces por segundo y saturaba teléfonos de gama media.
+        if (necesitaRedibujoCono(dibujado, estado)) {
+          dibujado = estado;
+          const radioM = RADIO_PX * metersPerPixel(fix.lat, zoom);
+          source.setData(
+            coneSector(fix.lon, fix.lat, mostrado, {
+              apertureDeg: 60,
+              radiusM: radioM,
+              steps: 12,
+            }),
+          );
+        }
       }
       raf = requestAnimationFrame(frame);
     };
