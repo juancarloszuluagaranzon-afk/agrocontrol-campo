@@ -20,6 +20,11 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
+  // Por defecto Serwist recarga la página en cada evento `online`. En campo, con
+  // señal que va y viene, eso reiniciaba la app muchas veces: mapa al inicio,
+  // paneles cerrados y GPS apagado. La app ya sincroniza sola al volver la
+  // señal (useSync), así que la recarga no aporta nada.
+  reloadOnOnline: false,
   // Precachea el documento del shell offline (`/~offline`) versionado junto a los
   // chunks del mismo build, para que la app abra sin señal (ADR-0020). Se usa
   // `manifestTransforms` y NO `additionalPrecacheEntries`: este último desactiva
