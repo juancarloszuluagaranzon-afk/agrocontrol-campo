@@ -46,7 +46,10 @@ Rio Map es funcionar mejor que Avenza en esas condiciones. La revisión encontr�
 - **Pantalla encendida** mientras el GPS está activo (`useWakeLock`, Screen Wake
   Lock API): con la pantalla apagada el navegador pausa el GPS.
 - **Modo "seguirme"** (`gpsSeguir`): el mapa acompaña cada posición nueva
-  (`easeTo`, sin interrumpir vuelos en curso). Arrastrar el mapa lo desactiva;
+  (`easeTo`, sin interrumpir vuelos en curso). Una posición que llega mientras
+  el mapa se mueve se aplica al terminar el movimiento (`moveend`); antes se
+  descartaba y, en un teléfono lento, el mapa quedaba atrás hasta el siguiente
+  punto. Arrastrar el mapa lo desactiva;
   el botón muestra "Seguir mi ubicación" (borde azul) y al tocarlo vuelve a
   seguir (relleno azul).
 - **Brújula liviana**: el cono se redibuja solo si cambió el rumbo (≥ 1°), la
