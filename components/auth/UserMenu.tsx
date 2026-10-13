@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { nombreUsuario, useUser } from "@/lib/auth/useUser";
 import { createClient } from "@/lib/supabase/client";
+import { guardarUsuario } from "@/lib/auth/usuarioGuardado";
 
 /** Identidad del usuario + cerrar sesión, en la cabecera. */
 export function UserMenu() {
@@ -11,6 +12,9 @@ export function UserMenu() {
 
   async function salir() {
     await createClient().auth.signOut();
+    // Aunque sin señal Supabase no confirme el cierre, el atajo offline se
+    // borra: quien sale no debe volver a entrar sin contraseña (ADR-0036).
+    guardarUsuario(null);
     router.replace("/login");
   }
 

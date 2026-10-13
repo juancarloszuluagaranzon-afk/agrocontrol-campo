@@ -154,6 +154,34 @@ export const t = {
       "El enlace no es válido o ya venció. Pide uno nuevo desde la pantalla de entrar.",
     irAEntrar: "Ir a entrar",
   },
+  mapaOffline: {
+    menu: "Mapa sin señal",
+    titulo: "📥 Mapa sin señal",
+    ayuda: (planta: string) =>
+      `Guarda en el celular el satélite de las fincas de ${planta} para verlo y ubicarte sin señal.`,
+    tamano: (teselas: string, mb: string) =>
+      `${teselas} teselas · ≈ ${mb} MB · del panorama al detalle de suerte`,
+    calculando: "Calculando el área de las fincas…",
+    listo: (fecha: string) => `✅ Listo para usar sin señal · ${fecha}`,
+    parcial: (pct: number) =>
+      `Descargado el ${pct} %. Toca Completar para terminar.`,
+    nada: "Aún no está descargado.",
+    consejo:
+      "Hazlo con Wi-Fi y deja la app abierta. Si se corta, toca Completar y sigue donde iba.",
+    descargar: "Descargar",
+    completar: "Completar",
+    cancelar: "Cancelar",
+    borrar: "Borrar",
+    progreso: (hechas: string, total: string, pct: number) =>
+      `${hechas} de ${total} · ${pct} %`,
+    faltaron: (n: string) =>
+      `Faltaron ${n} teselas por la señal. Toca Completar para reintentar.`,
+    cancelado: "Descarga detenida. Lo bajado queda guardado.",
+    sinSenal: "Sin señal: conéctate para descargar.",
+    noSoportado:
+      "Este navegador no permite guardar el mapa. Abre Rio Map desde el ícono instalado o desde Chrome.",
+    errorDatos: "No se pudieron leer las suertes de la planta.",
+  },
   maestro: {
     titulo: "Maestro de suertes",
     buscar: "Buscar suerte o hacienda…",

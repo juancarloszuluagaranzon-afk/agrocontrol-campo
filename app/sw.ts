@@ -1,6 +1,7 @@
 import { defaultCache } from "@serwist/next/worker";
 import type {
   PrecacheEntry,
+  RouteHandlerCallback,
   RuntimeCaching,
   SerwistGlobalConfig,
 } from "serwist";
@@ -11,6 +12,12 @@ import {
   Serwist,
   StaleWhileRevalidate,
 } from "serwist";
+import {
+  recorteDeMadre,
+  teselaDeUrlEsri,
+  urlTeselaEsri,
+} from "../lib/geo/teselas";
+import { CACHE_MAPA_OFFLINE, PARAM_DESCARGA } from "../lib/offline/mapaOffline";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -21,11 +28,96 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
+/** Busca en el "Mapa sin señal" descargado por la app (ADR-0036). */
+async function buscarEnMapaDescargado(url: string): Promise<Response | null> {
+  const cache = await caches.open(CACHE_MAPA_OFFLINE);
+  return (await cache.match(url)) ?? null;
+}
+
+// Caché "al vuelo": lo que se ve con señal fuera de lo descargado.
+const esriRuntime = new CacheFirst({
+  cacheName: "agrocontrol-tiles-esri",
+  plugins: [
+    new ExpirationPlugin({
+      maxEntries: 3000,
+      maxAgeSeconds: 30 * 24 * 60 * 60,
+      purgeOnQuotaError: true,
+    }),
+  ],
+});
+
+const glifosRuntime = new CacheFirst({
+  cacheName: "agrocontrol-glifos",
+  plugins: [
+    new ExpirationPlugin({
+      maxEntries: 32,
+      maxAgeSeconds: 365 * 24 * 60 * 60,
+      purgeOnQuotaError: true,
+    }),
+  ],
+});
+
+/** Niveles de zoom hacia arriba en que se busca una tesela "madre". */
+const NIVELES_MADRE = 5;
+
+/**
+ * Sin señal y sin la tesela exacta (p. ej. zoom 19, o una zona fuera de lo
+ * descargado), arma una con el trozo de una tesela de menor zoom ampliado:
+ * se ve más borroso, pero el técnico no queda sobre un fondo vacío.
+ */
+async function teselaDesdeMadre(url: string): Promise<Response | null> {
+  const t = teselaDeUrlEsri(url);
+  if (
+    !t ||
+    typeof OffscreenCanvas === "undefined" ||
+    typeof createImageBitmap === "undefined"
+  )
+    return null;
+  for (let n = 1; n <= NIVELES_MADRE; n++) {
+    const r = recorteDeMadre(t, n);
+    if (!r) break;
+    const urlMadre = urlTeselaEsri(r.madre);
+    const madre =
+      (await buscarEnMapaDescargado(urlMadre)) ??
+      (await caches.match(urlMadre, { cacheName: "agrocontrol-tiles-esri" }));
+    if (!madre) continue;
+    try {
+      const bmp = await createImageBitmap(await madre.blob());
+      const lienzo = new OffscreenCanvas(256, 256);
+      const ctx = lienzo.getContext("2d");
+      if (!ctx) return null;
+      ctx.drawImage(bmp, r.sx, r.sy, r.lado, r.lado, 0, 0, 256, 256);
+      bmp.close();
+      const blob = await lienzo.convertToBlob({
+        type: "image/jpeg",
+        quality: 0.9,
+      });
+      return new Response(blob, { headers: { "Content-Type": "image/jpeg" } });
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+const teselaEsri: RouteHandlerCallback = async ({ request, event }) => {
+  const descargada = await buscarEnMapaDescargado(request.url);
+  if (descargada) return descargada;
+  try {
+    return await esriRuntime.handle({ request, event });
+  } catch (err) {
+    const armada = await teselaDesdeMadre(request.url);
+    if (armada) return armada;
+    throw err;
+  }
+};
+
 /**
  * Estrategias offline de campo (§14):
  *  - Datos estáticos (/data/*.geojson|json): cache-first (cambian poco; sirven sin red).
- *  - Tiles satelitales Esri del AOI: cache-first con tope de entradas y expiración,
- *    para "descargar el mapa" navegando una vez antes de ir a campo.
+ *  - Tiles satelitales Esri: el "Mapa sin señal" descargado (caché propio, sin
+ *    tope), luego cache-first al vuelo con tope de entradas y, sin red, una
+ *    tesela de menor zoom ampliada (ADR-0036).
  * Van ANTES del defaultCache de @serwist/next (app shell, estáticos de Next).
  */
 const campoCaching: RuntimeCaching[] = [
@@ -82,17 +174,27 @@ const campoCaching: RuntimeCaching[] = [
     }),
   },
   {
+    // Descarga del "Mapa sin señal": directo a la red; la app guarda la
+    // respuesta en su propio caché (no duplicarla en el caché al vuelo).
+    matcher: ({ url }) => url.searchParams.has(PARAM_DESCARGA),
+    handler: new NetworkOnly(),
+  },
+  {
+    // Satélite Esri: primero el mapa descargado, luego el caché al vuelo / red
+    // y, sin señal, una tesela de menor zoom ampliada (ADR-0036).
     matcher: ({ url }) => url.hostname.endsWith("arcgisonline.com"),
-    handler: new CacheFirst({
-      cacheName: "agrocontrol-tiles-esri",
-      plugins: [
-        new ExpirationPlugin({
-          maxEntries: 3000, // suficiente para el AOI a varios zooms
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-          purgeOnQuotaError: true,
-        }),
-      ],
-    }),
+    handler: teselaEsri,
+  },
+  {
+    // Glifos de las etiquetas: casi nunca cambian. Mapa descargado primero y
+    // cache-first de larga duración (el NetworkFirst por defecto los guardaba
+    // 1 h y sin señal las etiquetas desaparecían).
+    matcher: ({ url }) =>
+      url.hostname === "demotiles.maplibre.org" &&
+      url.pathname.startsWith("/font/"),
+    handler: async ({ request, event }) =>
+      (await buscarEnMapaDescargado(request.url)) ??
+      glifosRuntime.handle({ request, event }),
   },
   {
     // Tiles Sentinel-2 (EOX): cache-first, para verlos sin re-descargar y offline

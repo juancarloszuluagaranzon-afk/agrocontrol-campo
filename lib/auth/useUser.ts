@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import {
+  decidirSesion,
+  guardarUsuario,
+  leerUsuarioGuardado,
+} from "@/lib/auth/usuarioGuardado";
 
 export interface AuthState {
   user: User | null;
@@ -18,8 +23,10 @@ const E2E_USER = {
 } as unknown as User;
 
 /**
- * Sesión del usuario actual (Supabase Auth). Lee la sesión persistida (funciona
- * offline tras el primer login, §14) y se suscribe a los cambios.
+ * Sesión del usuario actual (Supabase Auth). Abre al instante con el último
+ * usuario guardado (sin esperar a Supabase, que sin señal puede tardar ~30 s en
+ * rendirse al renovar el token), confirma con la sesión persistida (§14) y se
+ * suscribe a los cambios (ADR-0036).
  */
 export function useUser(): AuthState {
   const [state, setState] = useState<AuthState>(
@@ -31,13 +38,38 @@ export function useUser(): AuthState {
     const supabase = createClient();
     let active = true;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (active)
-        setState({ user: data.session?.user ?? null, loading: false });
+    // Se lee en el efecto (no en el estado inicial) para que el primer render
+    // coincida con el del servidor.
+    const guardado = leerUsuarioGuardado();
+    if (guardado)
+      queueMicrotask(() => {
+        if (active) setState({ user: guardado, loading: false });
+      });
+
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      const d = decidirSesion(data.session, error);
+      if (d.tipo === "usuario") {
+        guardarUsuario(d.user);
+        setState({ user: d.user, loading: false });
+      } else if (d.tipo === "mantener") {
+        setState({ user: guardado, loading: false });
+      } else {
+        guardarUsuario(null);
+        setState({ user: null, loading: false });
+      }
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setState({ user: session?.user ?? null, loading: false });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        guardarUsuario(session.user);
+        setState({ user: session.user, loading: false });
+      } else if (event === "SIGNED_OUT") {
+        guardarUsuario(null);
+        setState({ user: null, loading: false });
+      }
+      // INITIAL_SESSION sin sesión: lo resuelve getSession (puede ser solo
+      // falta de señal, y no debe sacar al técnico de la app).
     });
 
     return () => {
