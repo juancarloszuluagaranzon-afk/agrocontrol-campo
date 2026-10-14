@@ -5,6 +5,15 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Campo — una falla ya no deja al técnico sin mapa ni GPS
+
+- Un técnico vio "This page couldn't load" al abrir sin señal: un componente falló y Next desmontó toda
+  la app. Ahora cada pieza de la pantalla va **protegida**: si una falla, solo esa se oculta y el
+  mapa y el GPS siguen (con **Reintentar** si los que fallan son ellos).
+- **Pantalla de error propia en español** ("Rio Map tuvo un problema al abrir"), con **Volver a
+  abrir**, **Intentar de nuevo** y el detalle técnico para diagnosticar con una foto. Los últimos 5
+  errores quedan guardados en el celular. Ver **ADR-0039**.
+
 ### Mapa — brújula siempre visible y mapa que gira contigo
 
 - **Botón 🧭** arriba a la derecha, bajo el zoom, siempre visible: la aguja roja apunta al norte y

@@ -25,6 +25,8 @@ import { MapaOfflineControl } from "@/components/map/MapaOfflineControl";
 import { ToolsMenu } from "@/components/map/ToolsMenu";
 import { Crosshair } from "@/components/map/Crosshair";
 import { PlantaSelector } from "@/components/PlantaSelector";
+import { Protegido } from "@/components/Protegido";
+import { t } from "@/lib/i18n/es-CO";
 import { useEffect } from "react";
 import { useMapStore } from "@/lib/store/mapStore";
 import { usePlantaStore } from "@/lib/store/plantaStore";
@@ -61,13 +63,37 @@ export function MapScreen() {
   // otra cartografía (universos geográficos distintos), sin estados residuales.
   return (
     <div key={planta} className="absolute inset-0">
-      <MapView />
+      {/* Cada pieza va protegida (ADR-0039): si una falla, solo esa se oculta
+          y el mapa y el GPS siguen funcionando, también sin señal. */}
+      <Protegido
+        nombre="mapa"
+        fallback={(reintentar) => (
+          <div className="bg-background absolute inset-0 grid place-items-center p-6 text-center">
+            <div className="space-y-3">
+              <p className="text-sm font-medium">{t.errorApp.mapa}</p>
+              <button
+                type="button"
+                onClick={reintentar}
+                className="bg-primary rounded-lg px-4 py-2 text-sm font-semibold text-white"
+              >
+                {t.errorApp.reintentarMapa}
+              </button>
+            </div>
+          </div>
+        )}
+      >
+        <MapView />
+      </Protegido>
       <Crosshair visible={midiendo || colocando} />
-      <SearchBox />
+      <Protegido nombre="buscador">
+        <SearchBox />
+      </Protegido>
 
       {/* Siempre visible (arriba-izq., bajo el buscador): conmutador de base. */}
       <div className="absolute top-14 left-2 z-10">
-        <BaseToggle />
+        <Protegido nombre="satélite/plano">
+          <BaseToggle />
+        </Protegido>
       </div>
 
       {/* Panel de la herramienta abierta desde el menú (arriba-izq.). Altura
@@ -79,52 +105,90 @@ export function MapScreen() {
         activeTool !== "reporte" &&
         activeTool !== "maestro" && (
           <div className="absolute top-28 left-2 z-10 -m-3 flex max-h-[calc(100dvh-12rem-env(safe-area-inset-bottom,0px))] max-w-[calc(100vw-1rem+1.5rem)] flex-col items-start gap-2 overflow-y-auto overscroll-contain p-3">
-            {activeTool === "plano" && <PdfPlanControl />}
-            {activeTool === "foto" && <FotoCampoControl />}
-            {activeTool === "lluvia" && <PrecipitacionControl />}
-            {activeTool === "medir" && <MeasureControl />}
-            {activeTool === "marcadores" && <MarcadorControl />}
-            {activeTool === "mediciones" && <MedicionesControl />}
-            {activeTool === "capas" && (
-              <>
-                <LayerToggles />
-                <Legend />
-              </>
-            )}
-            {activeTool === "indices" && <IndexToggles />}
-            {activeTool === "offline" && <MapaOfflineControl />}
+            <Protegido key={activeTool} nombre={`herramienta ${activeTool}`}>
+              {activeTool === "plano" && <PdfPlanControl />}
+              {activeTool === "foto" && <FotoCampoControl />}
+              {activeTool === "lluvia" && <PrecipitacionControl />}
+              {activeTool === "medir" && <MeasureControl />}
+              {activeTool === "marcadores" && <MarcadorControl />}
+              {activeTool === "mediciones" && <MedicionesControl />}
+              {activeTool === "capas" && (
+                <>
+                  <LayerToggles />
+                  <Legend />
+                </>
+              )}
+              {activeTool === "indices" && <IndexToggles />}
+              {activeTool === "offline" && <MapaOfflineControl />}
+            </Protegido>
           </div>
         )}
 
       {/* Reporte de lluvia: panel de pantalla completa (tabla ancha), fuera
           del recuadro flotante angosto que usan las demás herramientas. */}
-      {activeTool === "reporte" && <ReporteLluviaControl />}
+      {activeTool === "reporte" && (
+        <Protegido nombre="reporte de lluvia">
+          <ReporteLluviaControl />
+        </Protegido>
+      )}
 
       {/* Maestro de suertes: panel de pantalla completa (búsqueda + ficha). */}
-      {activeTool === "maestro" && <MaestroControl />}
+      {activeTool === "maestro" && (
+        <Protegido nombre="maestro">
+          <MaestroControl />
+        </Protegido>
+      )}
 
       {/* Brújula siempre visible, bajo los botones de zoom (arriba-der.). */}
       <div className="absolute top-[76px] right-[6px] z-10">
-        <BrujulaControl />
+        <Protegido nombre="brújula">
+          <BrujulaControl />
+        </Protegido>
       </div>
 
-      {/* Mi ubicación (GPS): FAB propio a la derecha (alcance con el pulgar). */}
+      {/* Mi ubicación (GPS): FAB propio a la derecha (alcance con el pulgar).
+          Si falla, queda un botón para volver a montarlo. */}
       <div className="pointer-events-auto absolute top-1/2 right-2 z-10 -translate-y-1/2">
-        <GpsControl />
+        <Protegido
+          nombre="gps"
+          fallback={(reintentar) => (
+            <button
+              type="button"
+              onClick={reintentar}
+              className="bg-background rounded-full px-3 py-2 text-xs font-semibold text-amber-700 shadow-lg ring-1 ring-black/10"
+            >
+              ◎ {t.errorApp.reintentarGps}
+            </button>
+          )}
+        >
+          <GpsControl />
+        </Protegido>
       </div>
 
       {/* Leyendas abajo-der.: edad de la caña (ADR-0034) y escala del índice
           Sentinel Hub activo (ADR-0026), apiladas para no encimarse. */}
       <div className="pointer-events-none absolute right-2 bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] z-10 flex flex-col items-end gap-1.5">
-        <EdadLegend />
-        <SentinelLegend />
+        <Protegido nombre="leyenda de edad">
+          <EdadLegend />
+        </Protegido>
+        <Protegido nombre="leyenda de índice">
+          <SentinelLegend />
+        </Protegido>
       </div>
 
       {/* Menú de herramientas (✏️📏, abajo-izquierda). */}
-      <ToolsMenu />
+      <Protegido nombre="menú de herramientas">
+        <ToolsMenu />
+      </Protegido>
 
-      {midiendo ? <MeasureResult /> : <SuertePanel />}
-      {!midiendo && <MarcadorCard />}
+      <Protegido nombre="ficha inferior">
+        {midiendo ? <MeasureResult /> : <SuertePanel />}
+      </Protegido>
+      {!midiendo && (
+        <Protegido nombre="ficha de marcador">
+          <MarcadorCard />
+        </Protegido>
+      )}
     </div>
   );
 }

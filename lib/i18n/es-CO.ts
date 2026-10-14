@@ -143,6 +143,17 @@ export const t = {
     titulo: "Ubicación · Rio Map",
     puntoCompartido: "Punto compartido",
   },
+  errorApp: {
+    titulo: "Rio Map tuvo un problema al abrir",
+    tranquilo: "Tus datos guardados en el celular están a salvo.",
+    volverAbrir: "Volver a abrir",
+    reintentar: "Intentar de nuevo",
+    foto: "Si vuelve a pasar, envía una foto de esta pantalla a soporte.",
+    detalle: "Detalle técnico",
+    mapa: "El mapa tuvo un problema.",
+    reintentarMapa: "Reintentar el mapa",
+    reintentarGps: "Reintentar GPS",
+  },
   marcador: {
     ficha: "Marcador",
     cerrar: "Cerrar marcador",
