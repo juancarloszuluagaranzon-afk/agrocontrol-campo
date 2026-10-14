@@ -65,6 +65,9 @@ Instálala como app desde el navegador ("Agregar a pantalla de inicio").
 
 - Tras la primera carga, la app **abre y funciona sin señal**, con tu sesión
   guardada: no hace falta conexión para entrar.
+- Si alguna parte falla, solo esa se oculta y el mapa y el GPS siguen. Si ves
+  **"Rio Map tuvo un problema al abrir"**, toca **Volver a abrir**; si se repite,
+  envía una **foto de esa pantalla** a soporte (trae el detalle para corregirlo).
 - Lo que registres sin red queda **pendiente**; la cabecera muestra
   _"N pendientes"_. Al volver la conexión se **sincroniza** solo
   (verás _"Sincronizando…"_ y luego _"Sincronizado"_).

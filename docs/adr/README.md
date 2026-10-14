@@ -42,3 +42,4 @@ añade una nueva.
 | 0036 | Mapa sin señal descargable y apertura con la sesión guardada      | Aceptada |
 | 0037 | Lluvia de Castilla: red de pluviómetros y asignación por suerte   | Aceptada |
 | 0038 | Brújula visible y mapa que gira con el celular                    | Aceptada |
+| 0039 | App resistente a errores: piezas protegidas y pantalla de error   | Aceptada |

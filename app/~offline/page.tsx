@@ -3,6 +3,7 @@ import { MapScreen } from "@/components/map/MapScreen";
 import { SyncStatus } from "@/components/SyncStatus";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { PlantaSwitch } from "@/components/PlantaSwitch";
+import { Protegido } from "@/components/Protegido";
 import { t } from "@/lib/i18n/es-CO";
 
 /**
@@ -26,9 +27,15 @@ export default function OfflineShellPage() {
           {t.app.nombre}
         </span>
         <div className="flex items-center gap-2">
-          <PlantaSwitch />
-          <SyncStatus />
-          <UserMenu />
+          <Protegido nombre="cambiar planta">
+            <PlantaSwitch />
+          </Protegido>
+          <Protegido nombre="estado de sincronización">
+            <SyncStatus />
+          </Protegido>
+          <Protegido nombre="usuario">
+            <UserMenu />
+          </Protegido>
         </div>
       </header>
       <main id="contenido" className="relative flex-1 overflow-hidden">

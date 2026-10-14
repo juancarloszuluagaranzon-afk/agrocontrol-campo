@@ -4,6 +4,7 @@ import { AuthGate } from "@/components/auth/AuthGate";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { PlantaSwitch } from "@/components/PlantaSwitch";
 import { EncuestaSatisfaccion } from "@/components/EncuestaSatisfaccion";
+import { Protegido } from "@/components/Protegido";
 import { t } from "@/lib/i18n/es-CO";
 
 /**
@@ -24,16 +25,26 @@ export default function TabsLayout({
           {t.app.nombre}
         </span>
         <div className="flex items-center gap-2">
-          <PlantaSwitch />
-          <SyncStatus />
-          <UserMenu />
+          <Protegido nombre="cambiar planta">
+            <PlantaSwitch />
+          </Protegido>
+          <Protegido nombre="estado de sincronización">
+            <SyncStatus />
+          </Protegido>
+          <Protegido nombre="usuario">
+            <UserMenu />
+          </Protegido>
         </div>
       </header>
       <main id="contenido" className="relative flex-1 overflow-hidden">
         <AuthGate>{children}</AuthGate>
       </main>
-      <SyncRunner />
-      <EncuestaSatisfaccion />
+      <Protegido nombre="sincronización">
+        <SyncRunner />
+      </Protegido>
+      <Protegido nombre="encuesta">
+        <EncuestaSatisfaccion />
+      </Protegido>
     </div>
   );
 }
