@@ -5,6 +5,12 @@ versionado [SemVer](https://semver.org/lang/es/).
 
 ## [No publicado]
 
+### Temporada — adorno sobrio de Halloween
+
+- Del 14 de octubre al 1 de noviembre (cada año), una calabaza 🎃 junto a "Rio Map" y una línea fina
+  naranja bajo la cabecera. Nada sobre el mapa ni animaciones. Se activa y se va solo por fecha
+  (`lib/temporada.ts`).
+
 ### Campo — una falla ya no deja al técnico sin mapa ni GPS
 
 - Un técnico vio "This page couldn't load" al abrir sin señal: un componente falló y Next desmontó toda

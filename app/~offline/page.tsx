@@ -4,6 +4,10 @@ import { SyncStatus } from "@/components/SyncStatus";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { PlantaSwitch } from "@/components/PlantaSwitch";
 import { Protegido } from "@/components/Protegido";
+import {
+  CalabazaHalloween,
+  FranjaHalloween,
+} from "@/components/AdornoTemporada";
 import { t } from "@/lib/i18n/es-CO";
 
 /**
@@ -25,6 +29,7 @@ export default function OfflineShellPage() {
       <header className="border-accent/10 flex items-center justify-between gap-3 border-b px-3 py-2 print:hidden">
         <span className="truncate text-base font-bold tracking-tight">
           {t.app.nombre}
+          <CalabazaHalloween />
         </span>
         <div className="flex items-center gap-2">
           <Protegido nombre="cambiar planta">
@@ -38,6 +43,7 @@ export default function OfflineShellPage() {
           </Protegido>
         </div>
       </header>
+      <FranjaHalloween />
       <main id="contenido" className="relative flex-1 overflow-hidden">
         <MapScreen />
       </main>
