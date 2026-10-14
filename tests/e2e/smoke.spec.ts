@@ -1,6 +1,23 @@
 import { test, expect } from "@playwright/test";
 import { elegirPlanta } from "./setup";
 
+test("Halloween: calabaza y franja naranja solo en temporada, solo en la cabecera", async ({
+  page,
+}) => {
+  await elegirPlanta(page);
+  await page.clock.setFixedTime(new Date(2026, 9, 20, 10, 0, 0));
+  await page.goto("/mapa");
+  const cabecera = page.locator("header");
+  await expect(cabecera.getByText("🎃")).toBeVisible();
+  await expect(page.getByTestId("franja-halloween")).toBeVisible();
+
+  await page.clock.setFixedTime(new Date(2026, 10, 5, 10, 0, 0));
+  await page.reload();
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect(cabecera.getByText("🎃")).toHaveCount(0);
+  await expect(page.getByTestId("franja-halloween")).toHaveCount(0);
+});
+
 test("la app abre y redirige al Mapa", async ({ page }) => {
   await elegirPlanta(page);
   await page.goto("/");
