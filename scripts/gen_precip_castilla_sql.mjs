@@ -2,7 +2,7 @@
 // public.precipitaciones, planta 'castilla') desde el CSV de Recursos Hídricos
 // "Precipitacion diaria por pluviometro.csv" (formato largo, ADR-0037):
 //
-//   PLUV;Fecha;Mes;Año;Dia;Precipitacion     (Fecha = serie de Excel)
+//   PLUV;Fecha;Mes;Año;Dia;Precipitacion     (Fecha = serie de Excel o d/mm/aaaa)
 //
 //   node scripts/gen_precip_castilla_sql.mjs --csv "ruta.csv" \
 //        [--desde 2026-01-01] [--hasta 2026-09-27] [--meses-por-archivo 3]
@@ -50,8 +50,16 @@ function uuid(pluv, fecha) {
   return `${x.slice(0, 8)}-${x.slice(8, 12)}-${x.slice(12, 16)}-${x.slice(16, 20)}-${x.slice(20, 32)}`;
 }
 
-/** Serie de Excel (días desde 1899-12-30) → YYYY-MM-DD. */
-function serieAFecha(n) {
+/**
+ * Columna Fecha → YYYY-MM-DD. Las exportaciones la traen como serie de Excel
+ * (46260, días desde 1899-12-30) o como texto "d/mm/aaaa" (13/09/2026).
+ */
+function serieAFecha(valor) {
+  const t = String(valor).trim();
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t);
+  if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  const n = Number(t);
+  if (!Number.isFinite(n)) return null;
   return new Date(Date.UTC(1899, 11, 30) + n * 86_400_000)
     .toISOString()
     .slice(0, 10);
@@ -76,7 +84,7 @@ for (const [i, linea] of lineas.entries()) {
     fueraDeRed.set(pluv, (fueraDeRed.get(pluv) ?? 0) + 1);
     continue;
   }
-  if (serieAFecha(Number(serie)) !== fecha) {
+  if (serieAFecha(serie) !== fecha) {
     problemas.push(`línea ${i + 2}: serie ${serie} ≠ ${fecha}`);
     continue;
   }
